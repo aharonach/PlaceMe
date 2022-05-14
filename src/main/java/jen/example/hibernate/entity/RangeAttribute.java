@@ -1,9 +1,17 @@
 package jen.example.hibernate.entity;
 
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Entity;
 
 @Entity
-public class RangeAttribute extends Attribute{
+@NoArgsConstructor
+public class RangeAttribute extends Attribute {
+
+    public RangeAttribute(String name, String description, int priority){
+        super(name, description, priority);
+    }
+
     @Override
     double calculate(double score) {
         return score * priority;
