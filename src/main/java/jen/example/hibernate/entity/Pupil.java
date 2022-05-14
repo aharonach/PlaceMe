@@ -1,16 +1,17 @@
 package jen.example.hibernate.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Table(name = "pupils")
 public class Pupil {
     @Id
@@ -20,10 +21,24 @@ public class Pupil {
     private String lastName;
     private Gender gender;
 
-    @OneToMany(mappedBy = "pupil") // Aharon: Added mappedBy because without it, a new redundant table is created.
+    @OneToMany(mappedBy = "pupil")
+    @ToString.Exclude // Aharon: Added mappedBy because without it, a new redundant table is created.
     private List<AttributeValue> attributeValues;
 
     public enum Gender {
         MALE, FEMALE
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Pupil pupil = (Pupil) o;
+        return id != null && Objects.equals(id, pupil.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
