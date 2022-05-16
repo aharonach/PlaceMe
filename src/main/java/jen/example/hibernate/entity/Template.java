@@ -58,6 +58,10 @@ public class Template {
                 });
     }
 
+    public boolean haveAttribute(Long attributeId){
+        return attributes.stream().anyMatch(attribute -> attribute.getId().equals(attributeId));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

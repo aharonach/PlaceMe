@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +46,19 @@ public class TemplateService implements EntityService<Template> {
 
         template.setName(item.getName());
         template.setDescription(item.getDescription());
-        template.setAttributes(item.getAttributes());
+
+        List<Long> newAttributeIds = item.getAttributes().stream().filter(attribute -> attribute.getId() != null).map(Attribute::getId).collect(Collectors.toList());
+        List<Attribute> toDelete = template.getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).collect(Collectors.toList());
+        template.getAttributes().removeAll(toDelete);
+
+        item.getAttributes().forEach(attribute -> {
+            if(attribute.getId() == null){
+                template.addAttribute(attribute);
+            } else {
+                template.updateAttribute(attribute.getId(), attribute);
+            }
+        });
+
         return repository.save(template);
     }
 
