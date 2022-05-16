@@ -35,7 +35,7 @@ public class TemplateService implements EntityService<Template> {
     }
 
     @Override
-    public List<Template> getAll() {
+    public List<Template> all() {
         return repository.findAll();
     }
 

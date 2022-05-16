@@ -31,7 +31,7 @@ class TemplateServiceTest {
     @Test
     @Transactional
     void shouldCreateAndRemoveTemplateWhenAddTemplateAndDeleteIt() {
-        assertEquals(0, service.getAll().size());
+        assertEquals(0, service.all().size());
 
         Template template1 = new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1);
         service.add(template1);
@@ -39,9 +39,9 @@ class TemplateServiceTest {
         Template template2 = new Template(TEMPLATE_2, TEMPLATE_DESCRIPTION_2);
         service.add(template2);
 
-        assertEquals(2, service.getAll().size());
-        Template receivedTemplate1 = service.getAll().get(0);
-        Template receivedTemplate2 = service.getAll().get(1);
+        assertEquals(2, service.all().size());
+        Template receivedTemplate1 = service.all().get(0);
+        Template receivedTemplate2 = service.all().get(1);
 
         assertEquals(receivedTemplate1, service.getOr404(receivedTemplate1.getId()));
         assertNotEquals(receivedTemplate1, service.getOr404(receivedTemplate2.getId()));
@@ -52,7 +52,7 @@ class TemplateServiceTest {
 
         service.deleteById(receivedTemplate1.getId());
         service.deleteById(receivedTemplate2.getId());
-        assertEquals(0, service.getAll().size());
+        assertEquals(0, service.all().size());
     }
 
     @Test
@@ -62,7 +62,7 @@ class TemplateServiceTest {
         Template template = new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1, attributes);
         service.add(template);
 
-        Template receivedTemplate = service.getAll().get(0);
+        Template receivedTemplate = service.all().get(0);
         List<Attribute> receivedAttributes = receivedTemplate.getAttributes();
         assertEquals(1, receivedAttributes.size());
         assertEquals("name", receivedAttributes.get(0).getName());
@@ -79,7 +79,7 @@ class TemplateServiceTest {
         );
         service.add(new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1, attributes));
 
-        Template receivedTemplate = service.getAll().get(0);
+        Template receivedTemplate = service.all().get(0);
         assertEquals(2, receivedTemplate.getAttributes().size());
 
         List<Attribute> newAttributes = Arrays.asList(

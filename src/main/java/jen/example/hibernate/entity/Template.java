@@ -1,13 +1,18 @@
 package jen.example.hibernate.entity;
 
+import jen.example.hibernate.controller.TemplateController;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.springframework.hateoas.EntityModel;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Entity
 @Getter
@@ -35,6 +40,13 @@ public class Template {
         this.description = description;
         this.attributes = attributes;
     }
+
+//    public static EntityModel<Template> toModel(Template entity) {
+//        return EntityModel.of(entity,
+//                linkTo(methodOn(TemplateController.class).one(entity.getId())).withSelfRel(),
+//                linkTo(methodOn(TemplateController.class).all()).withRel("templates")
+//        );
+//    }
 
     public void addAttribute(Attribute attribute){
         attributes.add(attribute);
