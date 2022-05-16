@@ -21,7 +21,7 @@ public class Template {
     private Long id;
     private String name;
     private String description;
-    //@Setter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attribute> attributes = new ArrayList<>();
 
@@ -58,8 +58,19 @@ public class Template {
                 });
     }
 
-    public boolean haveAttribute(Long attributeId){
-        return attributes.stream().anyMatch(attribute -> attribute.getId().equals(attributeId));
+    public void updateAttributes(List<Attribute> newAttributes){
+
+        List<Long> newAttributeIds = newAttributes.stream().filter(attribute -> attribute.getId() != null).map(Attribute::getId).collect(Collectors.toList());
+        List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).collect(Collectors.toList());
+        getAttributes().removeAll(attributesToDelete);
+
+        newAttributes.forEach(attribute -> {
+            if(attribute.getId() == null){
+                addAttribute(attribute);
+            } else {
+                updateAttribute(attribute.getId(), attribute);
+            }
+        });
     }
 
     @Override
