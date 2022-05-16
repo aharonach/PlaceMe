@@ -22,9 +22,19 @@ public class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase(TemplateRepository repository, TemplateService service) {
         return args -> {
-            logger.info("Preloading " + repository.save(new Template("name", "desc")));
-            logger.info("Preloading " + repository.save(new Template("name", "desc", Arrays.asList(new RangeAttribute()))));
-            logger.info("Preloading " + repository.save(new Template("name", "desc", Arrays.asList(new RangeAttribute("dfs", "dfad", 4)))));
+
+            // add templates
+            logger.info("Preloading " + repository.save(new Template("template 1", "template 1 desc")));
+
+            logger.info("Preloading " + repository.save(new Template("template 2", "template 2 desc", Arrays.asList(
+                    new RangeAttribute("attr 1", "attr 1 for template 2", 10),
+                    new RangeAttribute("attr 2", "attr 2 for template 2", 20)
+            ))));
+
+            logger.info("Preloading " + repository.save(new Template("template 3", "template 3 desc", Arrays.asList(
+                    new RangeAttribute("attr_1", "attr 1 for template 3", 45),
+                    new RangeAttribute("attr_2", "attr 2 for template 3", 24)
+            ))));
 
             logger.info("Preloading " + repository.findAll());
         };
