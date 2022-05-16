@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class TemplateService implements EntityService<Template> {
     }
 
     @Override
-    public List<Template> getAll() {
+    public List<Template> all() {
         return repository.findAll();
     }
 
@@ -45,7 +46,8 @@ public class TemplateService implements EntityService<Template> {
 
         template.setName(item.getName());
         template.setDescription(item.getDescription());
-        template.setAttributes(item.getAttributes());
+        template.updateAttributes(item.getAttributes());
+
         return repository.save(template);
     }
 

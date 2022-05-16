@@ -7,7 +7,7 @@ public interface EntityService<T> {
 
     T getOr404(Long id);
 
-    List<T> getAll();
+    List<T> all();
 
     T updateById(Long id, T item);
 

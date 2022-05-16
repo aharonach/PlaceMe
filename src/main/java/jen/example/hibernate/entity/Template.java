@@ -1,13 +1,18 @@
 package jen.example.hibernate.entity;
 
+import jen.example.hibernate.controller.TemplateController;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.springframework.hateoas.EntityModel;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Entity
 @Getter
@@ -21,7 +26,7 @@ public class Template {
     private Long id;
     private String name;
     private String description;
-    //@Setter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Attribute> attributes = new ArrayList<>();
 
@@ -35,6 +40,13 @@ public class Template {
         this.description = description;
         this.attributes = attributes;
     }
+
+//    public static EntityModel<Template> toModel(Template entity) {
+//        return EntityModel.of(entity,
+//                linkTo(methodOn(TemplateController.class).one(entity.getId())).withSelfRel(),
+//                linkTo(methodOn(TemplateController.class).all()).withRel("templates")
+//        );
+//    }
 
     public void addAttribute(Attribute attribute){
         attributes.add(attribute);
@@ -56,6 +68,21 @@ public class Template {
                     attribute.setDescription(newAttribute.getDescription());
                     attribute.setPriority(newAttribute.getPriority());
                 });
+    }
+
+    public void updateAttributes(List<Attribute> newAttributes){
+
+        List<Long> newAttributeIds = newAttributes.stream().filter(attribute -> attribute.getId() != null).map(Attribute::getId).collect(Collectors.toList());
+        List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).collect(Collectors.toList());
+        getAttributes().removeAll(attributesToDelete);
+
+        newAttributes.forEach(attribute -> {
+            if(attribute.getId() == null){
+                addAttribute(attribute);
+            } else {
+                updateAttribute(attribute.getId(), attribute);
+            }
+        });
     }
 
     @Override

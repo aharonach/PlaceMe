@@ -28,7 +28,7 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     @Override
-    public List<Pupil> getAll() {
+    public List<Pupil> all() {
         return null;
     }
 
