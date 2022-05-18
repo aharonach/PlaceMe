@@ -12,4 +12,6 @@ public interface EntityService<T> {
     T updateById(Long id, T item);
 
     void deleteById(Long id);
+
+    void validate(T item);
 }

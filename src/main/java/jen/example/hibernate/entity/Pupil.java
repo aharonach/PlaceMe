@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,9 +18,12 @@ public class Pupil {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(unique=true)
+    private String givenId;
     private String firstName;
     private String lastName;
     private Gender gender;
+    private LocalDate birthDate;
 
     @OneToMany(mappedBy = "pupil")
     @ToString.Exclude // Aharon: Added mappedBy because without it, a new redundant table is created.

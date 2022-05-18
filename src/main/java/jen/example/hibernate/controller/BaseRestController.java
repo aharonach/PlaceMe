@@ -1,26 +1,15 @@
 package jen.example.hibernate.controller;
 
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 public abstract class BaseRestController<T> {
+
     /**
      * Get all records.
      *
      * @return List of records
      */
-    @GetMapping("/")
-    public abstract List<T> getAll();
-
-    /**
-     * Create a record.
-     *
-     * @param record record details
-     * @return created record
-     */
-    @PutMapping("/")
-    public abstract T create(@RequestBody T record);
+    public abstract ResponseEntity<?> getAll();
 
     /**
      * Get one record by ID.
@@ -28,8 +17,15 @@ public abstract class BaseRestController<T> {
      * @param id record id
      * @return entity record
      */
-    @GetMapping("/{id}")
-    public abstract T get(@PathVariable Long id);
+    public abstract ResponseEntity<?> get(Long id);
+
+    /**
+     * Create a record.
+     *
+     * @param newRecord record details
+     * @return created record
+     */
+    public abstract ResponseEntity<?> create(T newRecord);
 
     /**
      * Update a record by ID.
@@ -38,14 +34,13 @@ public abstract class BaseRestController<T> {
      * @param updatedRecord the updated record with the new details
      * @return the updated record
      */
-    @PostMapping("/{id}")
-    public abstract T update(@PathVariable Long id, @RequestBody T updatedRecord);
+    public abstract ResponseEntity<?> update(Long id, T updatedRecord);
 
     /**
      * Delete a record by ID.
      *
      * @return List of records
      */
-    @DeleteMapping("/{id}")
-    public abstract T delete(@PathVariable Long id);
+
+    public abstract ResponseEntity<?> delete(Long id);
 }
