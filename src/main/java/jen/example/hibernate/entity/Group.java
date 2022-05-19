@@ -25,9 +25,12 @@ public class Group {
     private Template template;
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    @ManyToMany(mappedBy = "groups")
     @ToString.Exclude
-    private List<Pupil> pupils = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "PUPILS_GROUPS",
+            joinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"))
+    private List<Pupil> pupils = new ArrayList<>();  // todo: maybe it is better to use set instead of list
 
 
     public Group(String name, String description, Template template){
@@ -36,16 +39,18 @@ public class Group {
         this.template = template;
     }
 
+    public List<Pupil> getPupils() {
+        return Collections.unmodifiableList(pupils);
+    }
+
     public void addPupil(Pupil pupil){
         pupils.add(pupil);
     }
 
     public void removePupil(Pupil pupil){
-        pupils.remove(pupil);
-    }
-
-    public List<Pupil> getPupils() {
-        return Collections.unmodifiableList(pupils);
+        if(pupils.contains(pupil)){
+            pupils.remove(pupil);
+        }
     }
 
     @Override

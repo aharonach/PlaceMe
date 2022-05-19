@@ -28,14 +28,14 @@ public class Pupil {
     private Gender gender;
     private LocalDate birthDate;
 
-    @OneToMany(mappedBy = "pupil") // Aharon: Added mappedBy because without it, a new redundant table is created.
+    @OneToMany(mappedBy = "pupil")
     @ToString.Exclude
     private List<AttributeValue> attributeValues;
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    @ManyToMany
     @ToString.Exclude
+    @ManyToMany(mappedBy = "pupils", cascade = CascadeType.ALL)
     private List<Group> groups = new ArrayList<>();
 
     public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate){

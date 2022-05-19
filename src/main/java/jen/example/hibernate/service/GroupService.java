@@ -21,7 +21,7 @@ public class GroupService implements EntityService<Group> {
     private final GroupRepository repository;
 
     @Override
-    //@Transactional
+    @Transactional
     public Group add(Group group) {
         // @TODO verify
         return repository.save(group);
