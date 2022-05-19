@@ -1,18 +1,13 @@
 package jen.example.hibernate.entity;
 
-import jen.example.hibernate.controller.TemplateController;
 import lombok.*;
 import org.hibernate.Hibernate;
-import org.springframework.hateoas.EntityModel;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Entity
 @Getter
@@ -72,8 +67,8 @@ public class Template {
 
     public void updateAttributes(List<Attribute> newAttributes){
 
-        List<Long> newAttributeIds = newAttributes.stream().filter(attribute -> attribute.getId() != null).map(Attribute::getId).collect(Collectors.toList());
-        List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).collect(Collectors.toList());
+        List<Long> newAttributeIds = newAttributes.stream().filter(attribute -> attribute.getId() != null).map(Attribute::getId).toList();
+        List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
         getAttributes().removeAll(attributesToDelete);
 
         newAttributes.forEach(attribute -> {

@@ -1,6 +1,6 @@
 package jen.example.hibernate.assembler;
 
-import jen.example.hibernate.controller.TemplateController;
+import jen.example.hibernate.controller.TemplateRestController;
 import jen.example.hibernate.entity.Template;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -16,14 +16,14 @@ public class TemplateModelAssembler implements RepresentationModelAssembler<Temp
     @Override
     public EntityModel<Template> toModel(Template entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(TemplateController.class).one(entity.getId())).withSelfRel(),
-                linkTo(methodOn(TemplateController.class).all()).withRel("templates")
+                linkTo(methodOn(TemplateRestController.class).one(entity.getId())).withSelfRel(),
+                linkTo(methodOn(TemplateRestController.class).all()).withRel("templates")
         );
     }
 
     @Override
     public CollectionModel<EntityModel<Template>> toCollectionModel(Iterable<? extends Template> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(TemplateController.class).all()).withSelfRel());
+                .add(linkTo(methodOn(TemplateRestController.class).all()).withSelfRel());
     }
 }

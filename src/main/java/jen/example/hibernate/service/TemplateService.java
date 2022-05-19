@@ -1,6 +1,5 @@
 package jen.example.hibernate.service;
 
-import jen.LoadDatabase;
 import jen.example.hibernate.entity.Attribute;
 import jen.example.hibernate.entity.Template;
 import jen.example.hibernate.repository.TemplateRepository;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +55,11 @@ public class TemplateService implements EntityService<Template> {
         repository.delete(template);
     }
 
+    @Override
+    public void validate(Template item) {
+        // todo: implement
+    }
+
     // handle attributes
     public Template deleteAttributeForTemplateById(Long templateId, Long attributeId){
         Template template = getOr404(templateId);
@@ -78,7 +81,7 @@ public class TemplateService implements EntityService<Template> {
 
     // handle exceptions
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public class NotFound extends RuntimeException{
+    public static class NotFound extends RuntimeException{
         public NotFound(Long id){
             super("Could not find template " + id);
         }

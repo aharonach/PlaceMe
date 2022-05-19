@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/templates/", "/templates"})
+@RequestMapping({"/templates"})
 @RequiredArgsConstructor
-public class TemplateController {
+public class TemplateRestController {
 
-    private static final Logger logger = LoggerFactory.getLogger(TemplateController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TemplateRestController.class);
 
     private final TemplateService service;
     private final TemplateModelAssembler assembler;
