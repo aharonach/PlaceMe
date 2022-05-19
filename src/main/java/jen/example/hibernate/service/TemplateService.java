@@ -39,12 +39,12 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     @Transactional
-    public Template updateById(Long id, Template item) {
+    public Template updateById(Long id, Template newTemplate) {
         Template template = getOr404(id);
 
-        template.setName(item.getName());
-        template.setDescription(item.getDescription());
-        template.updateAttributes(item.getAttributes());
+        template.setName(newTemplate.getName());
+        template.setDescription(newTemplate.getDescription());
+        template.updateAttributes(newTemplate.getAttributes());
 
         return repository.save(template);
     }

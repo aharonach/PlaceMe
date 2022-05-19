@@ -21,9 +21,9 @@ public class PupilService implements EntityService<Pupil>{
     private final PupilRepository repository;
 
     @Override
-    public Pupil add(Pupil item) {
-        validate(item);
-        return repository.save(item);
+    public Pupil add(Pupil pupil) {
+        validate(pupil);
+        return repository.save(pupil);
     }
 
     @Override
@@ -38,17 +38,17 @@ public class PupilService implements EntityService<Pupil>{
 
     @Override
     @Transactional
-    public Pupil updateById(Long id, Pupil item) {
+    public Pupil updateById(Long id, Pupil newPupil) {
         Pupil pupil = getOr404(id);
 
-        validate(item);
+        validate(newPupil);
 
-        pupil.setGivenId(item.getGivenId());
-        pupil.setFirstName(item.getFirstName());
-        pupil.setLastName(item.getLastName());
-        pupil.setGender(item.getGender());
-        pupil.setBirthDate(item.getBirthDate());
-        pupil.setAttributeValues(item.getAttributeValues());
+        pupil.setGivenId(newPupil.getGivenId());
+        pupil.setFirstName(newPupil.getFirstName());
+        pupil.setLastName(newPupil.getLastName());
+        pupil.setGender(newPupil.getGender());
+        pupil.setBirthDate(newPupil.getBirthDate());
+        pupil.setAttributeValues(newPupil.getAttributeValues());
         return repository.save(pupil);
     }
 
