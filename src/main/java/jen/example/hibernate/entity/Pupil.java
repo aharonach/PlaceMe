@@ -12,11 +12,11 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Table(name = "pupils")
 public class Pupil {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique=true)
     private String givenId;
@@ -25,9 +25,17 @@ public class Pupil {
     private Gender gender;
     private LocalDate birthDate;
 
-    @OneToMany(mappedBy = "pupil")
-    @ToString.Exclude // Aharon: Added mappedBy because without it, a new redundant table is created.
+    @OneToMany(mappedBy = "pupil") // Aharon: Added mappedBy because without it, a new redundant table is created.
+    @ToString.Exclude
     private List<AttributeValue> attributeValues;
+
+    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate){
+        this.givenId = givenId; // todo: validate that givenId contains only digits
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.gender = gender;
+        this.birthDate = birthDate;
+    }
 
     public enum Gender {
         MALE, FEMALE
