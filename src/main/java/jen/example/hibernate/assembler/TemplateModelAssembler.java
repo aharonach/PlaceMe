@@ -16,14 +16,14 @@ public class TemplateModelAssembler implements RepresentationModelAssembler<Temp
     @Override
     public EntityModel<Template> toModel(Template entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(TemplateRestController.class).one(entity.getId())).withSelfRel(),
-                linkTo(methodOn(TemplateRestController.class).all()).withRel("templates")
+                linkTo(methodOn(TemplateRestController.class).get(entity.getId())).withSelfRel(),
+                linkTo(methodOn(TemplateRestController.class).getAll()).withRel("templates")
         );
     }
 
     @Override
     public CollectionModel<EntityModel<Template>> toCollectionModel(Iterable<? extends Template> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(TemplateRestController.class).all()).withSelfRel());
+                .add(linkTo(methodOn(TemplateRestController.class).getAll()).withSelfRel());
     }
 }

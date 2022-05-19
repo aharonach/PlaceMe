@@ -20,49 +20,55 @@ import java.util.List;
 @RestController
 @RequestMapping({"/templates"})
 @RequiredArgsConstructor
-public class TemplateRestController {
+public class TemplateRestController extends BaseRestController<Template> {
 
     private static final Logger logger = LoggerFactory.getLogger(TemplateRestController.class);
 
     private final TemplateService service;
     private final TemplateModelAssembler assembler;
 
+
+    @Override
     @GetMapping()
-    public ResponseEntity<?> all(){
+    public ResponseEntity<?> getAll() {
         List<Template> allTemplates = service.all();
         CollectionModel<EntityModel<Template>> entityModels = assembler.toCollectionModel(allTemplates);
         return ResponseEntity.ok().body(entityModels);
     }
 
-    // Manage Template
+    @Override
     @GetMapping("/{id}")
-    public ResponseEntity<?> one(@PathVariable Long id) {
+    public ResponseEntity<?> get(@PathVariable Long id) {
         Template template = service.getOr404(id);
         return ResponseEntity
                 .ok()
                 .body(assembler.toModel(template));
     }
 
+
+    @Override
     @PutMapping()
-    public ResponseEntity<?> newTemplate(@RequestBody Template template){
-        EntityModel<Template> entity = assembler.toModel(service.add(template));
+    public ResponseEntity<?> create(@RequestBody Template newRecord) {
+        EntityModel<Template> entity = assembler.toModel(service.add(newRecord));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entity);
     }
 
+    @Override
     @PostMapping("/{id}")
-    public ResponseEntity<?> updateTemplate(@PathVariable Long id, @RequestBody Template newTemplate) {
-        Template entity = service.updateById(id, newTemplate);
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Template updatedRecord) {
+        Template entity = service.updateById(id, updatedRecord);
 
         return ResponseEntity
                 .ok()
                 .body(entity);
     }
 
+    @Override
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTemplate(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
