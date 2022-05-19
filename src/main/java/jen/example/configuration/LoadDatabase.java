@@ -1,4 +1,4 @@
-package jen;
+package jen.example.configuration;
 
 import jen.example.hibernate.entity.RangeAttribute;
 import jen.example.hibernate.entity.Template;
