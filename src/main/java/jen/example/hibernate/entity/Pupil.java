@@ -5,6 +5,8 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,12 +24,19 @@ public class Pupil {
     private String givenId;
     private String firstName;
     private String lastName;
+    @Enumerated(EnumType.STRING)
     private Gender gender;
     private LocalDate birthDate;
 
     @OneToMany(mappedBy = "pupil") // Aharon: Added mappedBy because without it, a new redundant table is created.
     @ToString.Exclude
     private List<AttributeValue> attributeValues;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    @ManyToMany
+    @ToString.Exclude
+    private List<Group> groups = new ArrayList<>();
 
     public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate){
         this.givenId = givenId; // todo: validate that givenId contains only digits
@@ -37,8 +46,8 @@ public class Pupil {
         this.birthDate = birthDate;
     }
 
-    public enum Gender {
-        MALE, FEMALE
+    public List<Group> getGroups() {
+        return Collections.unmodifiableList(groups);
     }
 
     @Override
@@ -52,5 +61,9 @@ public class Pupil {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public enum Gender {
+        MALE, FEMALE
     }
 }

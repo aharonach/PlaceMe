@@ -73,14 +73,14 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public class NotFound extends RuntimeException{
+    public static class NotFound extends RuntimeException{
         public NotFound(Long id){
             super("Could not find pupil " + id);
         }
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public class GivenIdAlreadyExists extends RuntimeException {
+    public static class GivenIdAlreadyExists extends RuntimeException {
         public GivenIdAlreadyExists(String givenId){
             super("pupil with given ID " + givenId + " already exists");
         }

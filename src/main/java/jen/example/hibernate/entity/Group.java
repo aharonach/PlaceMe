@@ -4,14 +4,16 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Getter
 @Setter
 @ToString
 @NoArgsConstructor
+@Getter
 @Table(name = "groups")
 public class Group {
     @Id
@@ -21,16 +23,29 @@ public class Group {
     private String description;
     @ManyToOne
     private Template template;
-
-    @ManyToMany
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    @ManyToMany(mappedBy = "groups")
     @ToString.Exclude
-    private List<Pupil> pupils;
+    private List<Pupil> pupils = new ArrayList<>();
 
 
     public Group(String name, String description, Template template){
         this.name = name;
         this.description = description;
         this.template = template;
+    }
+
+    public void addPupil(Pupil pupil){
+        pupils.add(pupil);
+    }
+
+    public void removePupil(Pupil pupil){
+        pupils.remove(pupil);
+    }
+
+    public List<Pupil> getPupils() {
+        return Collections.unmodifiableList(pupils);
     }
 
     @Override
