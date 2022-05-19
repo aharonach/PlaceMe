@@ -25,7 +25,7 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     public Template add(Template template) {
-        // verify that all attributes are new (without ids) and other template fields
+        // @TODO verify that all attributes are new (without ids) and other template fields
         return repository.save(template);
     }
 

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PupilRepository extends JpaRepository<Pupil, Long> {
+    boolean existsByGivenId(String givenId);
 }
