@@ -1,7 +1,10 @@
 package jen.example.hibernate.controller;
 
+import jen.example.hibernate.assembler.GroupModelAssembler;
 import jen.example.hibernate.assembler.PupilModelAssembler;
+import jen.example.hibernate.entity.Group;
 import jen.example.hibernate.entity.Pupil;
+import jen.example.hibernate.service.GroupService;
 import jen.example.hibernate.service.PupilService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @RestController
@@ -23,7 +27,9 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
     private static final Logger logger = LoggerFactory.getLogger(PupilRestController.class);
     private final PupilService service;
+    private final GroupService groupService;
     private final PupilModelAssembler assembler;
+    private final GroupModelAssembler groupAssembler;
 
     @Override
     @GetMapping()
@@ -73,32 +79,39 @@ public class PupilRestController extends BaseRestController<Pupil> {
      * @param id the pupil ID
      * @return List of attribute values
      */
-    @GetMapping("/{id}/group")
-    public ResponseEntity<?> getGroup(@PathVariable Long id) {
-        return null;
+    @GetMapping("/{id}/groups")
+    public ResponseEntity<?> getGroups(@PathVariable Long id) {
+        Pupil pupil = service.getOr404(id);
+        Set<Group> groups = pupil.getGroups();
+
+        return ResponseEntity.ok().body(groupAssembler.toCollectionModel(groups));
     }
 
     /**
      * Assign pupil to a group.
      *
      * @param id the pupil ID
-     * @param groupId list of attribute ids with values
-     * @return List of attribute values
+     * @param groupIds list of group IDs
      */
-    @PutMapping("/{id}/group")
-    @PostMapping("/{id}/group")
-    public ResponseEntity<?> updateGroup(@PathVariable Long id, @RequestBody Long groupId) {
-        return null;
+    @RequestMapping(path = "/{id}/groups", method = {RequestMethod.PUT, RequestMethod.POST})
+    public ResponseEntity<?> updateGroup(@PathVariable Long id, @RequestBody Set<Long> groupIds) {
+        Pupil pupil = service.getOr404(id);
+
+        // @TODO this probably should be in service class
+        Set<Group> groups = groupService.getByIds(groupIds);
+        groups.forEach(pupil::addGroup);
+        service.updateById(id, pupil);
+
+        return ResponseEntity.ok().body(groupAssembler.toCollectionModel(groups));
     }
 
     /**
      * Delete a group from pupil.
      *
-     * @param id
-     * @return
+     * @param id pupil ID
      */
-    @DeleteMapping("/{id}/group")
-    public ResponseEntity<?> deleteGroup(@PathVariable Long id) {
+    @DeleteMapping("/{id}/groups")
+    public ResponseEntity<?> deleteGroups(@PathVariable Long id, @RequestBody Set<Long> groupIds) {
         return null;
     }
 
@@ -107,7 +120,6 @@ public class PupilRestController extends BaseRestController<Pupil> {
      *
      * @param id the pupil ID
      * @param templateId (optional) the template ID
-     * @return List of attribute values
      */
     @GetMapping("/{id}/attributes")
     public ResponseEntity<?> getAttributes(@PathVariable Long id,
@@ -122,7 +134,6 @@ public class PupilRestController extends BaseRestController<Pupil> {
      *
      * @param id the pupil ID
      * @param attributeValues list of attribute ids with values
-     * @return List of attribute values
      */
     @PutMapping("/{id}/attributes")
     public ResponseEntity<?> putAttributes(@PathVariable Long id, @RequestBody Map<Long, Double> attributeValues) {

@@ -22,7 +22,7 @@ public class PupilService implements EntityService<Pupil>{
 
     @Override
     public Pupil add(Pupil pupil) {
-        validate(pupil);
+        validate(pupil, null);
         return repository.save(pupil);
     }
 
@@ -41,7 +41,7 @@ public class PupilService implements EntityService<Pupil>{
     public Pupil updateById(Long id, Pupil newPupil) {
         Pupil pupil = getOr404(id);
 
-        validate(newPupil);
+        validate(newPupil, pupil);
 
         pupil.setGivenId(newPupil.getGivenId());
         pupil.setFirstName(newPupil.getFirstName());
@@ -66,8 +66,8 @@ public class PupilService implements EntityService<Pupil>{
 
     }
 
-    public void validate(Pupil pupil) {
-        if (pupilExists(pupil.getGivenId())) {
+    public void validate(Pupil pupil, Pupil oldPupil) {
+        if (oldPupil != null && !oldPupil.getGivenId().equals(pupil.getGivenId()) && pupilExists(pupil.getGivenId())) {
             throw new GivenIdAlreadyExists(pupil.getGivenId());
         }
     }

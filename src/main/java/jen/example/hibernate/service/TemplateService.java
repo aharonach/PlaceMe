@@ -56,7 +56,7 @@ public class TemplateService implements EntityService<Template> {
     }
 
     @Override
-    public void validate(Template item) {
+    public void validate(Template item, Template oldItem) {
         // todo: implement
     }
 

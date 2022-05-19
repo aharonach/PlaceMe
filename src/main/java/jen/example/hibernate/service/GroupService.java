@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -48,8 +49,12 @@ public class GroupService implements EntityService<Group> {
         repository.delete(group);
     }
 
+    public Set<Group> getByIds(Set<Long> ids) {
+        return repository.getGroupsByIdIn(ids);
+    }
+
     @Override
-    public void validate(Group group) {
+    public void validate(Group group, Group oldGroup) {
 
     }
 

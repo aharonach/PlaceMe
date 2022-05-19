@@ -1,13 +1,11 @@
 package jen.example.hibernate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Setter
@@ -23,14 +21,14 @@ public class Group {
     private String description;
     @ManyToOne
     private Template template;
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
+
     @ToString.Exclude
-    @ManyToMany
-    @JoinTable(name = "PUPILS_GROUPS",
-            joinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"))
-    private List<Pupil> pupils = new ArrayList<>();  // todo: maybe it is better to use set instead of list
+    @JsonIgnore
+    @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
+//    @JoinTable(name = "pupils_groups",
+//            joinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"),
+//            inverseJoinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"))
+    private Set<Pupil> pupils = new LinkedHashSet<>();
 
 
     public Group(String name, String description, Template template){
@@ -39,18 +37,12 @@ public class Group {
         this.template = template;
     }
 
-    public List<Pupil> getPupils() {
-        return Collections.unmodifiableList(pupils);
-    }
-
     public void addPupil(Pupil pupil){
         pupils.add(pupil);
     }
 
     public void removePupil(Pupil pupil){
-        if(pupils.contains(pupil)){
-            pupils.remove(pupil);
-        }
+        pupils.remove(pupil);
     }
 
     @Override
