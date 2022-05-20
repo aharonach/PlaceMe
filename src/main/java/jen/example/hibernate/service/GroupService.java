@@ -50,7 +50,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     public Set<Group> getByIds(Set<Long> ids) {
-        return repository.getGroupsByIdIn(ids);
+        return repository.getAllByIdIn(ids);
     }
 
     @Override

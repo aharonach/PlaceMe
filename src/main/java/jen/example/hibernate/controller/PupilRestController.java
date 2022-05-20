@@ -112,6 +112,13 @@ public class PupilRestController extends BaseRestController<Pupil> {
      */
     @DeleteMapping("/{id}/groups")
     public ResponseEntity<?> deleteGroups(@PathVariable Long id, @RequestBody Set<Long> groupIds) {
+        Pupil pupil = service.getOr404(id);
+
+        // @TODO this probably should be in service class
+        Set<Group> groups = groupService.getByIds(groupIds);
+        groups.forEach(pupil::removeGroup);
+        service.updateById(id, pupil);
+
         return null;
     }
 
@@ -137,9 +144,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
      */
     @PutMapping("/{id}/attributes")
     public ResponseEntity<?> putAttributes(@PathVariable Long id, @RequestBody Map<Long, Double> attributeValues) {
-        Pupil pupil = service.getOr404(id);
-
-        return null;
+        service.addAttributeValues(id, attributeValues);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -153,7 +159,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
     @PostMapping("/{id}/attributes/{attributeId}")
     public ResponseEntity<?> updateAttributes(@PathVariable Long id, @PathVariable Long attributeId,
                                         @RequestBody Double value) {
-        return null;
+        service.addAttributeValue(id, attributeId, value);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -165,7 +172,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
      */
     @DeleteMapping("/{id}/attributes/{attributeId}")
     public ResponseEntity<?> deleteAttribute(@PathVariable Long id, @PathVariable Long attributeId) {
-        return null;
+        service.removeAttributeValue(id, attributeId);
+        return ResponseEntity.ok().build();
     }
 
     @ExceptionHandler

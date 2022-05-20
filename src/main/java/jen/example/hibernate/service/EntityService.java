@@ -10,7 +10,6 @@ public interface EntityService<T> {
 
     List<T> all();
 
-
     T updateById(Long id, T newItem);
 
     void deleteById(Long id);

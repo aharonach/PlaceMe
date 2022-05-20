@@ -2,6 +2,7 @@ package jen.example.hibernate.entity;
 
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -17,7 +18,7 @@ public class Pupil {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique=true)
+    @NaturalId
     private String givenId;
     private String firstName;
     private String lastName;
@@ -89,17 +90,33 @@ public class Pupil {
         return sum % 10 == 0;
     }
 
+    public void addAttributeValue(Attribute attribute, Double value) {
+        this.getAttributeValues()
+                .stream()
+                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
+                .findFirst()
+                .ifPresentOrElse(
+                    attributeValue -> attributeValue.setValue(value),
+                    () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))
+        );
+    }
+
+    public void removeAttributeValue(Attribute attribute) {
+        this.getAttributeValues()
+                .stream()
+                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
+                .findFirst()
+                .ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
+    }
+
     public void addGroup(Group group) {
         this.groups.add(group);
         group.getPupils().add(this);
     }
 
-    public void removeGroup(long groupId) {
-        Group tag = this.groups.stream().filter(t -> t.getId() == groupId).findFirst().orElse(null);
-        if (tag != null) {
-            this.groups.remove(tag);
-            tag.getPupils().remove(this);
-        }
+    public void removeGroup(Group group) {
+        this.groups.remove(group);
+        group.getPupils().remove(this);
     }
 
     public enum Gender {
