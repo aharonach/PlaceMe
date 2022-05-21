@@ -1,10 +1,8 @@
 package jen.example.configuration;
 
-import jen.example.hibernate.entity.Group;
-import jen.example.hibernate.entity.Pupil;
-import jen.example.hibernate.entity.RangeAttribute;
-import jen.example.hibernate.entity.Template;
+import jen.example.hibernate.entity.*;
 import jen.example.hibernate.service.GroupService;
+import jen.example.hibernate.service.PlacementService;
 import jen.example.hibernate.service.PupilService;
 import jen.example.hibernate.service.TemplateService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +26,8 @@ public class LoadDatabase {
     private final TemplateService templateService;
     private final PupilService pupilService;
     private final GroupService groupService;
+    private final PlacementService placementService;
+
     @Bean
     CommandLineRunner initDatabase() {
         return args -> {
@@ -48,7 +48,7 @@ public class LoadDatabase {
             groupService.all().forEach(System.out::println);
 
             System.out.println("Placements:");
-            //groupService.all().forEach(System.out::println);
+            placementService.all().forEach(System.out::println);
         };
     }
 
@@ -90,6 +90,7 @@ public class LoadDatabase {
     }
 
     private void createPlacements(){
-
+        //Group group = groupService.getOr404(1L);
+        //logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
     }
 }

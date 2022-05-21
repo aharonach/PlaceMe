@@ -22,11 +22,8 @@ public class Placement {
 
     @Setter(AccessLevel.NONE)
     private LocalDateTime createdTime = LocalDateTime.now();
-
     private String name;
-
     private int numberOfClasses;
-
     @ToString.Exclude
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Group group;
