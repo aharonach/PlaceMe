@@ -24,7 +24,7 @@ public class GroupService implements EntityService<Group> {
     @Override
     @Transactional
     public Group add(Group group) {
-        // @TODO verify
+        // todo: validate that id dont exists
         return repository.save(group);
     }
 
@@ -51,11 +51,6 @@ public class GroupService implements EntityService<Group> {
 
     public Set<Group> getByIds(Set<Long> ids) {
         return repository.getAllByIdIn(ids);
-    }
-
-    @Override
-    public void validate(Group group, Group oldGroup) {
-
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

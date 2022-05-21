@@ -6,6 +6,7 @@ import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -18,6 +19,8 @@ public class Pupil {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private LocalDateTime createdTime = LocalDateTime.now();
     @NaturalId
     private String givenId;
     private String firstName;
@@ -30,8 +33,9 @@ public class Pupil {
     @ToString.Exclude
     private List<AttributeValue> attributeValues;
 
+    @Setter(AccessLevel.NONE)
     @ToString.Exclude
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "pupils_groups",
             joinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"))
@@ -43,19 +47,6 @@ public class Pupil {
         this.lastName = lastName;
         this.gender = gender;
         this.birthDate = birthDate;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Pupil pupil = (Pupil) o;
-        return id != null && Objects.equals(id, pupil.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
     }
 
     /**
@@ -90,33 +81,52 @@ public class Pupil {
         return sum % 10 == 0;
     }
 
-    public void addAttributeValue(Attribute attribute, Double value) {
-        this.getAttributeValues()
-                .stream()
-                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                .findFirst()
-                .ifPresentOrElse(
-                    attributeValue -> attributeValue.setValue(value),
-                    () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))
-        );
+//    public void addAttributeValue(Attribute attribute, Double value) {
+//        this.getAttributeValues()
+//                .stream()
+//                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
+//                .findFirst()
+//                .ifPresentOrElse(
+//                    attributeValue -> attributeValue.setValue(value),
+//                    () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))
+//        );
+//    }
+//
+//    public void removeAttributeValue(Attribute attribute) {
+//        this.getAttributeValues()
+//                .stream()
+//                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
+//                .findFirst()
+//                .ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
+//    }
+
+    public boolean isInGroup(Group group){
+        return groups.contains(group);
     }
 
-    public void removeAttributeValue(Attribute attribute) {
-        this.getAttributeValues()
-                .stream()
-                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                .findFirst()
-                .ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
+    public void addToGroup(Group group){
+        groups.add(group);
     }
 
-    public void addGroup(Group group) {
-        this.groups.add(group);
-        group.getPupils().add(this);
+    public void removeFromGroup(Group group) {
+        groups.remove(group);
     }
 
-    public void removeGroup(Group group) {
-        this.groups.remove(group);
-        group.getPupils().remove(this);
+    public Set<Group> getGroups(){
+        return Collections.unmodifiableSet(groups);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Pupil pupil = (Pupil) o;
+        return id != null && Objects.equals(id, pupil.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     public enum Gender {

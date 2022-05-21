@@ -73,19 +73,19 @@ public class PupilRestController extends BaseRestController<Pupil> {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Get pupil's group.
-     *
-     * @param id the pupil ID
-     * @return List of attribute values
-     */
-    @GetMapping("/{id}/groups")
-    public ResponseEntity<?> getGroups(@PathVariable Long id) {
-        Pupil pupil = service.getOr404(id);
-        Set<Group> groups = pupil.getGroups();
-
-        return ResponseEntity.ok().body(groupAssembler.toCollectionModel(groups));
-    }
+//    /**
+//     * Get pupil's group.
+//     *
+//     * @param id the pupil ID
+//     * @return List of attribute values
+//     */
+//    @GetMapping("/{id}/groups")
+//    public ResponseEntity<?> getGroups(@PathVariable Long id) {
+//        Pupil pupil = service.getOr404(id);
+//        Set<Group> groups = pupil.getGroups();
+//
+//        return ResponseEntity.ok().body(groupAssembler.toCollectionModel(groups));
+//    }
 
     /**
      * Assign pupil to a group.
@@ -99,7 +99,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
         // @TODO this probably should be in service class
         Set<Group> groups = groupService.getByIds(groupIds);
-        groups.forEach(pupil::addGroup);
+        groups.forEach(pupil::addToGroup);
         service.updateById(id, pupil);
 
         return ResponseEntity.ok().body(groupAssembler.toCollectionModel(groups));
@@ -116,7 +116,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
         // @TODO this probably should be in service class
         Set<Group> groups = groupService.getByIds(groupIds);
-        groups.forEach(pupil::removeGroup);
+        groups.forEach(pupil::removeFromGroup);
         service.updateById(id, pupil);
 
         return null;
@@ -136,45 +136,45 @@ public class PupilRestController extends BaseRestController<Pupil> {
         return ResponseEntity.ok().body(pupil.getAttributeValues());
     }
 
-    /**
-     * Create attribute values of a pupil within a template.
-     *
-     * @param id the pupil ID
-     * @param attributeValues list of attribute ids with values
-     */
-    @PutMapping("/{id}/attributes")
-    public ResponseEntity<?> putAttributes(@PathVariable Long id, @RequestBody Map<Long, Double> attributeValues) {
-        service.addAttributeValues(id, attributeValues);
-        return ResponseEntity.ok().build();
-    }
+//    /**
+//     * Create attribute values of a pupil within a template.
+//     *
+//     * @param id the pupil ID
+//     * @param attributeValues list of attribute ids with values
+//     */
+//    @PutMapping("/{id}/attributes")
+//    public ResponseEntity<?> putAttributes(@PathVariable Long id, @RequestBody Map<Long, Double> attributeValues) {
+//        service.addAttributeValues(id, attributeValues);
+//        return ResponseEntity.ok().build();
+//    }
 
-    /**
-     * Update single value of attribute of a pupil.
-     *
-     * @param id
-     * @param attributeId
-     * @param value
-     * @return
-     */
-    @PostMapping("/{id}/attributes/{attributeId}")
-    public ResponseEntity<?> updateAttributes(@PathVariable Long id, @PathVariable Long attributeId,
-                                        @RequestBody Double value) {
-        service.addAttributeValue(id, attributeId, value);
-        return ResponseEntity.ok().build();
-    }
+//    /**
+//     * Update single value of attribute of a pupil.
+//     *
+//     * @param id
+//     * @param attributeId
+//     * @param value
+//     * @return
+//     */
+//    @PostMapping("/{id}/attributes/{attributeId}")
+//    public ResponseEntity<?> updateAttributes(@PathVariable Long id, @PathVariable Long attributeId,
+//                                        @RequestBody Double value) {
+//        service.addAttributeValue(id, attributeId, value);
+//        return ResponseEntity.ok().build();
+//    }
 
-    /**
-     * Delete a attribute value from student.
-     *
-     * @param id
-     * @param attributeId
-     * @return
-     */
-    @DeleteMapping("/{id}/attributes/{attributeId}")
-    public ResponseEntity<?> deleteAttribute(@PathVariable Long id, @PathVariable Long attributeId) {
-        service.removeAttributeValue(id, attributeId);
-        return ResponseEntity.ok().build();
-    }
+//    /**
+//     * Delete a attribute value from student.
+//     *
+//     * @param id
+//     * @param attributeId
+//     * @return
+//     */
+//    @DeleteMapping("/{id}/attributes/{attributeId}")
+//    public ResponseEntity<?> deleteAttribute(@PathVariable Long id, @PathVariable Long attributeId) {
+//        service.removeAttributeValue(id, attributeId);
+//        return ResponseEntity.ok().build();
+//    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

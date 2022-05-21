@@ -1,10 +1,10 @@
 package jen.example.hibernate.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -13,17 +13,19 @@ import java.util.*;
 @NoArgsConstructor
 @Getter
 @Table(name = "groups")
-public class Group {
+public class Group  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private LocalDateTime createdTime = LocalDateTime.now();
     private String name;
     private String description;
     @ManyToOne
     private Template template;
 
+    @Setter(AccessLevel.NONE)
     @ToString.Exclude
-    @JsonIgnore
     @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
 //    @JoinTable(name = "pupils_groups",
 //            joinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"),
@@ -43,6 +45,10 @@ public class Group {
 
     public void removePupil(Pupil pupil){
         pupils.remove(pupil);
+    }
+
+    public Set<Pupil> getPupils(){
+        return Collections.unmodifiableSet(pupils);
     }
 
     @Override

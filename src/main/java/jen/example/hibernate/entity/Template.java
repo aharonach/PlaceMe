@@ -4,9 +4,8 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
 @Getter
@@ -18,6 +17,8 @@ public class Template {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private LocalDateTime createdTime = LocalDateTime.now();
     private String name;
     private String description;
     @Setter(AccessLevel.NONE)
@@ -34,13 +35,6 @@ public class Template {
         this.description = description;
         this.attributes = attributes;
     }
-
-//    public static EntityModel<Template> toModel(Template entity) {
-//        return EntityModel.of(entity,
-//                linkTo(methodOn(TemplateController.class).one(entity.getId())).withSelfRel(),
-//                linkTo(methodOn(TemplateController.class).all()).withRel("templates")
-//        );
-//    }
 
     public void addAttribute(Attribute attribute){
         attributes.add(attribute);
@@ -64,11 +58,14 @@ public class Template {
                 });
     }
 
+    public List<Attribute> getAttributes(){
+        return Collections.unmodifiableList(attributes);
+    }
     public void updateAttributes(List<Attribute> newAttributes){
 
-        List<Long> newAttributeIds = newAttributes.stream().filter(attribute -> attribute.getId() != null).map(Attribute::getId).toList();
+        List<Long> newAttributeIds = newAttributes.stream().map(Attribute::getId).filter(Objects::nonNull).toList();
         List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
-        getAttributes().removeAll(attributesToDelete);
+        attributes.removeAll(attributesToDelete);
 
         newAttributes.forEach(attribute -> {
             if(attribute.getId() == null){

@@ -1,23 +1,29 @@
 package jen.example.hibernate.entity;
 
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @Table(name = "pupils_attributes_values")
 public class AttributeValue {
     @EmbeddedId
-    private PupilAttributeId id;
+    private PupilAttributeId PupilAttributeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("pupilId")
+    @ToString.Exclude
     private Pupil pupil;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("attributeId")
+    @ToString.Exclude
     private Attribute attribute;
 
     @Column(name = "attribute_value")
@@ -27,7 +33,6 @@ public class AttributeValue {
         this.pupil = pupil;
         this.attribute = attribute;
         this.value = value;
-        this.id = new PupilAttributeId(pupil.getId(), attribute.getId());
     }
 
     public double getScore(){
@@ -36,5 +41,18 @@ public class AttributeValue {
 
     public double getMaxScore(){
         return attribute.calculate(attribute.getMaxValue());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        AttributeValue that = (AttributeValue) o;
+        return PupilAttributeId != null && Objects.equals(PupilAttributeId, that.PupilAttributeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(PupilAttributeId);
     }
 }

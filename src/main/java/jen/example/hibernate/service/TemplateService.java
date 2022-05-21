@@ -23,6 +23,7 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     public Template add(Template template) {
+        // todo: validate that id dont exists
         // @TODO verify that all attributes are new (without ids) and other template fields
         return repository.save(template);
     }
@@ -53,11 +54,6 @@ public class TemplateService implements EntityService<Template> {
     public void deleteById(Long id) {
         Template template = getOr404(id);
         repository.delete(template);
-    }
-
-    @Override
-    public void validate(Template item, Template oldItem) {
-        // todo: implement
     }
 
     // handle attributes

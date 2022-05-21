@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -19,7 +20,10 @@ import java.util.Objects;
 public abstract class Attribute {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
+
+    protected LocalDateTime createdTime = LocalDateTime.now();
+
     protected String name;
     protected String description;
     protected int priority;
@@ -29,9 +33,6 @@ public abstract class Attribute {
         this.description = description;
         this.priority = priority;
     }
-
-//    @OneToMany(mappedBy = "attribute")
-//    protected List<Pupil> pupils;
 
     abstract double calculate(double score);
 

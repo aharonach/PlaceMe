@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 @Entity
 @NoArgsConstructor
 public class RangeAttribute extends Attribute {
-
     public RangeAttribute(String name, String description, int priority){
         super(name, description, priority);
     }

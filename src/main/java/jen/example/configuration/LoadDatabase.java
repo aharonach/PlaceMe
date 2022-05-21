@@ -24,10 +24,10 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class LoadDatabase {
     private static final Logger logger = LoggerFactory.getLogger(LoadDatabase.class);
+
     private final TemplateService templateService;
     private final PupilService pupilService;
     private final GroupService groupService;
-
     @Bean
     CommandLineRunner initDatabase() {
         return args -> {
@@ -41,8 +41,8 @@ public class LoadDatabase {
 
             // add groups
             createGroups();
-//            logger.info("Groups: " + groupService.all());
-//            logger.info("Groups: " + groupService.getOr404(1L).getPupils());
+            logger.info("Groups: " + groupService.all());
+            //pupilService.getOr404(1L).addToGroup(groupService.getOr404(1L));
         };
     }
 
@@ -76,23 +76,10 @@ public class LoadDatabase {
 
     private void createGroups(){
         Template template = templateService.getOr404(2L);
-//        Pupil pupil1 = pupilService.getOr404(1L);
-//        Pupil pupil2 = pupilService.getOr404(2L);
-//        Pupil pupil3 = pupilService.getOr404(3L);
+        Pupil pupil = pupilService.getOr404(1L);
 
-        Group group1 = new Group("group 1", "group 1 desc", template);
-        Group group2 = new Group("group 2", "group 2 desc", template);
-
-        logger.info("Preloading " + groupService.add(group1));
-        logger.info("Preloading " + groupService.add(group2));
-
-//        pupil1.addGroup(group1);
-//        pupil2.addGroup(group1);
-//        pupil2.addGroup(group2);
-//        pupil3.addGroup(group2);
-//
-//        pupilService.updateById(pupil1.getId(), pupil1);
-//        pupilService.updateById(pupil2.getId(), pupil2);
-//        pupilService.updateById(pupil3.getId(), pupil3);
+        Group group = new Group("group 1", "group 1 desc", template);
+        //group.addPupil(pupil);
+        logger.info("Preloading " + groupService.add(group));
     }
 }
