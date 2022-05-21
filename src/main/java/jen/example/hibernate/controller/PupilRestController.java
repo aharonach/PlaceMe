@@ -31,7 +31,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll() {
-        CollectionModel<EntityModel<PupilDto>> allEntities = pupilAssembler.toCollectionModel(service.all());
+        CollectionModel<EntityModel<Pupil>> allEntities = pupilAssembler.toCollectionModel(service.all());
 
         return ResponseEntity
                 .ok()
@@ -41,7 +41,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        EntityModel<PupilDto> entity = pupilAssembler.toModel(service.getOr404(id));
+        EntityModel<Pupil> entity = pupilAssembler.toModel(service.getOr404(id));
 
         return ResponseEntity
                 .ok()
@@ -51,7 +51,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Pupil newRecord) {
-        EntityModel<PupilDto> entity = pupilAssembler.toModel(service.add(newRecord));
+        EntityModel<Pupil> entity = pupilAssembler.toModel(service.add(newRecord));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -61,7 +61,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     @Override
     @PostMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Pupil updatedRecord) {
-        EntityModel<PupilDto> entity = pupilAssembler.toModel(service.updateById(id, updatedRecord));
+        EntityModel<Pupil> entity = pupilAssembler.toModel(service.updateById(id, updatedRecord));
 
         return ResponseEntity
                 .ok()
@@ -82,7 +82,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
      * @return List of attribute values
      */
     @GetMapping("/{id}/groups")
-    public ResponseEntity<?> getGroups(@PathVariable Long id) {
+    public ResponseEntity<?> getPupilGroups(@PathVariable Long id) {
         Pupil pupil = service.getOr404(id);
         CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupil.getGroups());
 

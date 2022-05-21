@@ -1,6 +1,7 @@
 package jen.example.hibernate.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -25,12 +26,12 @@ public class Group  {
     private LocalDateTime createdTime = LocalDateTime.now();
     private String name;
     private String description;
+    @JsonIgnore
     @ManyToOne
     private Template template;
 
     @ToString.Exclude
-    //@JsonIgnore
-    @JsonFormat
+    @JsonIgnore
     @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
     private Set<Pupil> pupils = new LinkedHashSet<>();
 

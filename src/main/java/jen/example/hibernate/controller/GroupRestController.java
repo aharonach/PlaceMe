@@ -44,4 +44,14 @@ public class GroupRestController extends BaseRestController<Group> {
     public ResponseEntity<?> delete(Long id) {
         return null;
     }
+
+    @GetMapping("/{id}/template")
+    public ResponseEntity<?> getGroupTemplate(@PathVariable Long id){
+        return null;
+    }
+
+    @GetMapping("/{id}/pupils")
+    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long id){
+        return null;
+    }
 }

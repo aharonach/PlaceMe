@@ -12,19 +12,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class PupilModelAssembler implements RepresentationModelAssembler<Pupil, EntityModel<PupilDto>> {
+public class PupilModelAssembler implements RepresentationModelAssembler<Pupil, EntityModel<Pupil>> {
     Class<PupilRestController> controller = PupilRestController.class;
 
     @Override
-    public EntityModel<PupilDto> toModel(Pupil entity) {
-        return EntityModel.of(new PupilDto(entity),
+    public EntityModel<Pupil> toModel(Pupil entity) {
+        return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
+                linkTo(methodOn(controller).getPupilGroups(entity.getId())).withRel("pupil_groups"),
                 linkTo(methodOn(controller).getAll()).withRel("pupils")
         );
     }
 
     @Override
-    public CollectionModel<EntityModel<PupilDto>> toCollectionModel(Iterable<? extends Pupil> entities) {
+    public CollectionModel<EntityModel<Pupil>> toCollectionModel(Iterable<? extends Pupil> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
                 .add(linkTo(methodOn(controller).getAll()).withSelfRel());
     }
