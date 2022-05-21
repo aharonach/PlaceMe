@@ -10,12 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping({"/templates"})
@@ -31,20 +28,22 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll() {
-        List<Template> allTemplates = service.all();
-        CollectionModel<EntityModel<Template>> entityModels = assembler.toCollectionModel(allTemplates);
-        return ResponseEntity.ok().body(entityModels);
+        CollectionModel<EntityModel<Template>> allEntities = assembler.toCollectionModel(service.all());
+
+        return ResponseEntity
+                .ok()
+                .body(allEntities);
     }
 
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        Template template = service.getOr404(id);
+        EntityModel<Template> entity = assembler.toModel(service.getOr404(id));
+
         return ResponseEntity
                 .ok()
-                .body(assembler.toModel(template));
+                .body(entity);
     }
-
 
     @Override
     @PutMapping()
@@ -59,7 +58,7 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PostMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Template updatedRecord) {
-        Template entity = service.updateById(id, updatedRecord);
+        EntityModel<Template> entity = assembler.toModel(service.updateById(id, updatedRecord));
 
         return ResponseEntity
                 .ok()
@@ -102,11 +101,5 @@ public class TemplateRestController extends BaseRestController<Template> {
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entity);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public void handle(HttpMessageNotReadableException e) {
-        logger.warn("Returning HTTP 400 Bad Request", e);
     }
 }

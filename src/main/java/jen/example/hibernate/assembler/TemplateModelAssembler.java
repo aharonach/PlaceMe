@@ -12,18 +12,19 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class TemplateModelAssembler implements RepresentationModelAssembler<Template, EntityModel<Template>> {
+    Class<TemplateRestController> controller = TemplateRestController.class;
 
     @Override
     public EntityModel<Template> toModel(Template entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(TemplateRestController.class).get(entity.getId())).withSelfRel(),
-                linkTo(methodOn(TemplateRestController.class).getAll()).withRel("templates")
+                linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
+                linkTo(methodOn(controller).getAll()).withRel("templates")
         );
     }
 
     @Override
     public CollectionModel<EntityModel<Template>> toCollectionModel(Iterable<? extends Template> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(TemplateRestController.class).getAll()).withSelfRel());
+                .add(linkTo(methodOn(controller).getAll()).withSelfRel());
     }
 }
