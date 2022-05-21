@@ -21,6 +21,7 @@ public class PupilService implements EntityService<Pupil>{
     private final PupilRepository repository;
 
     @Override
+    @Transactional
     public Pupil add(Pupil pupil) {
         // todo: validate that id dont exists
         return repository.save(pupil);

@@ -14,6 +14,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -60,10 +61,14 @@ public class LoadDatabase {
         ))));
     }
 
-    private void createPupils(){
-        logger.info("Preloading " + pupilService.add(
-                new Pupil("204054845", "Gal", "Yeshua", Pupil.Gender.MALE, LocalDate.of(1992, 7, 28))
-        ));
+    public void createPupils(){
+        Template template = templateService.getOr404(2L);
+        Group group = groupService.add(new Group("group 2", "group 2 desc", template));
+
+        Pupil pupil = pupilService.add(new Pupil("204054845", "Gal", "Yeshua", Pupil.Gender.MALE, LocalDate.of(1992, 7, 28)));
+        logger.info("Preloading " + pupil);
+        pupil.addToGroup(group);
+        pupilService.add(pupil);
 
         logger.info("Preloading " + pupilService.add(
                 new Pupil("308338318", "Aharon", "Achildiev", Pupil.Gender.MALE, LocalDate.of(1993, 2, 28))
@@ -72,14 +77,16 @@ public class LoadDatabase {
         logger.info("Preloading " + pupilService.add(
                 new Pupil("307944710", "Shir", "Halfon", Pupil.Gender.FEMALE, LocalDate.of(1993, 4, 6))
         ));
+
+
     }
 
-    private void createGroups(){
+    public void createGroups(){
         Template template = templateService.getOr404(2L);
         Pupil pupil = pupilService.getOr404(1L);
 
-        Group group = new Group("group 1", "group 1 desc", template);
-        //group.addPupil(pupil);
+        Group group = groupService.add(new Group("group 1", "group 1 desc", template));
+        group.addPupil(pupil);
         logger.info("Preloading " + groupService.add(group));
     }
 }

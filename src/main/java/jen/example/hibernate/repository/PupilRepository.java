@@ -9,5 +9,4 @@ import java.util.List;
 @Repository
 public interface PupilRepository extends JpaRepository<Pupil, Long> {
     boolean existsByGivenId(String givenId);
-    List<Pupil> findPupilsByGroupsId(Long groupId);
 }

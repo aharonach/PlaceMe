@@ -27,9 +27,6 @@ public class Group  {
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
     @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
-//    @JoinTable(name = "pupils_groups",
-//            joinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"),
-//            inverseJoinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"))
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
 
@@ -41,10 +38,12 @@ public class Group  {
 
     public void addPupil(Pupil pupil){
         pupils.add(pupil);
+        pupil.addToGroup(this);
     }
 
     public void removePupil(Pupil pupil){
         pupils.remove(pupil);
+        pupil.removeFromGroup(this);
     }
 
     public Set<Pupil> getPupils(){

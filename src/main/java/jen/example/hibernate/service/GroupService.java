@@ -39,6 +39,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Override
+    @Transactional
     public Group updateById(Long id, Group newGroup) {
         return null;
     }
