@@ -35,6 +35,7 @@ public class LoadDatabase {
             createTemplates();
             createPupils();
             createGroups();
+            createPlacements();
 
             // print
             System.out.println("Pupils:");
@@ -45,6 +46,9 @@ public class LoadDatabase {
 
             System.out.println("Groups:");
             groupService.all().forEach(System.out::println);
+
+            System.out.println("Placements:");
+            //groupService.all().forEach(System.out::println);
         };
     }
 
@@ -62,7 +66,7 @@ public class LoadDatabase {
         ))));
     }
 
-    public void createPupils(){
+    private void createPupils(){
         logger.info("Preloading " + pupilService.add(
                 new Pupil("204054845", "Gal", "Yeshua", Pupil.Gender.MALE, LocalDate.of(1992, 7, 28))
         ));
@@ -76,12 +80,16 @@ public class LoadDatabase {
         ));
     }
 
-    public void createGroups(){
+    private void createGroups(){
         Template template = templateService.getOr404(2L);
 
         Group group = groupService.add(new Group("group 1", "group 1 desc", template));
         pupilService.all().forEach(group::addPupil);
 
         logger.info("Preloading " + groupService.add(group));
+    }
+
+    private void createPlacements(){
+
     }
 }
