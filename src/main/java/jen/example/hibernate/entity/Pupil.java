@@ -109,6 +109,10 @@ public class Pupil {
 //                .ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
 //    }
 
+    public void setGroups(Set<Group> groups){
+        getGroups().forEach(this::removeFromGroup);
+        groups.forEach(this::addToGroup);
+    }
     public boolean isInGroup(Group group){
         return groups.contains(group);
     }
