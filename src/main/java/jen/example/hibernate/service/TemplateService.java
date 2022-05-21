@@ -2,14 +2,13 @@ package jen.example.hibernate.service;
 
 import jen.example.hibernate.entity.Attribute;
 import jen.example.hibernate.entity.Template;
+import jen.example.hibernate.exception.NotFound;
 import jen.example.hibernate.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     public Template getOr404(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFound(id));
+        return repository.findById(id).orElseThrow(() -> new NotFound("Could not find template " + id));
     }
 
     @Override
@@ -73,13 +72,5 @@ public class TemplateService implements EntityService<Template> {
         Template template = getOr404(templateId);
         template.addAttribute(newAttribute);
         return repository.save(template);
-    }
-
-    // handle exceptions
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public static class NotFound extends RuntimeException{
-        public NotFound(Long id){
-            super("Could not find template " + id);
-        }
     }
 }

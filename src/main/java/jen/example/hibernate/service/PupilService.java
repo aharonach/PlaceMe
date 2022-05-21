@@ -1,14 +1,14 @@
 package jen.example.hibernate.service;
 
 import jen.example.hibernate.entity.Pupil;
+import jen.example.hibernate.exception.BadRequest;
+import jen.example.hibernate.exception.NotFound;
 import jen.example.hibernate.repository.PupilRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 
@@ -23,13 +23,13 @@ public class PupilService implements EntityService<Pupil>{
     @Override
     @Transactional
     public Pupil add(Pupil pupil) {
-        // todo: validate that id dont exists
+        validateGivenId(pupil.getGivenId());
         return repository.save(pupil);
     }
 
     @Override
     public Pupil getOr404(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFound(id));
+        return repository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
 
     @Override
@@ -42,6 +42,7 @@ public class PupilService implements EntityService<Pupil>{
     public Pupil updateById(Long id, Pupil newPupil) {
         Pupil pupil = getOr404(id);
 
+        validateGivenId(pupil.getGivenId());
         pupil.setGivenId(newPupil.getGivenId());
         pupil.setFirstName(newPupil.getFirstName());
         pupil.setLastName(newPupil.getLastName());
@@ -82,17 +83,9 @@ public class PupilService implements EntityService<Pupil>{
         return givenId != null && repository.existsByGivenId(givenId);
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public static class NotFound extends RuntimeException{
-        public NotFound(Long id){
-            super("Could not find pupil " + id);
-        }
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public static class GivenIdAlreadyExists extends RuntimeException {
-        public GivenIdAlreadyExists(String givenId){
-            super("pupil with given ID " + givenId + " already exists");
+    private void validateGivenId(String givenId){
+        if(pupilExists(givenId)){
+            throw new BadRequest("pupil with given ID " + givenId + " already exists");
         }
     }
 }
