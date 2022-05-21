@@ -14,7 +14,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -32,18 +31,20 @@ public class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase() {
         return args -> {
-            // add templates
+            // add
             createTemplates();
-            logger.info("Templates: " + templateService.all());
-
-            // add pupils
             createPupils();
-            logger.info("Pupils: " + pupilService.all());
-
-            // add groups
             createGroups();
-            logger.info("Groups: " + groupService.all());
-            //pupilService.getOr404(1L).addToGroup(groupService.getOr404(1L));
+
+            // print
+            System.out.println("Pupils:");
+            pupilService.all().forEach(System.out::println);
+
+            System.out.println("Templates:");
+            templateService.all().forEach(System.out::println);
+
+            System.out.println("Groups:");
+            groupService.all().forEach(System.out::println);
         };
     }
 
@@ -62,13 +63,9 @@ public class LoadDatabase {
     }
 
     public void createPupils(){
-        Template template = templateService.getOr404(2L);
-        Group group = groupService.add(new Group("group 2", "group 2 desc", template));
-
-        Pupil pupil = pupilService.add(new Pupil("204054845", "Gal", "Yeshua", Pupil.Gender.MALE, LocalDate.of(1992, 7, 28)));
-        logger.info("Preloading " + pupil);
-        pupil.addToGroup(group);
-        pupilService.add(pupil);
+        logger.info("Preloading " + pupilService.add(
+                new Pupil("204054845", "Gal", "Yeshua", Pupil.Gender.MALE, LocalDate.of(1992, 7, 28))
+        ));
 
         logger.info("Preloading " + pupilService.add(
                 new Pupil("308338318", "Aharon", "Achildiev", Pupil.Gender.MALE, LocalDate.of(1993, 2, 28))
@@ -77,16 +74,14 @@ public class LoadDatabase {
         logger.info("Preloading " + pupilService.add(
                 new Pupil("307944710", "Shir", "Halfon", Pupil.Gender.FEMALE, LocalDate.of(1993, 4, 6))
         ));
-
-
     }
 
     public void createGroups(){
         Template template = templateService.getOr404(2L);
-        Pupil pupil = pupilService.getOr404(1L);
 
         Group group = groupService.add(new Group("group 1", "group 1 desc", template));
-        group.addPupil(pupil);
+        pupilService.all().forEach(group::addPupil);
+
         logger.info("Preloading " + groupService.add(group));
     }
 }
