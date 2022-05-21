@@ -4,7 +4,6 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -13,15 +12,7 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @Table(name = "placements")
-public class Placement {
-    @Setter(AccessLevel.NONE)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    private Long id;
-
-    @Setter(AccessLevel.NONE)
-    private LocalDateTime createdTime = LocalDateTime.now();
+public class Placement extends BaseEntity {
     private String name;
     private int numberOfClasses;
     @ToString.Exclude

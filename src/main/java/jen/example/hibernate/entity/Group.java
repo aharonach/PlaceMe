@@ -1,12 +1,10 @@
 package jen.example.hibernate.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -15,26 +13,16 @@ import java.util.*;
 @NoArgsConstructor
 @Getter
 @Table(name = "groups")
-public class Group  {
-    @Setter(AccessLevel.NONE)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    private Long id;
-
-    @Setter(AccessLevel.NONE)
-    private LocalDateTime createdTime = LocalDateTime.now();
+public class Group extends BaseEntity {
     private String name;
     private String description;
     @JsonIgnore
     @ManyToOne
     private Template template;
-
     @ToString.Exclude
     @JsonIgnore
     @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
     private Set<Pupil> pupils = new LinkedHashSet<>();
-
 
     public Group(String name, String description, Template template){
         this.name = name;

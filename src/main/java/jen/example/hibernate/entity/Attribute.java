@@ -6,7 +6,6 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -17,16 +16,7 @@ import java.util.Objects;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({@JsonSubTypes.Type(value = RangeAttribute.class, name = "range")})
 @Table(name = "attributes")
-public abstract class Attribute {
-    @Setter(AccessLevel.NONE)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    protected Long id;
-
-    @Setter(AccessLevel.NONE)
-    protected LocalDateTime createdTime = LocalDateTime.now();
-
+public abstract class Attribute extends BaseEntity {
     protected String name;
     protected String description;
     protected int priority;
@@ -39,7 +29,7 @@ public abstract class Attribute {
 
     abstract double calculate(double score);
 
-    abstract double getMaxValue();
+    abstract double maxValue();
 
     @Override
     public boolean equals(Object o) {

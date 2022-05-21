@@ -6,11 +6,9 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -19,15 +17,7 @@ import java.util.*;
 @ToString
 @NoArgsConstructor
 @Table(name = "pupils")
-public class Pupil {
-    @Setter(AccessLevel.NONE)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    private Long id;
-
-    @Setter(AccessLevel.NONE)
-    private LocalDateTime createdTime = LocalDateTime.now();
+public class Pupil extends BaseEntity {
     @NaturalId
     private String givenId;
     private String firstName;
@@ -64,7 +54,7 @@ public class Pupil {
      * @param israeliId the id to validate
      * @return bool
      */
-    public static boolean isGivenIdValid(String israeliId ) {
+    public static boolean isGivenIdValid(String israeliId) {
         if (israeliId.length() != 9)
             return false;
 

@@ -17,7 +17,7 @@ public class RangeAttribute extends Attribute {
     }
 
     @Override
-    double getMaxValue() {
+    double maxValue() {
         return 5;
     }
 }

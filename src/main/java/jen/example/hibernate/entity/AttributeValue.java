@@ -40,7 +40,7 @@ public class AttributeValue {
     }
 
     public double getMaxScore(){
-        return attribute.calculate(attribute.getMaxValue());
+        return attribute.calculate(attribute.maxValue());
     }
 
     @Override
