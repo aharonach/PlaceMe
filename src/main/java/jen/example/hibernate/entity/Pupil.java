@@ -80,29 +80,43 @@ public class Pupil extends BaseEntity {
         return sum % 10 == 0;
     }
 
-//    public void addAttributeValue(Attribute attribute, Double value) {
-//        this.getAttributeValues()
-//                .stream()
-//                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-//                .findFirst()
-//                .ifPresentOrElse(
-//                    attributeValue -> attributeValue.setValue(value),
-//                    () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))
-//        );
-//    }
-//
-//    public void removeAttributeValue(Attribute attribute) {
-//        this.getAttributeValues()
-//                .stream()
-//                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-//                .findFirst()
-//                .ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
-//    }
+    public void addAttributeValue(Group group, Long attributeId, Double value) throws Exception {
+        if (!isInGroup(group)) {
+            throw new Exception("Pupil " + this.getGivenId() + " is not in " + group.getName() + " group.");
+        }
+
+        // First find the attribute object inside the group's template.
+        // Then find if the attribute is already has a value for pupil,
+        // If it does, update the value, otherwise create a new AttributeValue.
+        group.getTemplate()
+                .getAttributes().stream()
+                .filter(attribute -> attribute.getId().equals(attributeId))
+                .findFirst()
+                .ifPresent(attribute -> this.getAttributeValues().stream()
+                        .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
+                        .findFirst()
+                        .ifPresentOrElse(attributeValue -> attributeValue.setValue(value),
+                                () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))));
+    }
+
+    public void removeAttributeValue(Group group, Long attributeId) throws Exception {
+        if (!isInGroup(group)) {
+            throw new Exception("Pupil " + this.getGivenId() + " is not in " + group.getName() + " group.");
+        }
+
+        group.getTemplate()
+                .getAttributes().stream()
+                .filter(attribute -> attribute.getId().equals(attributeId))
+                .findFirst().flatMap(attribute -> this.getAttributeValues().stream()
+                        .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
+                        .findFirst()).ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
+    }
 
     public void setGroups(Set<Group> groups){
         getGroups().forEach(this::removeFromGroup);
         groups.forEach(this::addToGroup);
     }
+
     public boolean isInGroup(Group group){
         return groups.contains(group);
     }
@@ -110,7 +124,6 @@ public class Pupil extends BaseEntity {
     public void addToGroup(Group group){
         groups.add(group);
     }
-
 
     public void removeFromGroup(Group group) {
         groups.remove(group);

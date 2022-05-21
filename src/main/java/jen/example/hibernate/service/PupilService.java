@@ -1,5 +1,6 @@
 package jen.example.hibernate.service;
 
+import jen.example.hibernate.entity.Group;
 import jen.example.hibernate.entity.Pupil;
 import jen.example.hibernate.exception.BadRequest;
 import jen.example.hibernate.exception.NotFound;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class PupilService implements EntityService<Pupil>{
     private static final Logger logger = LoggerFactory.getLogger(PupilService.class);
 
     private final PupilRepository repository;
+    private final GroupService groupService;
 
     @Override
     @Transactional
@@ -58,26 +62,30 @@ public class PupilService implements EntityService<Pupil>{
         repository.delete(pupil);
     }
 
-//    public void addAttributeValues(Long pupilId, Map<Long, Double> attributeValues) {
-//        Pupil pupil = getOr404(pupilId);
-//        List<Attribute> attributes = attributeRepository.getAllByIdIn(attributeValues.keySet());
-//        attributes.forEach(attribute -> pupil.addAttributeValue(attribute, attributeValues.get(attribute.getId())));
-//        repository.save(pupil);
-//    }
-//
-//    public void addAttributeValue(Long pupilId, Long attributeId, Double value) {
-//        Pupil pupil = getOr404(pupilId);
-//        Attribute attribute = attributeRepository.getById(attributeId);
-//        pupil.addAttributeValue(attribute, value);
-//        repository.save(pupil);
-//    }
-//
-//    public void removeAttributeValue(Long pupilId, Long attributeId) {
-//        Pupil pupil = getOr404(pupilId);
-//        Attribute attribute = attributeRepository.getById(attributeId);
-//        pupil.removeAttributeValue(attribute);
-//        repository.save(pupil);
-//    }
+    public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) {
+        try {
+            for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
+                pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());
+            }
+
+            // not saving the attribute values :(
+            repository.save(pupil);
+            groupService.getRepository().save(group);
+        } catch(Exception exception) {
+            throw new BadRequest(exception.getMessage());
+        }
+    }
+
+    public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) {
+        try {
+            for (Long attributeId : attributeIds) {
+                pupil.removeAttributeValue(group, attributeId);
+            }
+            repository.save(pupil);
+        } catch(Exception exception) {
+            throw new BadRequest(exception.getMessage());
+        }
+    }
 
     public boolean pupilExists(String givenId) {
         return givenId != null && repository.existsByGivenId(givenId);
