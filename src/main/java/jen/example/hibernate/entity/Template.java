@@ -14,10 +14,13 @@ import java.util.*;
 @NoArgsConstructor
 @Table(name = "templates")
 public class Template {
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
+    @Setter(AccessLevel.NONE)
     private LocalDateTime createdTime = LocalDateTime.now();
     private String name;
     private String description;

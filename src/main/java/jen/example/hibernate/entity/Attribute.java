@@ -18,10 +18,13 @@ import java.util.Objects;
 @JsonSubTypes({@JsonSubTypes.Type(value = RangeAttribute.class, name = "range")})
 @Table(name = "attributes")
 public abstract class Attribute {
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     protected Long id;
 
+    @Setter(AccessLevel.NONE)
     protected LocalDateTime createdTime = LocalDateTime.now();
 
     protected String name;
