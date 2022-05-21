@@ -3,6 +3,7 @@ package jen.example.hibernate.service;
 import jen.example.hibernate.entity.Attribute;
 import jen.example.hibernate.entity.RangeAttribute;
 import jen.example.hibernate.entity.Template;
+import jen.example.hibernate.exception.NotFound;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -103,7 +104,7 @@ class TemplateServiceTest {
 
     @Test
     void shouldThrowNotFoundExceptionOnGetTemplateWhenTemplateNotExist() {
-        assertThrows(TemplateService.NotFound.class, () -> {
+        assertThrows(NotFound.class, () -> {
             service.getOr404(100L);
         });
     }
