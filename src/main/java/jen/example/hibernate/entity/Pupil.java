@@ -1,5 +1,6 @@
 package jen.example.hibernate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -19,10 +20,13 @@ import java.util.*;
 @NoArgsConstructor
 @Table(name = "pupils")
 public class Pupil {
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
+    @Setter(AccessLevel.NONE)
     private LocalDateTime createdTime = LocalDateTime.now();
     @NaturalId
     private String givenId;
@@ -43,6 +47,7 @@ public class Pupil {
             joinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"))
     @Fetch(FetchMode.JOIN)
+    @JsonIgnore
     private Set<Group> groups = new LinkedHashSet<>();
 
     public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate){
@@ -104,22 +109,16 @@ public class Pupil {
 //                .ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
 //    }
 
-//    public boolean isInGroup(Group group){
-//        return groups.contains(group);
-//    }
+    public boolean isInGroup(Group group){
+        return groups.contains(group);
+    }
 
     public void addToGroup(Group group){
-//        if(isInGroup(group))
-//            return;
-//
         groups.add(group);
     }
 
 
     public void removeFromGroup(Group group) {
-//        if(!isInGroup(group))
-//            return;
-//
         groups.remove(group);
     }
 

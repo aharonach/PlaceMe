@@ -1,5 +1,6 @@
 package jen.example.hibernate.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -14,18 +15,22 @@ import java.util.*;
 @Getter
 @Table(name = "groups")
 public class Group  {
+    @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id;
 
+    @Setter(AccessLevel.NONE)
     private LocalDateTime createdTime = LocalDateTime.now();
     private String name;
     private String description;
     @ManyToOne
     private Template template;
 
-    @Setter(AccessLevel.NONE)
     @ToString.Exclude
+    //@JsonIgnore
+    @JsonFormat
     @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
@@ -34,6 +39,15 @@ public class Group  {
         this.name = name;
         this.description = description;
         this.template = template;
+    }
+
+    public void setPupils(Set<Pupil> pupils) {
+        getPupils().forEach(this::removePupil);
+        pupils.forEach(this::addPupil);
+    }
+
+    public boolean isContains(Pupil pupil){
+        return pupils.contains(pupil);
     }
 
     public void addPupil(Pupil pupil){
