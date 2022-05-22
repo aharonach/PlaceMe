@@ -33,13 +33,17 @@ public class LoadDatabase {
         return args -> {
             // add
             createTemplates();
-            createPupils();
             createGroups();
+            createPupils();
+            createAttributeValues();
             createPlacements();
 
             // print
             System.out.println("Pupils:");
-            pupilService.all().forEach(System.out::println);
+            pupilService.all().forEach(pupil -> {
+                System.out.println(pupil);
+                //System.out.println(pupil.getAttributeValues());
+            });
 
             System.out.println("Templates:");
             templateService.all().forEach(System.out::println);
@@ -87,6 +91,10 @@ public class LoadDatabase {
         pupilService.all().forEach(group::addPupil);
 
         logger.info("Preloading " + groupService.add(group));
+    }
+
+    private void createAttributeValues(){
+
     }
 
     private void createPlacements(){

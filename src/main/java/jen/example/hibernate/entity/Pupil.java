@@ -1,6 +1,7 @@
 package jen.example.hibernate.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jen.example.hibernate.util.IsraeliIdValidator;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -56,39 +57,16 @@ public class Pupil extends BaseEntity {
      * @return bool
      */
     public static boolean isGivenIdValid(String israeliId) {
-        if (israeliId.length() != 9)
-            return false;
-
-        int sum = 0;
-
-        for (int i = 0; i < israeliId.length(); i++) {
-            int digit = israeliId.charAt(i) - '0';
-            sum += i % 2 != 0 ?
-                    switch (digit) {
-                        case 1 -> 2;
-                        case 2 -> 4;
-                        case 3 -> 6;
-                        case 4 -> 8;
-                        case 5 -> 1;
-                        case 6 -> 3;
-                        case 7 -> 5;
-                        case 8 -> 7;
-                        case 9 -> 9;
-                        default -> 0;
-                    } : digit;
-        }
-
-        return sum % 10 == 0;
+        return IsraeliIdValidator.isValid(israeliId);
     }
 
-    public void addAttributeValue(Group group, Long attributeId, Double value) throws Exception {
-        if (!isInGroup(group)) {
-            throw new Exception("Pupil " + this.getGivenId() + " is not in " + group.getName() + " group.");
-        }
+    public void addAttributeValue(Group group, Long attributeId, Double value) throws NotBelongToGroupException {
+        verifyPupilInGroup(group);
 
         // First find the attribute object inside the group's template.
         // Then find if the attribute is already has a value for pupil,
         // If it does, update the value, otherwise create a new AttributeValue.
+        // todo: add to the Group class method for getting attribute by ID
         group.getTemplate()
                 .getAttributes().stream()
                 .filter(attribute -> attribute.getId().equals(attributeId))
@@ -100,13 +78,12 @@ public class Pupil extends BaseEntity {
                                 () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))));
     }
 
-    public PupilAttributeId removeAttributeValue(Group group, Long attributeId) throws Exception {
-        if (!isInGroup(group)) {
-            throw new Exception("Pupil " + this.getGivenId() + " is not in " + group.getName() + " group.");
-        }
+    public PupilAttributeId removeAttributeValue(Group group, Long attributeId) throws NotBelongToGroupException {
+        verifyPupilInGroup(group);
 
         AtomicReference<PupilAttributeId> removed = new AtomicReference<>();
 
+        // todo: add to the Group class method for getting attribute by ID
         group.getTemplate()
                 .getAttributes().stream()
                 .filter(attribute -> attribute.getId().equals(attributeId))
@@ -141,6 +118,12 @@ public class Pupil extends BaseEntity {
         return Collections.unmodifiableSet(groups);
     }
 
+    private void verifyPupilInGroup(Group group) throws NotBelongToGroupException {
+        if (!isInGroup(group)) {
+            throw new NotBelongToGroupException("Pupil " + this.getGivenId() + " is not in " + group.getName() + " group.");
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -152,6 +135,12 @@ public class Pupil extends BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public static class NotBelongToGroupException extends Exception{
+        public NotBelongToGroupException(String message){
+            super(message);
+        }
     }
 
     public enum Gender {

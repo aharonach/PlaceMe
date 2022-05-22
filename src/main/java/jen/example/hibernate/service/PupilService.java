@@ -26,7 +26,6 @@ public class PupilService implements EntityService<Pupil>{
 
     private final PupilRepository repository;
     private final AttributeValueRepository attributeValueRepository;
-    private final GroupService groupService;
 
     @Override
     @Transactional
@@ -67,29 +66,30 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) {
+
         try {
             for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
                 pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());
             }
-
-            attributeValueRepository.saveAllAndFlush(pupil.getAttributeValues());
-        } catch(Exception exception) {
-            throw new BadRequest(exception.getMessage());
+        } catch(Pupil.NotBelongToGroupException e) {
+            throw new BadRequest(e.getMessage());
         }
+
+        attributeValueRepository.saveAllAndFlush(pupil.getAttributeValues());
     }
 
     public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) {
+        List<PupilAttributeId> toRemove = new ArrayList<>();
+
         try {
-            List<PupilAttributeId> removed = new ArrayList<>();
-
             for (Long attributeId : attributeIds) {
-                removed.add(pupil.removeAttributeValue(group, attributeId));
+                toRemove.add(pupil.removeAttributeValue(group, attributeId));
             }
-
-            attributeValueRepository.deleteAllById(removed);
-        } catch(Exception exception) {
-            throw new BadRequest(exception.getMessage());
+        } catch(Pupil.NotBelongToGroupException e) {
+            throw new BadRequest(e.getMessage());
         }
+
+        attributeValueRepository.deleteAllById(toRemove);
     }
 
     public boolean pupilExists(String givenId) {
