@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Profile;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Configuration
@@ -35,14 +37,14 @@ public class LoadDatabase {
             createTemplates();
             createGroups();
             createPupils();
-            createAttributeValues();
+            //createAttributeValues();
             createPlacements();
 
             // print
             System.out.println("Pupils:");
             pupilService.all().forEach(pupil -> {
                 System.out.println(pupil);
-                //System.out.println(pupil.getAttributeValues());
+                System.out.println(pupil.getAttributeValues());
             });
 
             System.out.println("Templates:");
@@ -94,7 +96,17 @@ public class LoadDatabase {
     }
 
     private void createAttributeValues(){
+        Group group = groupService.getOr404(1L);
+        Template template = group.getTemplate();
+        Pupil pupil = pupilService.getOr404(1L);
 
+        Map<Long, Double> attributeValues = new HashMap<>(template.getAttributes().size());
+
+        template.getAttributes().forEach(attribute -> {
+            attributeValues.put(attribute.getId(), 4D);
+        });
+
+        pupilService.addAttributeValues(pupil, group, attributeValues);
     }
 
     private void createPlacements(){

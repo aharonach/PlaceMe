@@ -28,9 +28,8 @@ public class Pupil extends BaseEntity {
     private Gender gender;
     private LocalDate birthDate;
 
-    @OneToMany(mappedBy = "pupil")
-    @ToString.Exclude
-    private List<AttributeValue> attributeValues;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "pupil")
+    private Set<AttributeValue> attributeValues = new HashSet<>();
 
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
@@ -120,7 +119,7 @@ public class Pupil extends BaseEntity {
 
     private void verifyPupilInGroup(Group group) throws NotBelongToGroupException {
         if (!isInGroup(group)) {
-            throw new NotBelongToGroupException("Pupil " + this.getGivenId() + " is not in " + group.getName() + " group.");
+            throw new NotBelongToGroupException("Pupil '" + this.getFirstName() + "' is not in '" + group.getName() + "' group.");
         }
     }
 
