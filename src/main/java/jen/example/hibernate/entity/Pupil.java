@@ -10,6 +10,7 @@ import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Entity
 @Getter
@@ -99,17 +100,24 @@ public class Pupil extends BaseEntity {
                                 () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))));
     }
 
-    public void removeAttributeValue(Group group, Long attributeId) throws Exception {
+    public PupilAttributeId removeAttributeValue(Group group, Long attributeId) throws Exception {
         if (!isInGroup(group)) {
             throw new Exception("Pupil " + this.getGivenId() + " is not in " + group.getName() + " group.");
         }
+
+        AtomicReference<PupilAttributeId> removed = new AtomicReference<>();
 
         group.getTemplate()
                 .getAttributes().stream()
                 .filter(attribute -> attribute.getId().equals(attributeId))
                 .findFirst().flatMap(attribute -> this.getAttributeValues().stream()
                         .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                        .findFirst()).ifPresent(attributeValue -> this.getAttributeValues().remove(attributeValue));
+                        .findFirst()).ifPresent(attributeValue -> {
+                            this.getAttributeValues().remove(attributeValue);
+                            removed.set(attributeValue.getPupilAttributeId());
+                        });
+
+        return removed.get();
     }
 
     public void setGroups(Set<Group> groups){
