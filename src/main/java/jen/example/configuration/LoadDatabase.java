@@ -35,9 +35,9 @@ public class LoadDatabase {
         return args -> {
             // add
             createTemplates();
-            createGroups();
             createPupils();
-            //createAttributeValues();
+            createGroups();
+            createAttributeValues();
             createPlacements();
 
             // print
