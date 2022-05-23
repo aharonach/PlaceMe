@@ -2,6 +2,8 @@ package jen.example.hibernate.entity;
 
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -16,7 +18,9 @@ public class Placement extends BaseEntity {
     private String name;
     private int numberOfClasses;
     @ToString.Exclude
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    @Fetch(FetchMode.JOIN)
     private Group group;
 
 
