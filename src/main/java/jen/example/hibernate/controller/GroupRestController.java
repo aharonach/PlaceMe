@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/groups")
 public class GroupRestController extends BaseRestController<Group> {
-    private static final Logger logger = LoggerFactory.getLogger(PupilRestController.class);
+    private static final Logger logger = LoggerFactory.getLogger(GroupRestController.class);
     private final GroupService service;
     private final GroupModelAssembler assembler;
 
