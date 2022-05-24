@@ -6,6 +6,8 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Entity
@@ -22,7 +24,10 @@ public class Placement extends BaseEntity {
     @JoinColumn
     @Fetch(FetchMode.JOIN)
     private Group group;
-
+    @OneToMany
+    @ToString.Exclude
+    @MapKey(name = "id")
+    private Map<Long, PlacementResult> results;
 
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;
