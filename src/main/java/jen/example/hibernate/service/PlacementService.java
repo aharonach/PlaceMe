@@ -3,6 +3,7 @@ package jen.example.hibernate.service;
 import jen.example.hibernate.entity.Placement;
 import jen.example.hibernate.exception.NotFound;
 import jen.example.hibernate.repository.PlacementRepository;
+import jen.example.hibernate.repository.PlacementResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ public class PlacementService implements EntityService<Placement> {
     private static final Logger logger = LoggerFactory.getLogger(PlacementService.class);
 
     private final PlacementRepository repository;
+
+    private final PlacementResultRepository placementResultRepository;
 
     @Override
     public Placement add(Placement placement) {
@@ -48,5 +51,10 @@ public class PlacementService implements EntityService<Placement> {
     public void deleteById(Long id) {
         Placement placement = getOr404(id);
         repository.delete(placement);
+    }
+
+    public void deletePlacementResultById(Long id, Long resultId){
+        Placement placement = getOr404(id);
+        placementResultRepository.delete(placement.getResults().get(resultId));
     }
 }
