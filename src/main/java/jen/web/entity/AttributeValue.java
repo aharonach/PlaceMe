@@ -15,6 +15,7 @@ import java.util.Objects;
 @Table(name = "pupils_attributes_values")
 public class AttributeValue {
     @EmbeddedId
+    @JsonIgnore
     private PupilAttributeId pupilAttributeId = new PupilAttributeId();
 
     @ManyToOne(fetch = FetchType.LAZY)
