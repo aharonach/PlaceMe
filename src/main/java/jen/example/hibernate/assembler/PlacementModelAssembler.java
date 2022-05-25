@@ -1,7 +1,7 @@
 package jen.example.hibernate.assembler;
 
-import jen.example.hibernate.controller.PupilRestController;
-import jen.example.hibernate.entity.Pupil;
+import jen.example.hibernate.controller.PlacementRestController;
+import jen.example.hibernate.entity.Placement;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -11,20 +11,20 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class PupilModelAssembler implements RepresentationModelAssembler<Pupil, EntityModel<Pupil>> {
-    Class<PupilRestController> controller = PupilRestController.class;
+public class PlacementModelAssembler implements RepresentationModelAssembler<Placement, EntityModel<Placement>> {
+    Class<PlacementRestController> controller = PlacementRestController.class;
 
     @Override
-    public EntityModel<Pupil> toModel(Pupil entity) {
+    public EntityModel<Placement> toModel(Placement entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
-                linkTo(methodOn(controller).getPupilGroups(entity.getId())).withRel("pupil_groups"),
-                linkTo(methodOn(controller).getAll()).withRel("pupils")
+                linkTo(methodOn(controller).getAll()).withRel("placements"),
+                linkTo(methodOn(controller).getResults(entity.getId())).withSelfRel()
         );
     }
 
     @Override
-    public CollectionModel<EntityModel<Pupil>> toCollectionModel(Iterable<? extends Pupil> entities) {
+    public CollectionModel<EntityModel<Placement>> toCollectionModel(Iterable<? extends Placement> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
                 .add(linkTo(methodOn(controller).getAll()).withSelfRel());
     }
