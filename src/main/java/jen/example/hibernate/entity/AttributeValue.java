@@ -1,5 +1,6 @@
 package jen.example.hibernate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -14,11 +15,13 @@ import java.util.Objects;
 @Table(name = "pupils_attributes_values")
 public class AttributeValue {
     @EmbeddedId
+    @JsonIgnore
     private PupilAttributeId pupilAttributeId = new PupilAttributeId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("pupilId")
     @ToString.Exclude
+    @JsonIgnore
     private Pupil pupil;
 
     @ManyToOne(fetch = FetchType.LAZY)
