@@ -58,7 +58,8 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @Override
-    public ResponseEntity<?> update(Long id, Group updatedRecord) {
+    @PostMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Group updatedRecord) {
         EntityModel<Group> entity = groupAssembler.toModel(groupService.updateById(id, updatedRecord));
 
         return ResponseEntity
@@ -67,7 +68,8 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @Override
-    public ResponseEntity<?> delete(Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         groupService.deleteById(id);
         return ResponseEntity.ok().build();
     }
