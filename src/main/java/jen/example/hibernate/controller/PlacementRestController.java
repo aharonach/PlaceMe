@@ -2,10 +2,12 @@ package jen.example.hibernate.controller;
 
 import jen.example.hibernate.assembler.PlacementModelAssembler;
 import jen.example.hibernate.entity.Placement;
+import jen.example.hibernate.entity.PlacementResult;
 import jen.example.hibernate.service.PlacementService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
@@ -64,19 +66,21 @@ public class PlacementRestController extends BaseRestController<Placement> {
     public ResponseEntity<?> getResults(@PathVariable Long id) {
         // @todo show an error if not finished to run the algorithm.
         // @todo output: placement.getResults()
-        return null;
+        //CollectionModel<EntityModel<PlacementResult>> allEntities = assembler.toCollectionModel(service.getOr404(id).getResults().values());
+        return ResponseEntity.ok().body(service.getOr404(id).getResults());
     }
 
     @GetMapping("/{id}/results/{resultId}")
     public ResponseEntity<?> getResult(@PathVariable Long id, @PathVariable Long resultId) {
         // @todo show an error if not finished to run the algorithm.
         // @todo output: placement.getResults().get(resultId);
-        return null;
+        return ResponseEntity.ok().body(service.getOr404(id).getResults().get(resultId));
     }
 
     @DeleteMapping("/{id}/results/{resultId}")
     public ResponseEntity<?> deleteResult(@PathVariable Long id, @PathVariable Long resultId) {
         // @todo remove an instance of PlacementResult: placement.removeResult(resultId)
-        return null;
+        service.deletePlacementResultById(id, resultId);
+        return ResponseEntity.ok().build();
     }
 }

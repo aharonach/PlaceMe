@@ -12,11 +12,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class PlacementModelAssembler implements RepresentationModelAssembler<Placement, EntityModel<Placement>> {
+public class PlacementResultModelAssembler implements RepresentationModelAssembler<PlacementResult, EntityModel<PlacementResult>>{
     Class<PlacementRestController> controller = PlacementRestController.class;
 
     @Override
-    public EntityModel<Placement> toModel(Placement entity) {
+    public EntityModel<PlacementResult> toModel(PlacementResult entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
                 linkTo(methodOn(controller).getAll()).withRel("placements"),
@@ -25,9 +25,10 @@ public class PlacementModelAssembler implements RepresentationModelAssembler<Pla
     }
 
     @Override
-    public CollectionModel<EntityModel<Placement>> toCollectionModel(Iterable<? extends Placement> entities) {
-        return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(controller).getAll()).withSelfRel());
+    public CollectionModel<EntityModel<PlacementResult>> toCollectionModel(Iterable<? extends PlacementResult> entities) {
+        return null;
+                //RepresentationModelAssembler.super.toCollectionModel(entities)
+                //.add(linkTo(methodOn(controller).getResults()).withSelfRel());
     }
 
 }
