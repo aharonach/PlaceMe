@@ -10,11 +10,9 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Table(name = "preference")
-public class Preference {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+@Table(name = "preferences")
+public class Preference extends BaseEntity {
+    // todo: maybe use embedded
 
     @OneToOne
     private Pupil selector;

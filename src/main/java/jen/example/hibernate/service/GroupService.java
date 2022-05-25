@@ -3,6 +3,7 @@ package jen.example.hibernate.service;
 import jen.example.hibernate.entity.Group;
 import jen.example.hibernate.exception.NotFound;
 import jen.example.hibernate.repository.GroupRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class GroupService implements EntityService<Group> {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
+    @Getter
     private final GroupRepository repository;
 
     @Override

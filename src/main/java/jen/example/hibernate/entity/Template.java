@@ -4,7 +4,6 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -13,15 +12,7 @@ import java.util.*;
 @ToString
 @NoArgsConstructor
 @Table(name = "templates")
-public class Template {
-    @Setter(AccessLevel.NONE)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    private Long id;
-
-    @Setter(AccessLevel.NONE)
-    private LocalDateTime createdTime = LocalDateTime.now();
+public class Template extends BaseEntity {
     private String name;
     private String description;
     @Setter(AccessLevel.NONE)
@@ -65,7 +56,6 @@ public class Template {
         return Collections.unmodifiableList(attributes);
     }
     public void updateAttributes(List<Attribute> newAttributes){
-
         List<Long> newAttributeIds = newAttributes.stream().map(Attribute::getId).filter(Objects::nonNull).toList();
         List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
         attributes.removeAll(attributesToDelete);

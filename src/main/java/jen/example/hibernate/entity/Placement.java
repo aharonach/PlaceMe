@@ -2,9 +2,12 @@ package jen.example.hibernate.entity;
 
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Entity
@@ -13,21 +16,18 @@ import java.util.Objects;
 @ToString
 @NoArgsConstructor
 @Table(name = "placements")
-public class Placement {
-    @Setter(AccessLevel.NONE)
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
-    private Long id;
-
-    @Setter(AccessLevel.NONE)
-    private LocalDateTime createdTime = LocalDateTime.now();
+public class Placement extends BaseEntity {
     private String name;
     private int numberOfClasses;
     @ToString.Exclude
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    @Fetch(FetchMode.JOIN)
     private Group group;
-
+    @OneToMany
+    @ToString.Exclude
+    @MapKey(name = "id")
+    private Map<Long, PlacementResult> results;
 
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;

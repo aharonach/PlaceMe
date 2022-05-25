@@ -14,7 +14,7 @@ import java.util.Objects;
 @Table(name = "pupils_attributes_values")
 public class AttributeValue {
     @EmbeddedId
-    private PupilAttributeId PupilAttributeId;
+    private PupilAttributeId pupilAttributeId = new PupilAttributeId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("pupilId")
@@ -30,6 +30,8 @@ public class AttributeValue {
     private double value;
 
     public AttributeValue(Pupil pupil, Attribute attribute, double value){
+        this.pupilAttributeId.setPupilId(pupil.getId());
+        this.pupilAttributeId.setAttributeId(attribute.getId());
         this.pupil = pupil;
         this.attribute = attribute;
         this.value = value;
@@ -40,7 +42,7 @@ public class AttributeValue {
     }
 
     public double getMaxScore(){
-        return attribute.calculate(attribute.getMaxValue());
+        return attribute.calculate(attribute.maxValue());
     }
 
     @Override
@@ -48,11 +50,11 @@ public class AttributeValue {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         AttributeValue that = (AttributeValue) o;
-        return PupilAttributeId != null && Objects.equals(PupilAttributeId, that.PupilAttributeId);
+        return pupilAttributeId != null && Objects.equals(pupilAttributeId, that.pupilAttributeId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(PupilAttributeId);
+        return Objects.hash(pupilAttributeId);
     }
 }

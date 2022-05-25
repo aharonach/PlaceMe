@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Profile;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Configuration
@@ -35,11 +37,15 @@ public class LoadDatabase {
             createTemplates();
             createPupils();
             createGroups();
+            createAttributeValues();
             createPlacements();
 
             // print
             System.out.println("Pupils:");
-            pupilService.all().forEach(System.out::println);
+            pupilService.all().forEach(pupil -> {
+                System.out.println(pupil);
+                System.out.println(pupil.getAttributeValues());
+            });
 
             System.out.println("Templates:");
             templateService.all().forEach(System.out::println);
@@ -48,7 +54,10 @@ public class LoadDatabase {
             groupService.all().forEach(System.out::println);
 
             System.out.println("Placements:");
-            placementService.all().forEach(System.out::println);
+            placementService.all().forEach(placement -> {
+                System.out.println(placement);
+                System.out.println(placement.getGroup());
+            });
         };
     }
 
@@ -89,8 +98,22 @@ public class LoadDatabase {
         logger.info("Preloading " + groupService.add(group));
     }
 
+    private void createAttributeValues(){
+        Group group = groupService.getOr404(1L);
+        Template template = group.getTemplate();
+        Pupil pupil = pupilService.getOr404(1L);
+
+        Map<Long, Double> attributeValues = new HashMap<>(template.getAttributes().size());
+
+        template.getAttributes().forEach(attribute -> {
+            attributeValues.put(attribute.getId(), 4D);
+        });
+
+        pupilService.addAttributeValues(pupil, group, attributeValues);
+    }
+
     private void createPlacements(){
-        //Group group = groupService.getOr404(1L);
-        //logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
+        Group group = groupService.getOr404(1L);
+        logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
     }
 }

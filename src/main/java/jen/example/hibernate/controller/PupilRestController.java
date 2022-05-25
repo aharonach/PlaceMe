@@ -15,6 +15,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Set;
 
 
@@ -144,43 +145,36 @@ public class PupilRestController extends BaseRestController<Pupil> {
         return ResponseEntity.ok().build();
     }
 
-//    /**
-//     * Create attribute values of a pupil within a template.
-//     *
-//     * @param id the pupil ID
-//     * @param attributeValues list of attribute ids with values
-//     */
-//    @PutMapping("/{id}/attributes")
-//    public ResponseEntity<?> putAttributes(@PathVariable Long id, @RequestBody Map<Long, Double> attributeValues) {
-//        service.addAttributeValues(id, attributeValues);
-//        return ResponseEntity.ok().build();
-//    }
+    /**
+     * Create attribute values of a pupil within a template.
+     *
+     * @param id the pupil ID
+     * @param groupId group ID which the pupil belongs to
+     */
+    @RequestMapping(path="/{id}/groups/{groupId}/attributes", method = {RequestMethod.POST, RequestMethod.PUT})
+    public ResponseEntity<?> updateAttributeValues(@PathVariable Long id, @PathVariable Long groupId, @RequestBody Map<Long,
+            Double> attributeValues) {
+        Pupil pupil = pupilService.getOr404(id);
+        Group group = groupService.getOr404(groupId);
 
-//    /**
-//     * Update single value of attribute of a pupil.
-//     *
-//     * @param id
-//     * @param attributeId
-//     * @param value
-//     * @return
-//     */
-//    @PostMapping("/{id}/attributes/{attributeId}")
-//    public ResponseEntity<?> updateAttributes(@PathVariable Long id, @PathVariable Long attributeId,
-//                                        @RequestBody Double value) {
-//        service.addAttributeValue(id, attributeId, value);
-//        return ResponseEntity.ok().build();
-//    }
+        pupilService.addAttributeValues(pupil, group, attributeValues);
+        return ResponseEntity.ok().build();
+    }
 
-//    /**
-//     * Delete a attribute value from student.
-//     *
-//     * @param id
-//     * @param attributeId
-//     * @return
-//     */
-//    @DeleteMapping("/{id}/attributes/{attributeId}")
-//    public ResponseEntity<?> deleteAttribute(@PathVariable Long id, @PathVariable Long attributeId) {
-//        service.removeAttributeValue(id, attributeId);
-//        return ResponseEntity.ok().build();
-//    }
+    /**
+     * Create attribute values of a pupil within a template.
+     *
+     * @param id the pupil ID
+     * @param groupId group ID which the pupil belongs to
+     * @param attributeIds a set of attribute ids to delete
+     */
+    @DeleteMapping("/{id}/groups/{groupId}/attributes")
+    public ResponseEntity<?> deleteAttributeValues(@PathVariable Long id, @PathVariable Long groupId,
+                                                   @RequestBody Set<Long> attributeIds) {
+        Pupil pupil = pupilService.getOr404(id);
+        Group group = groupService.getOr404(groupId);
+
+        pupilService.removeAttributeValues(pupil, group, attributeIds);
+        return ResponseEntity.ok().build();
+    }
 }

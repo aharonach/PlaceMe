@@ -24,7 +24,6 @@ public class GroupRestController extends BaseRestController<Group> {
     private final GroupService groupService;
     private final GroupModelAssembler groupAssembler;
     private final TemplateModelAssembler templateAssembler;
-
     private final PupilModelAssembler pupilAssembler;
 
     @Override
