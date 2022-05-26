@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/groups")
 public class GroupRestController extends BaseRestController<Group> {
-    private static final Logger logger = LoggerFactory.getLogger(PupilRestController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(GroupRestController.class);
     private final GroupService groupService;
     private final GroupModelAssembler groupAssembler;
     private final TemplateModelAssembler templateAssembler;
@@ -75,7 +76,6 @@ public class GroupRestController extends BaseRestController<Group> {
 
     @GetMapping("/{id}/template")
     public ResponseEntity<?> getGroupTemplate(@PathVariable Long id){
-
         EntityModel<Template> entity = templateAssembler.toModel(groupService.getOr404(id).getTemplate());
 
         return ResponseEntity

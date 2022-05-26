@@ -2,12 +2,10 @@ package jen.example.hibernate.controller;
 
 import jen.example.hibernate.assembler.PlacementModelAssembler;
 import jen.example.hibernate.entity.Placement;
-import jen.example.hibernate.entity.PlacementResult;
 import jen.example.hibernate.service.PlacementService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/placements")
 public class PlacementRestController extends BaseRestController<Placement> {
+
     private static final Logger logger = LoggerFactory.getLogger(PlacementRestController.class);
     private final PlacementService service;
     private final PlacementModelAssembler assembler;
