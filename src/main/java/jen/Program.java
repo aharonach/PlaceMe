@@ -8,7 +8,7 @@ public class Program {
         //new HelloWorldMinimize().start();
         //new OnesCounting().start();
         //new Knapsack().start();
-        new PupilInClasses().start();
-        //new PupilInClassesNew().start();
+        //new PupilInClasses().start();
+        new PupilInClassesEntities().start();
     }
 }

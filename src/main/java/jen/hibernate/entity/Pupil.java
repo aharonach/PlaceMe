@@ -123,6 +123,14 @@ public class Pupil extends BaseEntity {
         }
     }
 
+    public double getPupilScore() {
+        double totalScore = 0;
+        for(AttributeValue attributeValue : attributeValues){
+            totalScore += attributeValue.getScore();
+        }
+        return totalScore;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
