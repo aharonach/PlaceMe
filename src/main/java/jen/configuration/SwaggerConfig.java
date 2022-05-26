@@ -25,6 +25,7 @@ public class SwaggerConfig {
                 .group("placeMe-public")
                 .pathsToMatch("/pupils/**")
                 .pathsToMatch("/templates/**")
+                .pathsToMatch("/placements/**")
                 .pathsToMatch("/groups/**")
                 .pathsToMatch("/**")
                 .build();
