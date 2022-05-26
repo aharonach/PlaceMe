@@ -10,4 +10,11 @@ import java.util.Map;
 public class PupilsConnections {
     @Getter
     private final Map<Pupil, List<Pupil>> values;
+
+    @Override
+    public String toString() {
+        return "PupilsConnections{" +
+                "values=" + values +
+                '}';
+    }
 }
