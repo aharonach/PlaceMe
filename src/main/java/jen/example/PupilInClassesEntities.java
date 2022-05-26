@@ -8,36 +8,16 @@ import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.engine.Limits;
 import jen.PlaceEngineEntities;
 import jen.example.placePupils.PupilsConnections;
-import jen.hibernate.entity.PlacementResult;
-import jen.hibernate.entity.Pupil;
-import jen.hibernate.entity.RangeAttribute;
-import jen.hibernate.entity.Template;
+import jen.hibernate.entity.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 public class PupilInClassesEntities {
 
-    public final static Template TEMPLATE = new Template("template 2", "template 2 desc", List.of(
-            new RangeAttribute("attr 1", "attr 1 for template", 10),
-            new RangeAttribute("attr 2", "attr 2 for template", 20),
-            new RangeAttribute("attr 3", "attr 3 for template", 30),
-            new RangeAttribute("attr 4", "attr 4 for template", 40)
-    ));
+    public final static Template TEMPLATE = new Template("template 2", "template 2 desc");
+    public final static Group GROUP = new Group("group 1", "group 1 desc", TEMPLATE);
 
-    // todo: handle attributes values
-    private static final List<Pupil> PUPILS = List.of(
-            new Pupil("1111", "Gal", "", Pupil.Gender.MALE, LocalDate.now()),
-            new Pupil("2222", "Aharon", "", Pupil.Gender.MALE, LocalDate.now()),
-            new Pupil("3333", "Moshe", "", Pupil.Gender.MALE, LocalDate.now()),
-            new Pupil("4444", "Danny", "", Pupil.Gender.MALE, LocalDate.now()),
-
-            new Pupil("5555", "Mai", "", Pupil.Gender.FEMALE, LocalDate.now()),
-            new Pupil("6666", "Shir", "", Pupil.Gender.FEMALE, LocalDate.now()),
-            new Pupil("7777", "Dana", "", Pupil.Gender.FEMALE, LocalDate.now()),
-            new Pupil("8888", "Sharon", "", Pupil.Gender.FEMALE, LocalDate.now())
-    );
 
     // todo: handle connectionsToInclude, connectionsToExclude
     private static final PupilsConnections connectionsToInclude = new PupilsConnections(Map.of());
@@ -47,13 +27,25 @@ public class PupilInClassesEntities {
     final static int NUM_OF_CLASSES = 3;
 
     public void start(){
-        PlaceEngineEntities placeEngine = new PlaceEngineEntities(PUPILS, NUM_OF_CLASSES, connectionsToInclude, connectionsToExclude);
+        TEMPLATE.addAttribute(new RangeAttribute("attr 1", "attr 1 for template", 10));
+        TEMPLATE.addAttribute(new RangeAttribute("attr 2", "attr 2 for template", 20));
+        TEMPLATE.addAttribute(new RangeAttribute("attr 3", "attr 3 for template", 30));
+        TEMPLATE.addAttribute(new RangeAttribute("attr 4", "attr 4 for template", 40));
 
-        System.out.println(PUPILS);
-        System.out.println(NUM_OF_CLASSES);
-        System.out.println(connectionsToInclude);
-        System.out.println(connectionsToExclude);
 
+        GROUP.addPupil(new Pupil("1111", "Gal", "", Pupil.Gender.MALE, LocalDate.now()));
+        GROUP.addPupil(new Pupil("2222", "Aharon", "", Pupil.Gender.MALE, LocalDate.now()));
+        GROUP.addPupil(new Pupil("3333", "Moshe", "", Pupil.Gender.MALE, LocalDate.now()));
+        GROUP.addPupil(new Pupil("4444", "Danny", "", Pupil.Gender.MALE, LocalDate.now()));
+        GROUP.addPupil(new Pupil("5555", "Mai", "", Pupil.Gender.FEMALE, LocalDate.now()));
+        GROUP.addPupil(new Pupil("6666", "Shir", "", Pupil.Gender.FEMALE, LocalDate.now()));
+        GROUP.addPupil(new Pupil("7777", "Dana", "", Pupil.Gender.FEMALE, LocalDate.now()));
+        GROUP.addPupil(new Pupil("8888", "Sharon", "", Pupil.Gender.FEMALE, LocalDate.now()));
+
+
+        Placement placement = new Placement("placement 1", NUM_OF_CLASSES, GROUP);
+
+        PlaceEngineEntities placeEngine = new PlaceEngineEntities(placement);
         Engine<BitGene, Double> engine = placeEngine.getEngine();
 
         final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();

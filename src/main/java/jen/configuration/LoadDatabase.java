@@ -1,5 +1,11 @@
 package jen.configuration;
 
+import io.jenetics.BitGene;
+import io.jenetics.Phenotype;
+import io.jenetics.engine.Engine;
+import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.Limits;
+import jen.PlaceEngineEntities;
 import jen.hibernate.entity.*;
 import jen.hibernate.service.GroupService;
 import jen.hibernate.service.PlacementService;
@@ -39,6 +45,8 @@ public class LoadDatabase {
             createGroups();
             createAttributeValues();
             createPlacements();
+            createPlacementResult(); // result is printed here, will change it after the service will be ready
+
 
             // print
             System.out.println("Pupils:");
@@ -57,7 +65,9 @@ public class LoadDatabase {
             placementService.all().forEach(placement -> {
                 System.out.println(placement);
                 System.out.println(placement.getGroup());
+                System.out.println(placement.getGroup().getPupils());
             });
+
         };
     }
 
@@ -101,17 +111,39 @@ public class LoadDatabase {
     private void createAttributeValues(){
         Group group = groupService.getOr404(1L);
         Template template = group.getTemplate();
-        Pupil pupil = pupilService.getOr404(1L);
 
-        Map<Long, Double> attributeValues = new HashMap<>(template.getAttributes().size());
-
-        template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
-
-        pupilService.addAttributeValues(pupil, group, attributeValues);
+        pupilService.all().forEach(pupil -> {
+            Map<Long, Double> attributeValues = new HashMap<>(template.getAttributes().size());
+            template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
+            pupilService.addAttributeValues(pupil, group, attributeValues);
+        });
     }
 
     private void createPlacements(){
         Group group = groupService.getOr404(1L);
         logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
+    }
+
+    private void createPlacementResult(){
+        Placement placement = placementService.all().get(0);
+
+        PlaceEngineEntities placeEngine = new PlaceEngineEntities(placement);
+        Engine<BitGene, Double> engine = placeEngine.getEngine();
+
+        final Phenotype<BitGene, Double> best = engine
+                .stream()
+                .limit(Limits.bySteadyFitness(7))
+                .limit(100)
+                .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
+                .collect(EvolutionResult.toBestPhenotype());
+
+        PlacementResult placementResult = placeEngine.decode(best.genotype());
+
+        System.out.println("Result:");
+        System.out.println(placementResult);
+        placementResult.printClassInfo();
+        System.out.println("is valid: " + PlaceEngineEntities.isValid(best.genotype()));
+
+        // save it from the service
     }
 }

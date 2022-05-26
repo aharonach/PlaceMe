@@ -5,29 +5,29 @@ import io.jenetics.engine.Codec;
 import io.jenetics.engine.Constraint;
 import io.jenetics.engine.Engine;
 import io.jenetics.util.IntRange;
-import jen.example.placePupils.PupilsConnections;
+import jen.hibernate.entity.Placement;
 import jen.hibernate.entity.PlacementClassroom;
 import jen.hibernate.entity.PlacementResult;
 import jen.hibernate.entity.Pupil;
-import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
-@RequiredArgsConstructor
 public class PlaceEngineEntities {
 
+    private final Placement placement;
     private final List<Pupil> pupils;
-    private final int numOfClasses;
-    // todo: handle PupilsConnections
-    private final PupilsConnections connectionsToInclude;
-    private final PupilsConnections connectionsToExclude;
+
+    public PlaceEngineEntities(Placement placement){
+        this.placement = placement;
+        this.pupils = placement.getGroup().getPupils().stream().toList();
+    }
 
     public Engine<BitGene, Double> getEngine(){
         pupils.forEach(System.out::println);
 
         Codec<PlacementResult, BitGene> codec = Codec.of(
-                Genotype.of(BitChromosome.of(getNumOfPupils(), 0.5), numOfClasses),
+                Genotype.of(BitChromosome.of(getNumOfPupils(), 0.5), placement.getNumberOfClasses()),
                 this::decode
         );
 
@@ -152,12 +152,13 @@ public class PlaceEngineEntities {
     }
 
     public PlacementResult decode(Genotype<BitGene> gt){
-        List<PlacementClassroom> allClasses = new ArrayList<>(numOfClasses);
+        List<PlacementClassroom> allClasses = new ArrayList<>(placement.getNumberOfClasses());
 
         gt.forEach(chromosome -> {
             List<Pupil> pupilsInClass = new ArrayList<>(getNumOfPupils());
             chromosome.as(BitChromosome.class).ones().forEach(index -> pupilsInClass.add(pupils.get(index)));
             allClasses.add(new PlacementClassroom(pupilsInClass));
+            // todo: complete it (connectionsToInclude, connectionsToExclude)
             //allClasses.add(new PlacementClassroom(pupilsInClass, connectionsToInclude, connectionsToExclude));
         });
 

@@ -3,6 +3,8 @@ package jen.hibernate.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.*;
@@ -22,6 +24,7 @@ public class Group extends BaseEntity {
     @ToString.Exclude
     @JsonIgnore
     @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
+    @Fetch(FetchMode.JOIN)
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
 //    @OneToMany
