@@ -1,5 +1,6 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,7 @@ import java.util.List;
 public class PlacementClassroom extends BaseEntity {
     private String name;
     @ManyToOne
+    //@JsonIgnore
     private PlacementResult placementResult;
     @ManyToMany
     private List<Pupil> pupils;

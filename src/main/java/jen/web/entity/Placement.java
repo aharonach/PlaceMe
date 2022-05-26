@@ -1,5 +1,6 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -25,6 +26,7 @@ public class Placement extends BaseEntity {
     private Group group;
     @OneToMany
     @ToString.Exclude
+    //@JsonIgnore
     @MapKey(name = "id")
     private Map<Long, PlacementResult> results;
 

@@ -1,5 +1,6 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -19,6 +20,7 @@ public class AttributeValue {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("pupilId")
     @ToString.Exclude
+    @JsonIgnore
     private Pupil pupil;
 
     @ManyToOne(fetch = FetchType.LAZY)
