@@ -1,9 +1,10 @@
 package jen.example.hibernate.service;
 
-import jen.example.hibernate.entity.Attribute;
-import jen.example.hibernate.entity.RangeAttribute;
-import jen.example.hibernate.entity.Template;
-import jen.example.hibernate.exception.NotFound;
+import jen.hibernate.entity.Attribute;
+import jen.hibernate.entity.RangeAttribute;
+import jen.hibernate.entity.Template;
+import jen.hibernate.exception.NotFound;
+import jen.hibernate.service.TemplateService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,7 +60,7 @@ class TemplateServiceTest {
     @Test
     @Transactional
     void shouldCreateTemplateWithAttributesWhenAddTemplate() {
-        List<Attribute> attributes = Arrays.asList(new RangeAttribute("name", "attr desc", 10));
+        List<Attribute> attributes = List.of(new RangeAttribute("name", "attr desc", 10));
         Template template = new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1, attributes);
         service.add(template);
 
@@ -104,8 +105,6 @@ class TemplateServiceTest {
 
     @Test
     void shouldThrowNotFoundExceptionOnGetTemplateWhenTemplateNotExist() {
-        assertThrows(NotFound.class, () -> {
-            service.getOr404(100L);
-        });
+        assertThrows(NotFound.class, () -> service.getOr404(100L));
     }
 }
