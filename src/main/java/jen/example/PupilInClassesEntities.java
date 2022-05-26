@@ -6,9 +6,9 @@ import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.engine.Limits;
-import jen.PlaceEngineEntities;
+import jen.web.engine.PlaceEngine;
 import jen.example.placePupils.PupilsConnections;
-import jen.hibernate.entity.*;
+import jen.web.entity.*;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class PupilInClassesEntities {
 
         Placement placement = new Placement("placement 1", NUM_OF_CLASSES, GROUP);
 
-        PlaceEngineEntities placeEngine = new PlaceEngineEntities(placement);
+        PlaceEngine placeEngine = new PlaceEngine(placement);
         Engine<BitGene, Double> engine = placeEngine.getEngine();
 
         final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
@@ -62,7 +62,7 @@ public class PupilInClassesEntities {
         System.out.println("Result:");
         System.out.println(best.genotype());
 
-        System.out.println("is valid: " + PlaceEngineEntities.isValid(best.genotype()));
+        System.out.println("is valid: " + PlaceEngine.isValid(best.genotype()));
         PlacementResult placementResult = placeEngine.decode(best.genotype());
 
         placementResult.getClasses().forEach(classInfo -> {
