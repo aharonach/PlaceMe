@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -49,19 +46,30 @@ public class PupilService implements EntityService<Pupil>{
     public Pupil updateById(Long id, Pupil newPupil) {
         Pupil pupil = getOr404(id);
 
-        validateGivenId(pupil.getGivenId());
-        pupil.setGivenId(newPupil.getGivenId());
+        if (!(newPupil.getGivenId() == null || pupil.getGivenId().equals(newPupil.getGivenId()))) {
+            validateGivenId(pupil.getGivenId());
+            pupil.setGivenId(newPupil.getGivenId());
+        }
+
         pupil.setFirstName(newPupil.getFirstName());
         pupil.setLastName(newPupil.getLastName());
         pupil.setGender(newPupil.getGender());
         pupil.setBirthDate(newPupil.getBirthDate());
-        pupil.setAttributeValues(newPupil.getAttributeValues());
+
+        if ( !newPupil.getAttributeValues().isEmpty() ) {
+            pupil.setAttributeValues(newPupil.getAttributeValues());
+        }
+
         return repository.save(pupil);
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
+        // todo: bug - it works only after sending the request twice.
         Pupil pupil = getOr404(id);
+        attributeValueRepository.deleteAllByPupilAttributeId_PupilId(id);
+        pupil.setGroups(new HashSet<>());
         repository.delete(pupil);
     }
 

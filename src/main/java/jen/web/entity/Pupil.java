@@ -97,9 +97,8 @@ public class Pupil extends BaseEntity {
         return removed.get();
     }
 
-    public void setGroups(Set<Group> groups){
-        getGroups().forEach(this::removeFromGroup);
-        groups.forEach(this::addToGroup);
+    public void setGroups(Set<Group> newGroups){
+        groups = newGroups;
     }
 
     public boolean isInGroup(Group group){
