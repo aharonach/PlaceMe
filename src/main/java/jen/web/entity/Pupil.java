@@ -29,6 +29,7 @@ public class Pupil extends BaseEntity {
     private LocalDate birthDate;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "pupil")
+    @JsonIgnore
     private Set<AttributeValue> attributeValues = new HashSet<>();
 
     @Setter(AccessLevel.NONE)
