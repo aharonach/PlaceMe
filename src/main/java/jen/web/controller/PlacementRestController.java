@@ -2,6 +2,7 @@ package jen.web.controller;
 
 import jen.web.assembler.PlacementModelAssembler;
 import jen.web.entity.Placement;
+import jen.web.entity.PlacementResult;
 import jen.web.service.PlacementService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -57,14 +58,17 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @PostMapping("/{id}/start")
     public ResponseEntity<?> startPlacement(@PathVariable Long id) {
-        // @todo start the EA module: placement.start();
-        return null;
+        Placement placement = service.getOr404(id);
+        PlacementResult placementResult = service.startPlacement(placement);
+
+        return ResponseEntity
+                .ok()
+                .body(EntityModel.of(placementResult));
     }
 
     @GetMapping("/{id}/results")
     public ResponseEntity<?> getResults(@PathVariable Long id) {
         // @todo show an error if not finished to run the algorithm.
-        // @todo output: placement.getResults()
         //CollectionModel<EntityModel<PlacementResult>> allEntities = assembler.toCollectionModel(service.getOr404(id).getResults().values());
         return ResponseEntity.ok().body(service.getOr404(id).getResults());
     }
@@ -72,7 +76,6 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @GetMapping("/{id}/results/{resultId}")
     public ResponseEntity<?> getResult(@PathVariable Long id, @PathVariable Long resultId) {
         // @todo show an error if not finished to run the algorithm.
-        // @todo output: placement.getResults().get(resultId);
         return ResponseEntity.ok().body(service.getOr404(id).getResults().get(resultId));
     }
 

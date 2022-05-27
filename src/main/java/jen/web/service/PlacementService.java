@@ -1,6 +1,13 @@
 package jen.web.service;
 
+import io.jenetics.BitGene;
+import io.jenetics.Phenotype;
+import io.jenetics.engine.Engine;
+import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.Limits;
+import jen.web.engine.PlaceEngine;
 import jen.web.entity.Placement;
+import jen.web.entity.PlacementResult;
 import jen.web.exception.NotFound;
 import jen.web.repository.PlacementRepository;
 import jen.web.repository.PlacementResultRepository;
@@ -56,5 +63,19 @@ public class PlacementService implements EntityService<Placement> {
     public void deletePlacementResultById(Long id, Long resultId){
         Placement placement = getOr404(id);
         placementResultRepository.delete(placement.getResults().get(resultId));
+    }
+
+    public PlacementResult startPlacement(Placement placement) {
+        PlaceEngine placeEngine = new PlaceEngine(placement);
+        Engine<BitGene, Double> engine = placeEngine.getEngine();
+
+        final Phenotype<BitGene, Double> best = engine
+                .stream()
+                .limit(Limits.bySteadyFitness(7))
+                .limit(100)
+                .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
+                .collect(EvolutionResult.toBestPhenotype());
+
+        return placeEngine.decode(best.genotype());
     }
 }
