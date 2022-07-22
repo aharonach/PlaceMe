@@ -70,8 +70,8 @@ public class GroupService implements EntityService<Group> {
     public void addPupilPreference(Preference preference){
         try {
             Group group = preference.getGroup();
-            Pupil selector = group.getPupil(preference.getSelectorSelectedId().getSelectorId());
-            Pupil selected = group.getPupil(preference.getSelectorSelectedId().getSelectedId());
+            Pupil selector = group.getPupilById(preference.getSelectorSelectedId().getSelectorId());
+            Pupil selected = group.getPupilById(preference.getSelectorSelectedId().getSelectedId());
             group.addPreference(selector, selected, preference.getIsSelectorWantToBeWithSelected());
 
             preferenceRepository.saveAllAndFlush(group.getPreferences());

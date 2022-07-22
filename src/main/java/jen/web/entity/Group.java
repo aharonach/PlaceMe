@@ -62,7 +62,7 @@ public class Group extends BaseEntity {
         return Collections.unmodifiableSet(pupils);
     }
 
-    public Pupil getPupil(Long pupilId) throws NotBelongToGroupException {
+    public Pupil getPupilById(Long pupilId) throws NotBelongToGroupException {
         Optional<Pupil> pupil = pupils.stream()
                 .filter(p -> p.getId().equals(pupilId))
                 .findFirst();
