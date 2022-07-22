@@ -12,6 +12,8 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Getter
@@ -31,6 +33,10 @@ public class Pupil extends BaseEntity {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "pupil")
     @JsonIgnore
     private Set<AttributeValue> attributeValues = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<Preference> preferences = new HashSet<>();
 
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
@@ -59,6 +65,44 @@ public class Pupil extends BaseEntity {
     public static boolean isGivenIdValid(String israeliId) {
         return IsraeliIdValidator.isValid(israeliId);
     }
+
+    public void addPreference(Pupil selected, boolean wantToBeTogether, Placement placement){
+        preferences.add(new Preference(this, selected, wantToBeTogether, placement));
+    }
+
+    public Set<SelectorSelectedId> deletePreference(Pupil selected, Placement placement){
+        return getPreferencesStream(placement)
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(this.getId()))
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectedId().equals(selected.getId()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<SelectorSelectedId> deleteAllPreferences(Placement placement){
+        return getPreferencesStream(placement)
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(this.getId())
+                        || selectorSelectedId.getSelectedId().equals(this.getId()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<SelectorSelectedId> deleteAllPreferencesWhereSelected(Placement placement){
+        return getPreferencesStream(placement)
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(this.getId()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<SelectorSelectedId> deleteAllPreferencesWhereSelector(Placement placement){
+        return getPreferencesStream(placement)
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(this.getId()))
+                .collect(Collectors.toSet());
+    }
+
+    private Stream<SelectorSelectedId> getPreferencesStream(Placement placement){
+        return preferences.stream()
+                .filter(preference -> preference.getPlacement().equals(placement))
+                .map(Preference::getSelectorSelectedId);
+    }
+
+
 
     public void addAttributeValue(Group group, Long attributeId, Double value) throws NotBelongToGroupException {
         verifyPupilInGroup(group);

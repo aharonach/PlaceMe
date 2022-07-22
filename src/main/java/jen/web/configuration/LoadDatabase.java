@@ -45,6 +45,7 @@ public class LoadDatabase {
             createGroups();
             createAttributeValues();
             createPlacements();
+            addPreferences();
             createPlacementResult(); // result is printed here, will change it after the service will be ready
 
 
@@ -122,6 +123,17 @@ public class LoadDatabase {
     private void createPlacements(){
         Group group = groupService.getOr404(1L);
         logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
+    }
+
+    private void addPreferences(){
+        Placement placement = placementService.all().get(0);
+        Pupil pupil1 = pupilService.getOr404(1L);
+        Pupil pupil2 = pupilService.getOr404(2L);
+        Pupil pupil3 = pupilService.getOr404(3L);
+
+        pupilService.addPreference(pupil1, pupil2, true, placement);
+        pupilService.addPreference(pupil2, pupil3, true, placement);
+        pupilService.addPreference(pupil3, pupil1, false, placement);
     }
 
     private void createPlacementResult(){
