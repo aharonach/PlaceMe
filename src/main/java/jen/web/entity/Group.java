@@ -1,6 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jen.web.exception.NotFound;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -63,21 +64,33 @@ public class Group extends BaseEntity {
         return Collections.unmodifiableSet(pupils);
     }
 
+    public Pupil getPupil(Long pupilId) throws NotBelongToGroupException {
+        Optional<Pupil> pupil = pupils.stream()
+                .filter(p -> p.getId().equals(pupilId))
+                .findFirst();
+
+        if(pupil.isEmpty()){
+            throw new NotBelongToGroupException("Pupil Id '" + pupilId + "' is not in '" + this.getName() + "' group.");
+        }
+
+        return pupil.get();
+    }
 
     public void addPreference(Pupil selector, Pupil selected, boolean wantToBeTogether) throws Preference.SamePupilException {
         preferences.add(new Preference(selector, selected, wantToBeTogether, this));
     }
 
-    public Set<SelectorSelectedId> getPreferencesIdForPupils(Pupil selector, Pupil selected){
-        return preferences.stream().map(Preference::getSelectorSelectedId)
-                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(selector.getId()))
-                .filter(selectorSelectedId -> selectorSelectedId.getSelectedId().equals(selected.getId()))
+    public Set<Preference> getPreferencesForPupils(Long selectorId, Long selectedId){
+        return preferences.stream()
+                .filter(preference -> preference.getSelectorSelectedId().getSelectorId().equals(selectorId))
+                .filter(preference -> preference.getSelectorSelectedId().getSelectedId().equals(selectedId))
                 .collect(Collectors.toSet());
     }
 
-    public Set<SelectorSelectedId> getAllPreferencesIdForPupil(Pupil pupil){
-        return preferences.stream().map(Preference::getSelectorSelectedId)
-                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(pupil.getId()) || selectorSelectedId.getSelectedId().equals(pupil.getId()))
+    public Set<Preference> getAllPreferencesForPupil(Long pupilId){
+        return preferences.stream()
+                .filter(preference -> preference.getSelectorSelectedId().getSelectorId().equals(pupilId)
+                        || preference.getSelectorSelectedId().getSelectedId().equals(pupilId))
                 .collect(Collectors.toSet());
     }
 
@@ -92,5 +105,11 @@ public class Group extends BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public static class NotBelongToGroupException extends Exception{
+        public NotBelongToGroupException(String message){
+            super(message);
+        }
     }
 }

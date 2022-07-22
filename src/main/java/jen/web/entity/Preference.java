@@ -15,15 +15,13 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Preference {
     @EmbeddedId
-    @JsonIgnore
+    //@JsonIgnore
     private SelectorSelectedId selectorSelectedId = new SelectorSelectedId();
 
     private Boolean isSelectorWantToBeWithSelected;
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@MapsId("pupilId")
     @ToString.Exclude
     @JsonIgnore
     private Group group;

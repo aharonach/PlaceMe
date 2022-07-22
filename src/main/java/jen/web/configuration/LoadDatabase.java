@@ -128,15 +128,15 @@ public class LoadDatabase {
         logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
     }
 
-    private void addPreferences(){
+    private void addPreferences() throws Preference.SamePupilException {
         Group group = groupService.all().get(0);
         Pupil pupil1 = pupilService.getOr404(1L);
         Pupil pupil2 = pupilService.getOr404(2L);
         Pupil pupil3 = pupilService.getOr404(3L);
 
-        groupService.addPupilPreference(pupil1, pupil2, true, group);
-        groupService.addPupilPreference(pupil2, pupil3, true, group);
-        groupService.addPupilPreference(pupil3, pupil1, false, group);
+        groupService.addPupilPreference(new Preference(pupil1, pupil2, true, group));
+        groupService.addPupilPreference(new Preference(pupil2, pupil3, true, group));
+        groupService.addPupilPreference(new Preference(pupil3, pupil1, false, group));
     }
 
     private void createPlacementResult(){

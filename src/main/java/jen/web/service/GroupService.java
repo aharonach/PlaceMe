@@ -1,15 +1,13 @@
 package jen.web.service;
 
-import jen.web.entity.Group;
-import jen.web.entity.Placement;
-import jen.web.entity.Preference;
-import jen.web.entity.Pupil;
+import jen.web.entity.*;
 import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Not;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,22 +68,37 @@ public class GroupService implements EntityService<Group> {
         return repository.getAllByIdIn(ids);
     }
 
-    public void addPupilPreference(Pupil selector, Pupil selected, boolean wantToBeTogether, Group group){
-
+    public void addPupilPreference(Preference preference){
         try {
-            group.addPreference(selector, selected, wantToBeTogether);
-        } catch (Preference.SamePupilException e) {
+            Group group = preference.getGroup();
+            Pupil selector = group.getPupil(preference.getSelectorSelectedId().getSelectorId());
+            Pupil selected = group.getPupil(preference.getSelectorSelectedId().getSelectedId());
+            group.addPreference(selector, selected, preference.getIsSelectorWantToBeWithSelected());
+
+            preferenceRepository.saveAllAndFlush(group.getPreferences());
+
+        } catch (Group.NotBelongToGroupException | Preference.SamePupilException e) {
             throw new BadRequest(e.getMessage());
         }
-
-        preferenceRepository.saveAllAndFlush(group.getPreferences());
     }
 
-    public void deletePupilPreferences(Pupil selector, Pupil selected, Group group){
-        preferenceRepository.deleteAllById(group.getPreferencesIdForPupils(selector, selected));
+    public void deletePupilPreferences(Preference preference) {
+        Group group = preference.getGroup();
+        Long selectorId = preference.getSelectorSelectedId().getSelectorId();
+        Long selectedId = preference.getSelectorSelectedId().getSelectedId();
+
+        Set<SelectorSelectedId> selectorSelectedIds = group.getPreferencesForPupils(selectorId, selectedId)
+                .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
+        preferenceRepository.deleteAllById(selectorSelectedIds);
     }
 
     public void deletePupilPreferences(Pupil pupil, Group group){
-        preferenceRepository.deleteAllById(group.getAllPreferencesIdForPupil(pupil));
+        Set<SelectorSelectedId> selectorSelectedIds = group.getAllPreferencesForPupil(pupil.getId())
+                .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
+        preferenceRepository.deleteAllById(selectorSelectedIds);
+    }
+
+    public Set<Preference> getAllPreferencesForPupil(Pupil pupil, Group group){
+        return group.getAllPreferencesForPupil(pupil.getId());
     }
 }
