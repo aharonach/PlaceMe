@@ -1,8 +1,13 @@
 package jen.web.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.*;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
@@ -11,30 +16,33 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Table(name = "preferences")
-public class Preference extends BaseEntity {
-    // todo: maybe use embedded
+public class Preference {
+    @EmbeddedId
+    @JsonIgnore
+    private SelectorSelectedId selectorSelectedId = new SelectorSelectedId();
 
-    @OneToOne
-    private Pupil selector;
-
-    @OneToOne
-    private Pupil selected;
-
-    private Boolean preference; // True = Selector wants to be with Selected
+    private Boolean isSelectorWantToBeWithSelected;
 
     @ManyToOne
     private Placement placement;
+
+    public Preference(Pupil selector, Pupil selected, boolean isSelectorWantToBeWithSelected, Placement placement){
+        this.selectorSelectedId.setSelectorId(selector.getId());
+        this.selectorSelectedId.setSelectedId(selected.getId());
+        this.isSelectorWantToBeWithSelected = isSelectorWantToBeWithSelected;
+        this.placement = placement;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Preference preference = (Preference) o;
-        return id != null && Objects.equals(id, preference.id);
+        Preference that = (Preference) o;
+        return selectorSelectedId != null && Objects.equals(selectorSelectedId, that.selectorSelectedId);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(selectorSelectedId);
     }
 }
