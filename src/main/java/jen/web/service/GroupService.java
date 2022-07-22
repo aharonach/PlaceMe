@@ -1,8 +1,13 @@
 package jen.web.service;
 
 import jen.web.entity.Group;
+import jen.web.entity.Placement;
+import jen.web.entity.Preference;
+import jen.web.entity.Pupil;
+import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
+import jen.web.repository.PreferenceRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,6 +26,8 @@ public class GroupService implements EntityService<Group> {
 
     @Getter
     private final GroupRepository repository;
+    @Getter
+    private final PreferenceRepository preferenceRepository;
 
     @Override
     @Transactional
@@ -60,5 +67,24 @@ public class GroupService implements EntityService<Group> {
 
     public Set<Group> getByIds(Set<Long> ids) {
         return repository.getAllByIdIn(ids);
+    }
+
+    public void addPupilPreference(Pupil selector, Pupil selected, boolean wantToBeTogether, Group group){
+
+        try {
+            group.addPreference(selector, selected, wantToBeTogether);
+        } catch (Preference.SamePupilException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
+        preferenceRepository.saveAllAndFlush(group.getPreferences());
+    }
+
+    public void deletePupilPreferences(Pupil selector, Pupil selected, Group group){
+        preferenceRepository.deleteAllById(group.getPreferencesIdForPupils(selector, selected));
+    }
+
+    public void deletePupilPreferences(Pupil pupil, Group group){
+        preferenceRepository.deleteAllById(group.getAllPreferencesIdForPupil(pupil));
     }
 }

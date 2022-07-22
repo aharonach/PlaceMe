@@ -8,6 +8,8 @@ import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Setter
@@ -27,9 +29,9 @@ public class Group extends BaseEntity {
     @Fetch(FetchMode.JOIN)
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
-//    @OneToMany
-//    @ToString.Exclude
-//    private Set<Placement> placements = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "group")
+    @JsonIgnore
+    private Set<Preference> preferences = new LinkedHashSet<>();
 
 
     public Group(String name, String description, Template template){
@@ -59,6 +61,24 @@ public class Group extends BaseEntity {
 
     public Set<Pupil> getPupils(){
         return Collections.unmodifiableSet(pupils);
+    }
+
+
+    public void addPreference(Pupil selector, Pupil selected, boolean wantToBeTogether) throws Preference.SamePupilException {
+        preferences.add(new Preference(selector, selected, wantToBeTogether, this));
+    }
+
+    public Set<SelectorSelectedId> getPreferencesIdForPupils(Pupil selector, Pupil selected){
+        return preferences.stream().map(Preference::getSelectorSelectedId)
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(selector.getId()))
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectedId().equals(selected.getId()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<SelectorSelectedId> getAllPreferencesIdForPupil(Pupil pupil){
+        return preferences.stream().map(Preference::getSelectorSelectedId)
+                .filter(selectorSelectedId -> selectorSelectedId.getSelectorId().equals(pupil.getId()) || selectorSelectedId.getSelectedId().equals(pupil.getId()))
+                .collect(Collectors.toSet());
     }
 
     @Override

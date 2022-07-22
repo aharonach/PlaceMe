@@ -25,7 +25,7 @@ public class PupilService implements EntityService<Pupil>{
 
     private final PupilRepository repository;
     private final AttributeValueRepository attributeValueRepository;
-    private final PreferenceRepository preferenceRepository;
+
 
 
     @Override
@@ -75,15 +75,6 @@ public class PupilService implements EntityService<Pupil>{
         attributeValueRepository.deleteAllByPupilAttributeId_PupilId(id);
         pupil.setGroups(new HashSet<>());
         repository.delete(pupil);
-    }
-
-    public void addPreference(Pupil selector, Pupil selected, boolean wantToBeTogether, Placement placement){
-        selector.addPreference(selected, wantToBeTogether, placement);
-        preferenceRepository.saveAllAndFlush(selector.getPreferences());
-    }
-
-    public void deletePreference(Pupil selector, Pupil selected, Placement placement){
-        preferenceRepository.deleteAllById(selector.deletePreference(selected, placement));
     }
 
     public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) {

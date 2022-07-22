@@ -4,18 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Table(name = "preferences")
+@NoArgsConstructor
 public class Preference {
     @EmbeddedId
     @JsonIgnore
@@ -24,13 +21,21 @@ public class Preference {
     private Boolean isSelectorWantToBeWithSelected;
 
     @ManyToOne
-    private Placement placement;
+    @JoinColumn(name = "group_id")
+    //@ManyToOne(fetch = FetchType.LAZY)
+    //@MapsId("pupilId")
+    @ToString.Exclude
+    @JsonIgnore
+    private Group group;
 
-    public Preference(Pupil selector, Pupil selected, boolean isSelectorWantToBeWithSelected, Placement placement){
+    public Preference(Pupil selector, Pupil selected, boolean isSelectorWantToBeWithSelected, Group group) throws SamePupilException {
+        if(selector.getId().equals(selected.getId())){
+            throw new SamePupilException();
+        }
         this.selectorSelectedId.setSelectorId(selector.getId());
         this.selectorSelectedId.setSelectedId(selected.getId());
         this.isSelectorWantToBeWithSelected = isSelectorWantToBeWithSelected;
-        this.placement = placement;
+        this.group = group;
     }
 
     @Override
@@ -44,5 +49,11 @@ public class Preference {
     @Override
     public int hashCode() {
         return Objects.hash(selectorSelectedId);
+    }
+
+    public static class SamePupilException extends Exception{
+        public SamePupilException(){
+            super("Selector pupil cannot be equal to selected pupil");
+        }
     }
 }

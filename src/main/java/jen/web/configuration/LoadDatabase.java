@@ -69,6 +69,9 @@ public class LoadDatabase {
                 System.out.println(placement.getGroup().getPupils());
             });
 
+            System.out.println("Prefs:");
+            System.out.println(groupService.all().get(0).getPreferences());
+
         };
     }
 
@@ -126,14 +129,14 @@ public class LoadDatabase {
     }
 
     private void addPreferences(){
-        Placement placement = placementService.all().get(0);
+        Group group = groupService.all().get(0);
         Pupil pupil1 = pupilService.getOr404(1L);
         Pupil pupil2 = pupilService.getOr404(2L);
         Pupil pupil3 = pupilService.getOr404(3L);
 
-        pupilService.addPreference(pupil1, pupil2, true, placement);
-        pupilService.addPreference(pupil2, pupil3, true, placement);
-        pupilService.addPreference(pupil3, pupil1, false, placement);
+        groupService.addPupilPreference(pupil1, pupil2, true, group);
+        groupService.addPupilPreference(pupil2, pupil3, true, group);
+        groupService.addPupilPreference(pupil3, pupil1, false, group);
     }
 
     private void createPlacementResult(){
