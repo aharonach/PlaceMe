@@ -7,7 +7,6 @@ import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Not;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

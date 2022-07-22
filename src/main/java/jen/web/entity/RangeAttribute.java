@@ -1,7 +1,6 @@
 package jen.web.entity;
 
 import lombok.NoArgsConstructor;
-
 import javax.persistence.Entity;
 
 @Entity

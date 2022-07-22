@@ -1,7 +1,6 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jen.web.exception.NotFound;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -10,7 +9,6 @@ import org.hibernate.annotations.FetchMode;
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Entity
 @Setter

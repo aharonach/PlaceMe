@@ -1,13 +1,11 @@
 package jen.web.service;
 
 import jen.web.entity.Group;
-import jen.web.entity.Placement;
 import jen.web.entity.Pupil;
 import jen.web.entity.PupilAttributeId;
 import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
-import jen.web.repository.PreferenceRepository;
 import jen.web.repository.PupilRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
