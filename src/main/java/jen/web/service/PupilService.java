@@ -108,6 +108,18 @@ public class PupilService implements EntityService<Pupil>{
         }
     }
 
+    public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) {
+
+        try {
+            Set<AttributeValue> attributeValues = pupil.getAttributeValues(group);
+            return attributeValues;
+
+        }  catch (Group.NotBelongToGroupException e) {
+            throw new BadRequest(e.getMessage());
+        }
+    }
+
+
     public boolean pupilExists(String givenId) {
         return givenId != null && pupilRepository.existsByGivenId(givenId);
     }

@@ -20,6 +20,7 @@ public class GroupModelAssembler implements RepresentationModelAssembler<Group, 
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
                 linkTo(methodOn(controller).getPupilsOfGroup(entity.getId())).withRel("group_pupils"),
                 linkTo(methodOn(controller).getGroupTemplate(entity.getId())).withRel("group_template"),
+                linkTo(methodOn(controller).getPreferences(entity.getId())).withRel("preferences"),
                 linkTo(methodOn(controller).getAll()).withRel("groups")
         );
     }

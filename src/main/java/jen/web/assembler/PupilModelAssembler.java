@@ -19,8 +19,6 @@ public class PupilModelAssembler implements RepresentationModelAssembler<Pupil, 
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
                 linkTo(methodOn(controller).getPupilGroups(entity.getId())).withRel("pupil_groups"),
-                // todo: add to pupil method for get attributes
-                //linkTo(methodOn(controller).getPupilGroups(entity.getId())).withRel("pupil_attributes"),
                 linkTo(methodOn(controller).getAll()).withRel("pupils")
         );
     }
