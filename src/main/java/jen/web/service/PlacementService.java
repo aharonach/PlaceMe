@@ -8,6 +8,7 @@ import io.jenetics.engine.Limits;
 import jen.web.engine.PlaceEngine;
 import jen.web.entity.Placement;
 import jen.web.entity.PlacementResult;
+import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.PlacementRepository;
 import jen.web.repository.PlacementResultRepository;
@@ -30,6 +31,11 @@ public class PlacementService implements EntityService<Placement> {
 
     @Override
     public Placement add(Placement placement) {
+        Long id = placement.getId();
+        if (id != null && placementRepository.existsById(id)) {
+            throw new EntityAlreadyExists("Placement with Id '" + id + "' already exists.");
+        }
+
         return placementRepository.save(placement);
     }
 

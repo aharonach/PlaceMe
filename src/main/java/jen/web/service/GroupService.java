@@ -2,6 +2,7 @@ package jen.web.service;
 
 import jen.web.entity.*;
 import jen.web.exception.BadRequest;
+import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
@@ -30,7 +31,11 @@ public class GroupService implements EntityService<Group> {
     @Override
     @Transactional
     public Group add(Group group) {
-        // todo: validate that id dont exists
+        Long id = group.getId();
+        if (id != null && groupRepository.existsById(id)) {
+            throw new EntityAlreadyExists("Group with Id '" + id + "' already exists.");
+        }
+
         return groupRepository.save(group);
     }
 

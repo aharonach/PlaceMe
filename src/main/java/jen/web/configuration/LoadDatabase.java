@@ -110,7 +110,7 @@ public class LoadDatabase {
         Group group = groupService.add(new Group("group 1", "group 1 desc", template));
         pupilService.all().forEach(group::addPupil);
 
-        logger.info("Preloading " + groupService.add(group));
+        logger.info("Preloading " + groupService.updateById(group.getId(), group));
     }
 
     private void createAttributeValues(){

@@ -2,6 +2,7 @@ package jen.web.service;
 
 import jen.web.entity.Attribute;
 import jen.web.entity.Template;
+import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,11 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     public Template add(Template template) {
-        // todo: validate that id dont exists
-        // @TODO verify that all attributes are new (without ids) and other template fields
+        Long id = template.getId();
+        if (id != null && templateRepository.existsById(id)) {
+            throw new EntityAlreadyExists("Template with Id '" + id + "' already exists.");
+        }
+
         return templateRepository.save(template);
     }
 

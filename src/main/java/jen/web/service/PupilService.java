@@ -2,6 +2,7 @@ package jen.web.service;
 
 import jen.web.entity.*;
 import jen.web.exception.BadRequest;
+import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.PupilRepository;
@@ -27,6 +28,11 @@ public class PupilService implements EntityService<Pupil>{
     @Override
     @Transactional
     public Pupil add(Pupil pupil) {
+        Long id = pupil.getId();
+        if (id != null && pupilRepository.existsById(id)) {
+            throw new EntityAlreadyExists("Pupil with Id '" + id + "' already exists.");
+        }
+
         validateGivenId(pupil.getGivenId());
         return pupilRepository.save(pupil);
     }
