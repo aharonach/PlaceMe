@@ -19,26 +19,26 @@ public class PupilService implements EntityService<Pupil>{
 
     private static final Logger logger = LoggerFactory.getLogger(PupilService.class);
 
-    private final PupilRepository repository;
+    private final PupilRepository pupilRepository;
     private final AttributeValueRepository attributeValueRepository;
-
+    private final GroupService groupService;
 
 
     @Override
     @Transactional
     public Pupil add(Pupil pupil) {
         validateGivenId(pupil.getGivenId());
-        return repository.save(pupil);
+        return pupilRepository.save(pupil);
     }
 
     @Override
     public Pupil getOr404(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
+        return pupilRepository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
 
     @Override
     public List<Pupil> all() {
-        return repository.findAll();
+        return pupilRepository.findAll();
     }
 
     @Override
@@ -60,17 +60,22 @@ public class PupilService implements EntityService<Pupil>{
             pupil.setAttributeValues(newPupil.getAttributeValues());
         }
 
-        return repository.save(pupil);
+        return pupilRepository.save(pupil);
     }
 
     @Override
     @Transactional
     public void deleteById(Long id) {
-        // todo: bug - it works only after sending the request twice.
         Pupil pupil = getOr404(id);
-        attributeValueRepository.deleteAllByPupilAttributeId_PupilId(id);
-        pupil.setGroups(new HashSet<>());
-        repository.delete(pupil);
+
+        attributeValueRepository.deleteAll(pupil.getAttributeValues());
+        for(Group group : pupil.getGroups()){
+            group.removePupil(pupil);
+            pupil.removeFromGroup(group);
+            groupService.deletePupilPreferences(pupil, group);
+        }
+
+        pupilRepository.delete(pupil);
     }
 
     public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) {
@@ -98,7 +103,7 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     public boolean pupilExists(String givenId) {
-        return givenId != null && repository.existsByGivenId(givenId);
+        return givenId != null && pupilRepository.existsByGivenId(givenId);
     }
 
     private void validateGivenId(String givenId){

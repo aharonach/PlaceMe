@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,7 @@ public class GroupService implements EntityService<Group> {
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     @Getter
-    private final GroupRepository repository;
+    private final GroupRepository groupRepository;
     @Getter
     private final PreferenceRepository preferenceRepository;
 
@@ -32,17 +31,17 @@ public class GroupService implements EntityService<Group> {
     @Transactional
     public Group add(Group group) {
         // todo: validate that id dont exists
-        return repository.save(group);
+        return groupRepository.save(group);
     }
 
     @Override
     public Group getOr404(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFound("Could not find group " + id));
+        return groupRepository.findById(id).orElseThrow(() -> new NotFound("Could not find group " + id));
     }
 
     @Override
     public List<Group> all() {
-        return repository.findAll();
+        return groupRepository.findAll();
     }
 
     @Override
@@ -55,17 +54,17 @@ public class GroupService implements EntityService<Group> {
         group.setTemplate(newGroup.getTemplate());
         group.setPupils(newGroup.getPupils());
 
-        return repository.save(group);
+        return groupRepository.save(group);
     }
 
     @Override
     public void deleteById(Long id) {
         Group group = getOr404(id);
-        repository.delete(group);
+        groupRepository.delete(group);
     }
 
     public Set<Group> getByIds(Set<Long> ids) {
-        return repository.getAllByIdIn(ids);
+        return groupRepository.getAllByIdIn(ids);
     }
 
     public void addPupilPreference(Preference preference){

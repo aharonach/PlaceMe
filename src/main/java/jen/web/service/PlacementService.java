@@ -24,23 +24,23 @@ public class PlacementService implements EntityService<Placement> {
 
     private static final Logger logger = LoggerFactory.getLogger(PlacementService.class);
 
-    private final PlacementRepository repository;
+    private final PlacementRepository placementRepository;
 
     private final PlacementResultRepository placementResultRepository;
 
     @Override
     public Placement add(Placement placement) {
-        return repository.save(placement);
+        return placementRepository.save(placement);
     }
 
     @Override
     public Placement getOr404(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
+        return placementRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
     }
 
     @Override
     public List<Placement> all() {
-        return repository.findAll();
+        return placementRepository.findAll();
     }
 
     @Override
@@ -51,13 +51,13 @@ public class PlacementService implements EntityService<Placement> {
         placement.setNumberOfClasses(newPlacement.getNumberOfClasses());
         placement.setGroup(newPlacement.getGroup());
 
-        return repository.save(placement);
+        return placementRepository.save(placement);
     }
 
     @Override
     public void deleteById(Long id) {
         Placement placement = getOr404(id);
-        repository.delete(placement);
+        placementRepository.delete(placement);
     }
 
     public void deletePlacementResultById(Long id, Long resultId){

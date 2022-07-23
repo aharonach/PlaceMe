@@ -35,7 +35,7 @@ public class Pupil extends BaseEntity {
 
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany
     @JoinTable(name = "pupils_groups",
             joinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"))
@@ -84,6 +84,17 @@ public class Pupil extends BaseEntity {
         return getAttributeValues().stream()
                 .filter(attributeValue ->  template.getAttributes().contains(attributeValue.getAttribute()))
                 .filter(attributeValue ->  attributeIds.contains(attributeValue.getAttribute().getId()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<AttributeValue> getAttributeValues(Group group) throws Group.NotBelongToGroupException {
+
+        verifyPupilInGroup(group);
+        Template template = group.getTemplate();
+
+        // get all AttributeValues by attribute ids for specific group
+        return getAttributeValues().stream()
+                .filter(attributeValue ->  template.getAttributes().contains(attributeValue.getAttribute()))
                 .collect(Collectors.toSet());
     }
 
