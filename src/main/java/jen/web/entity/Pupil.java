@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Table(name = "pupils")
 public class Pupil extends BaseEntity {
+    public static final String DIGITS_REGEX = "\\d+";
+
     @NaturalId
     private String givenId;
     private String firstName;
@@ -51,8 +53,7 @@ public class Pupil extends BaseEntity {
     }
 
     public void setGivenId(String givenId) {
-        String digitsRegex = "\\d+";
-        if(!givenId.matches(digitsRegex)){
+        if(!givenId.matches(DIGITS_REGEX)){
             throw new BadGivenIdException("Given id must contain only digits.");
         }
 
