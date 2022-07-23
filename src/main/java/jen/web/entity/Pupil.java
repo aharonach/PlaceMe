@@ -43,7 +43,6 @@ public class Pupil extends BaseEntity {
     private Set<Group> groups = new LinkedHashSet<>();
 
     public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate) throws BadGivenIdException {
-        this.givenId = givenId; // todo: validate that givenId contains only digits
         setGivenId(givenId);
         this.firstName = firstName;
         this.lastName = lastName;
