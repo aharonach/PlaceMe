@@ -55,6 +55,16 @@ public class Template extends BaseEntity {
     public List<Attribute> getAttributes(){
         return Collections.unmodifiableList(attributes);
     }
+
+    public Attribute getAttribute(Long id) throws NotExistInTemplateException {
+        Optional<Attribute> attribute = attributes.stream().filter(attr -> attr.getId().equals(id)).findFirst();
+
+        if(attribute.isEmpty()){
+            throw new NotExistInTemplateException("Template does not contain attribute with id: " + id);
+        }
+
+        return attribute.get();
+    }
     public void updateAttributes(List<Attribute> newAttributes){
         List<Long> newAttributeIds = newAttributes.stream().map(Attribute::getId).filter(Objects::nonNull).toList();
         List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
@@ -80,5 +90,11 @@ public class Template extends BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public static class NotExistInTemplateException extends Exception{
+        public NotExistInTemplateException(String message){
+            super(message);
+        }
     }
 }

@@ -152,8 +152,9 @@ public class PupilRestController extends BaseRestController<Pupil> {
      * @param groupId group ID which the pupil belongs to
      */
     @RequestMapping(path="/{id}/groups/{groupId}/attributes", method = {RequestMethod.POST, RequestMethod.PUT})
-    public ResponseEntity<?> updateAttributeValues(@PathVariable Long id, @PathVariable Long groupId, @RequestBody Map<Long,
-            Double> attributeValues) {
+    public ResponseEntity<?> updateAttributeValues(@PathVariable Long id,
+                                                   @PathVariable Long groupId,
+                                                   @RequestBody Map<Long, Double> attributeValues) {
         Pupil pupil = pupilService.getOr404(id);
         Group group = groupService.getOr404(groupId);
 
@@ -169,7 +170,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
      * @param attributeIds a set of attribute ids to delete
      */
     @DeleteMapping("/{id}/groups/{groupId}/attributes")
-    public ResponseEntity<?> deleteAttributeValues(@PathVariable Long id, @PathVariable Long groupId,
+    public ResponseEntity<?> deleteAttributeValues(@PathVariable Long id,
+                                                   @PathVariable Long groupId,
                                                    @RequestBody Set<Long> attributeIds) {
         Pupil pupil = pupilService.getOr404(id);
         Group group = groupService.getOr404(groupId);

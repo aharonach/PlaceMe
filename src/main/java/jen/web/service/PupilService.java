@@ -1,8 +1,6 @@
 package jen.web.service;
 
-import jen.web.entity.Group;
-import jen.web.entity.Pupil;
-import jen.web.entity.PupilAttributeId;
+import jen.web.entity.*;
 import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
@@ -81,7 +79,7 @@ public class PupilService implements EntityService<Pupil>{
             for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
                 pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());
             }
-        } catch(Pupil.NotBelongToGroupException e) {
+        } catch (Group.NotBelongToGroupException | Template.NotExistInTemplateException e) {
             throw new BadRequest(e.getMessage());
         }
 
@@ -89,17 +87,14 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) {
-        List<PupilAttributeId> toRemove = new ArrayList<>();
 
         try {
-            for (Long attributeId : attributeIds) {
-                toRemove.add(pupil.removeAttributeValue(group, attributeId));
-            }
-        } catch(Pupil.NotBelongToGroupException e) {
+            Set<AttributeValue> attributeValues = pupil.getAttributeValues(group, attributeIds);
+            attributeValueRepository.deleteAll(attributeValues);
+
+        }  catch (Group.NotBelongToGroupException e) {
             throw new BadRequest(e.getMessage());
         }
-
-        attributeValueRepository.deleteAllById(toRemove);
     }
 
     public boolean pupilExists(String givenId) {

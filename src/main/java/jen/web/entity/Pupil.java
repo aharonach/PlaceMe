@@ -12,6 +12,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -60,41 +61,30 @@ public class Pupil extends BaseEntity {
         return IsraeliIdValidator.isValid(israeliId);
     }
 
-    public void addAttributeValue(Group group, Long attributeId, Double value) throws NotBelongToGroupException {
-        verifyPupilInGroup(group);
+    public void addAttributeValue(Group group, Long attributeId, Double value) throws Template.NotExistInTemplateException, Group.NotBelongToGroupException {
 
-        // First find the attribute object inside the group's template.
+        verifyPupilInGroup(group);
+        Attribute attribute = group.getTemplate().getAttribute(attributeId);
+
         // Then find if the attribute is already has a value for pupil,
         // If it does, update the value, otherwise create a new AttributeValue.
-        // todo: add to the Group class method for getting attribute by ID
-        group.getTemplate()
-                .getAttributes().stream()
-                .filter(attribute -> attribute.getId().equals(attributeId))
+        attributeValues.stream()
+                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
                 .findFirst()
-                .ifPresent(attribute -> this.getAttributeValues().stream()
-                        .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                        .findFirst()
-                        .ifPresentOrElse(attributeValue -> attributeValue.setValue(value),
-                                () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))));
+                .ifPresentOrElse(attributeValue -> attributeValue.setValue(value),
+                        () -> attributeValues.add(new AttributeValue(this, attribute, value)));
     }
 
-    public PupilAttributeId removeAttributeValue(Group group, Long attributeId) throws NotBelongToGroupException {
+    public Set<AttributeValue> getAttributeValues(Group group, Set<Long> attributeIds) throws Group.NotBelongToGroupException {
+
         verifyPupilInGroup(group);
+        Template template = group.getTemplate();
 
-        AtomicReference<PupilAttributeId> removed = new AtomicReference<>();
-
-        // todo: add to the Group class method for getting attribute by ID
-        group.getTemplate()
-                .getAttributes().stream()
-                .filter(attribute -> attribute.getId().equals(attributeId))
-                .findFirst().flatMap(attribute -> this.getAttributeValues().stream()
-                        .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                        .findFirst()).ifPresent(attributeValue -> {
-                            this.getAttributeValues().remove(attributeValue);
-                            removed.set(attributeValue.getPupilAttributeId());
-                        });
-
-        return removed.get();
+        // get all AttributeValues by attribute ids for specific group
+        return getAttributeValues().stream()
+                .filter(attributeValue ->  template.getAttributes().contains(attributeValue.getAttribute()))
+                .filter(attributeValue ->  attributeIds.contains(attributeValue.getAttribute().getId()))
+                .collect(Collectors.toSet());
     }
 
     public void setGroups(Set<Group> newGroups){
@@ -117,18 +107,18 @@ public class Pupil extends BaseEntity {
         return Collections.unmodifiableSet(groups);
     }
 
-    private void verifyPupilInGroup(Group group) throws NotBelongToGroupException {
-        if (!isInGroup(group)) {
-            throw new NotBelongToGroupException("Pupil '" + this.getFirstName() + "' is not in '" + group.getName() + "' group.");
-        }
-    }
-
     public double getPupilScore() {
         double totalScore = 0;
         for(AttributeValue attributeValue : attributeValues){
             totalScore += attributeValue.getScore();
         }
         return totalScore;
+    }
+
+    private void verifyPupilInGroup(Group group) throws Group.NotBelongToGroupException {
+        if(!isInGroup(group)){
+            throw new Group.NotBelongToGroupException("Pupil '" + this.getFirstName() + "' is not in '" + group.getName() + "' group.");
+        }
     }
 
     @Override
@@ -142,12 +132,6 @@ public class Pupil extends BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    public static class NotBelongToGroupException extends Exception{
-        public NotBelongToGroupException(String message){
-            super(message);
-        }
     }
 
     public enum Gender {

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 @Configuration
@@ -121,6 +122,8 @@ public class LoadDatabase {
             template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
             pupilService.addAttributeValues(pupil, group, attributeValues);
         });
+
+        pupilService.removeAttributeValues(pupilService.all().get(0), group, Set.of(1L));
     }
 
     private void createPlacements(){
