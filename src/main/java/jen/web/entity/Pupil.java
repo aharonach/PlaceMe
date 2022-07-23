@@ -1,7 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jen.web.util.IsraeliIdValidator;
+import jen.web.exception.BadRequest;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -11,7 +11,6 @@ import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Entity
@@ -43,22 +42,24 @@ public class Pupil extends BaseEntity {
     @JsonIgnore
     private Set<Group> groups = new LinkedHashSet<>();
 
-    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate){
+    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate) throws BadGivenIdException {
         this.givenId = givenId; // todo: validate that givenId contains only digits
+        setGivenId(givenId);
         this.firstName = firstName;
         this.lastName = lastName;
         this.gender = gender;
         this.birthDate = birthDate;
     }
 
-    /**
-     * Validate an Israeli ID Number.
-     *
-     * @param israeliId the id to validate
-     * @return bool
-     */
-    public static boolean isGivenIdValid(String israeliId) {
-        return IsraeliIdValidator.isValid(israeliId);
+    public void setGivenId(String givenId) {
+        String digitsRegex = "\\d+";
+        if(!givenId.matches(digitsRegex)){
+            throw new BadGivenIdException("Given id must contain only digits.");
+        }
+
+//        if(!IsraeliIdValidator.isValid(givenId)){
+//            throw new BadGivenIdException("Given id is not valid.");
+//        }
     }
 
     public void addAttributeValue(Group group, Long attributeId, Double value) throws Template.NotExistInTemplateException, Group.NotBelongToGroupException {
@@ -147,5 +148,11 @@ public class Pupil extends BaseEntity {
 
     public enum Gender {
         MALE, FEMALE
+    }
+
+    public static class BadGivenIdException extends BadRequest {
+        public BadGivenIdException(String message){
+            super(message);
+        }
     }
 }
