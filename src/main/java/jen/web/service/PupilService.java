@@ -119,7 +119,6 @@ public class PupilService implements EntityService<Pupil>{
         }
     }
 
-
     public boolean pupilExists(String givenId) {
         return givenId != null && pupilRepository.existsByGivenId(givenId);
     }
