@@ -32,6 +32,9 @@ public class Group extends BaseEntity {
     @JsonIgnore
     private Set<Preference> preferences = new LinkedHashSet<>();
 
+    @OneToMany(fetch = FetchType.EAGER)
+    private Set<Placement> placements = new LinkedHashSet<>();
+
 
     public Group(String name, String description, Template template){
         this.name = name;

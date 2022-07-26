@@ -6,10 +6,12 @@ import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.Limits;
 import jen.web.engine.PlaceEngine;
+import jen.web.entity.Group;
 import jen.web.entity.Placement;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
+import jen.web.repository.GroupRepository;
 import jen.web.repository.PlacementRepository;
 import jen.web.repository.PlacementResultRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,8 @@ public class PlacementService implements EntityService<Placement> {
 
     private final PlacementResultRepository placementResultRepository;
 
+    private final GroupRepository groupRepository;
+
     @Override
     public Placement add(Placement placement) {
         Long id = placement.getId();
@@ -36,7 +40,9 @@ public class PlacementService implements EntityService<Placement> {
             throw new EntityAlreadyExists("Placement with Id '" + id + "' already exists.");
         }
 
-        return placementRepository.save(placement);
+        Placement res = placementRepository.save(placement);
+        groupRepository.save(placement.getGroup());
+        return res;
     }
 
     @Override
@@ -63,6 +69,11 @@ public class PlacementService implements EntityService<Placement> {
     @Override
     public void deleteById(Long id) {
         Placement placement = getOr404(id);
+        Group group = placement.getGroup();
+
+        group.getPlacements().remove(placement);
+        // delete placement results
+
         placementRepository.delete(placement);
     }
 

@@ -3,9 +3,11 @@ package jen.web.service;
 import jen.web.entity.*;
 import jen.web.exception.BadRequest;
 import jen.web.exception.EntityAlreadyExists;
+import jen.web.exception.NotAcceptable;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
+import jen.web.repository.PupilRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -27,6 +29,8 @@ public class GroupService implements EntityService<Group> {
     private final GroupRepository groupRepository;
     @Getter
     private final PreferenceRepository preferenceRepository;
+
+    private final PupilRepository pupilRepository;
 
     @Override
     @Transactional
@@ -65,6 +69,11 @@ public class GroupService implements EntityService<Group> {
     @Override
     public void deleteById(Long id) {
         Group group = getOr404(id);
+        verifyGroupNotAssociated(group);
+
+        deleteAllPreferencesFromGroup(group);
+        RemoveAllPupilsFromGroup(group);
+
         groupRepository.delete(group);
     }
 
@@ -102,7 +111,25 @@ public class GroupService implements EntityService<Group> {
         preferenceRepository.deleteAllById(selectorSelectedIds);
     }
 
+    public void deleteAllPreferencesFromGroup(Group group){
+        Set<SelectorSelectedId> selectorSelectedIds = group.getPreferences().stream()
+                .map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
+        preferenceRepository.deleteAllById(selectorSelectedIds);
+    }
+
     public Set<Preference> getAllPreferencesForPupil(Pupil pupil, Group group){
         return group.getAllPreferencesForPupil(pupil.getId());
+    }
+
+    public void RemoveAllPupilsFromGroup(Group group){
+        group.getPupils().forEach(pupil -> pupil.removeFromGroup(group));
+        pupilRepository.saveAll(group.getPupils());
+    }
+
+    private void verifyGroupNotAssociated(Group group){
+        if(group.getPlacements().size() > 0){
+            Placement placement = group.getPlacements().stream().findFirst().get();
+            throw new NotAcceptable("Group is associated with Placement " + placement.getId() + " (" + placement.getName() + ")");
+        }
     }
 }
