@@ -72,15 +72,23 @@ public class PlacementService implements EntityService<Placement> {
         Group group = placement.getGroup();
 
         group.getPlacements().remove(placement);
-        // delete placement results
+        // @todo: delete placement results
 
         placementRepository.delete(placement);
     }
 
-    public void deletePlacementResultById(Long id, Long resultId){
-        Placement placement = getOr404(id);
-        placementResultRepository.delete(placement.getResults().get(resultId));
+    public void addPlacementResult(Placement placement, PlacementResult placementResult){
+        placementResult.setPlacement(placement);
+        PlacementResult savedResult = placementResultRepository.save(placementResult);
+
+        placement.getResults().put(savedResult.getId(), savedResult);
+        placementRepository.save(placement);
     }
+
+//    public void deletePlacementResultById(Long id, Long resultId){
+//        Placement placement = getOr404(id);
+//        placementResultRepository.delete(placement.getResults().get(resultId));
+//    }
 
     public PlacementResult startPlacement(Placement placement) {
         PlaceEngine placeEngine = new PlaceEngine(placement);
@@ -93,6 +101,8 @@ public class PlacementService implements EntityService<Placement> {
                 .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
                 .collect(EvolutionResult.toBestPhenotype());
 
-        return placeEngine.decode(best.genotype());
+        PlacementResult placementResult = placeEngine.decode(best.genotype());
+        addPlacementResult(placement, placementResult);
+        return placementResult;
     }
 }

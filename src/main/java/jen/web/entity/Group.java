@@ -33,6 +33,7 @@ public class Group extends BaseEntity {
     private Set<Preference> preferences = new LinkedHashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
     private Set<Placement> placements = new LinkedHashSet<>();
 
 

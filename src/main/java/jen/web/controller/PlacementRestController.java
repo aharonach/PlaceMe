@@ -57,6 +57,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @PostMapping("/{id}/start")
+    //@GetMapping("/{id}/start")
     public ResponseEntity<?> startPlacement(@PathVariable Long id) {
         Placement placement = service.getOr404(id);
         PlacementResult placementResult = service.startPlacement(placement);
@@ -73,16 +74,16 @@ public class PlacementRestController extends BaseRestController<Placement> {
         return ResponseEntity.ok().body(service.getOr404(id).getResults());
     }
 
-    @GetMapping("/{id}/results/{resultId}")
-    public ResponseEntity<?> getResult(@PathVariable Long id, @PathVariable Long resultId) {
-        // @todo show an error if not finished to run the algorithm.
-        return ResponseEntity.ok().body(service.getOr404(id).getResults().get(resultId));
-    }
+//    @GetMapping("/{id}/results/{resultId}")
+//    public ResponseEntity<?> getResult(@PathVariable Long id, @PathVariable Long resultId) {
+//        // @todo show an error if not finished to run the algorithm.
+//        return ResponseEntity.ok().body(service.getOr404(id).getResults().get(resultId));
+//    }
 
-    @DeleteMapping("/{id}/results/{resultId}")
-    public ResponseEntity<?> deleteResult(@PathVariable Long id, @PathVariable Long resultId) {
-        // @todo remove an instance of PlacementResult: placement.removeResult(resultId)
-        service.deletePlacementResultById(id, resultId);
-        return ResponseEntity.ok().build();
-    }
+//    @DeleteMapping("/{id}/results/{resultId}")
+//    public ResponseEntity<?> deleteResult(@PathVariable Long id, @PathVariable Long resultId) {
+//        // @todo remove an instance of PlacementResult: placement.removeResult(resultId)
+//        service.deletePlacementResultById(id, resultId);
+//        return ResponseEntity.ok().build();
+//    }
 }
