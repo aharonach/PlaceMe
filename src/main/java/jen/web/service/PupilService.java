@@ -1,9 +1,8 @@
 package jen.web.service;
 
-import jen.web.entity.Group;
-import jen.web.entity.Pupil;
-import jen.web.entity.PupilAttributeId;
+import jen.web.entity.*;
 import jen.web.exception.BadRequest;
+import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.PupilRepository;
@@ -21,24 +20,31 @@ public class PupilService implements EntityService<Pupil>{
 
     private static final Logger logger = LoggerFactory.getLogger(PupilService.class);
 
-    private final PupilRepository repository;
+    private final PupilRepository pupilRepository;
     private final AttributeValueRepository attributeValueRepository;
+    private final GroupService groupService;
+
 
     @Override
     @Transactional
     public Pupil add(Pupil pupil) {
+        Long id = pupil.getId();
+        if (id != null && pupilRepository.existsById(id)) {
+            throw new EntityAlreadyExists("Pupil with Id '" + id + "' already exists.");
+        }
+
         validateGivenId(pupil.getGivenId());
-        return repository.save(pupil);
+        return pupilRepository.save(pupil);
     }
 
     @Override
     public Pupil getOr404(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
+        return pupilRepository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
 
     @Override
     public List<Pupil> all() {
-        return repository.findAll();
+        return pupilRepository.findAll();
     }
 
     @Override
@@ -60,17 +66,22 @@ public class PupilService implements EntityService<Pupil>{
             pupil.setAttributeValues(newPupil.getAttributeValues());
         }
 
-        return repository.save(pupil);
+        return pupilRepository.save(pupil);
     }
 
     @Override
     @Transactional
     public void deleteById(Long id) {
-        // todo: bug - it works only after sending the request twice.
         Pupil pupil = getOr404(id);
-        attributeValueRepository.deleteAllByPupilAttributeId_PupilId(id);
-        pupil.setGroups(new HashSet<>());
-        repository.delete(pupil);
+
+        attributeValueRepository.deleteAll(pupil.getAttributeValues());
+        for(Group group : pupil.getGroups()){
+            group.removePupil(pupil);
+            pupil.removeFromGroup(group);
+            groupService.deletePupilPreferences(pupil, group);
+        }
+
+        pupilRepository.delete(pupil);
     }
 
     public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) {
@@ -79,7 +90,7 @@ public class PupilService implements EntityService<Pupil>{
             for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
                 pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());
             }
-        } catch(Pupil.NotBelongToGroupException e) {
+        } catch (Group.NotBelongToGroupException | Template.NotExistInTemplateException e) {
             throw new BadRequest(e.getMessage());
         }
 
@@ -87,21 +98,29 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) {
-        List<PupilAttributeId> toRemove = new ArrayList<>();
 
         try {
-            for (Long attributeId : attributeIds) {
-                toRemove.add(pupil.removeAttributeValue(group, attributeId));
-            }
-        } catch(Pupil.NotBelongToGroupException e) {
+            Set<AttributeValue> attributeValues = pupil.getAttributeValues(group, attributeIds);
+            attributeValueRepository.deleteAll(attributeValues);
+
+        }  catch (Group.NotBelongToGroupException e) {
             throw new BadRequest(e.getMessage());
         }
+    }
 
-        attributeValueRepository.deleteAllById(toRemove);
+    public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) {
+
+        try {
+            Set<AttributeValue> attributeValues = pupil.getAttributeValues(group);
+            return attributeValues;
+
+        }  catch (Group.NotBelongToGroupException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     public boolean pupilExists(String givenId) {
-        return givenId != null && repository.existsByGivenId(givenId);
+        return givenId != null && pupilRepository.existsByGivenId(givenId);
     }
 
     private void validateGivenId(String givenId){

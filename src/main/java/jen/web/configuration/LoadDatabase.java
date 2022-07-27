@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 @Configuration
@@ -45,6 +46,7 @@ public class LoadDatabase {
             createGroups();
             createAttributeValues();
             createPlacements();
+            addPreferences();
             createPlacementResult(); // result is printed here, will change it after the service will be ready
 
 
@@ -67,6 +69,9 @@ public class LoadDatabase {
                 System.out.println(placement.getGroup());
                 System.out.println(placement.getGroup().getPupils());
             });
+
+            System.out.println("Prefs:");
+            System.out.println(groupService.all().get(0).getPreferences());
 
         };
     }
@@ -105,7 +110,7 @@ public class LoadDatabase {
         Group group = groupService.add(new Group("group 1", "group 1 desc", template));
         pupilService.all().forEach(group::addPupil);
 
-        logger.info("Preloading " + groupService.add(group));
+        logger.info("Preloading " + groupService.updateById(group.getId(), group));
     }
 
     private void createAttributeValues(){
@@ -117,11 +122,24 @@ public class LoadDatabase {
             template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
             pupilService.addAttributeValues(pupil, group, attributeValues);
         });
+
+        pupilService.removeAttributeValues(pupilService.all().get(0), group, Set.of(1L));
     }
 
     private void createPlacements(){
         Group group = groupService.getOr404(1L);
         logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
+    }
+
+    private void addPreferences() throws Preference.SamePupilException {
+        Group group = groupService.all().get(0);
+        Pupil pupil1 = pupilService.getOr404(1L);
+        Pupil pupil2 = pupilService.getOr404(2L);
+        Pupil pupil3 = pupilService.getOr404(3L);
+
+        groupService.addPupilPreference(new Preference(pupil1, pupil2, true, group));
+        groupService.addPupilPreference(new Preference(pupil2, pupil3, true, group));
+        groupService.addPupilPreference(new Preference(pupil3, pupil1, false, group));
     }
 
     private void createPlacementResult(){

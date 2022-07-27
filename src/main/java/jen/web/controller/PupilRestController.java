@@ -2,7 +2,9 @@ package jen.web.controller;
 
 import jen.web.assembler.GroupModelAssembler;
 import jen.web.assembler.PupilModelAssembler;
+import jen.web.entity.AttributeValue;
 import jen.web.entity.Group;
+import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
@@ -17,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Set;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RequiredArgsConstructor
@@ -151,10 +156,11 @@ public class PupilRestController extends BaseRestController<Pupil> {
      * @param id the pupil ID
      * @param groupId group ID which the pupil belongs to
      */
-    @RequestMapping(path="/{id}/groups/{groupId}/attributes", method = {RequestMethod.POST, RequestMethod.PUT})
-    public ResponseEntity<?> updateAttributeValues(@PathVariable Long id, @PathVariable Long groupId, @RequestBody Map<Long,
-            Double> attributeValues) {
-        Pupil pupil = pupilService.getOr404(id);
+    @RequestMapping(path="/{pupilId}/groups/{groupId}/attributes", method = {RequestMethod.POST, RequestMethod.PUT})
+    public ResponseEntity<?> updateAttributeValues(@PathVariable Long pupilId,
+                                                   @PathVariable Long groupId,
+                                                   @RequestBody Map<Long, Double> attributeValues) {
+        Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
         pupilService.addAttributeValues(pupil, group, attributeValues);
@@ -168,13 +174,38 @@ public class PupilRestController extends BaseRestController<Pupil> {
      * @param groupId group ID which the pupil belongs to
      * @param attributeIds a set of attribute ids to delete
      */
-    @DeleteMapping("/{id}/groups/{groupId}/attributes")
-    public ResponseEntity<?> deleteAttributeValues(@PathVariable Long id, @PathVariable Long groupId,
+    @DeleteMapping("/{pupilId}/groups/{groupId}/attributes")
+    public ResponseEntity<?> deleteAttributeValues(@PathVariable Long pupilId,
+                                                   @PathVariable Long groupId,
                                                    @RequestBody Set<Long> attributeIds) {
-        Pupil pupil = pupilService.getOr404(id);
+        Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
         pupilService.removeAttributeValues(pupil, group, attributeIds);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{pupilId}/groups/{groupId}/attributes")
+    public ResponseEntity<?> getAttributeValues(@PathVariable Long pupilId,
+                                                   @PathVariable Long groupId) {
+        Pupil pupil = pupilService.getOr404(pupilId);
+        Group group = groupService.getOr404(groupId);
+
+        pupilService.getAttributeValues(pupil, group);
+
+        Set<AttributeValue> attributeValues = pupilService.getAttributeValues(pupil, group);
+        CollectionModel<AttributeValue> allEntities = preferencesToModelCollection(pupil.getId(), group.getId(), attributeValues);
+
+        return ResponseEntity
+                .ok()
+                .body(allEntities);
+    }
+
+    private CollectionModel<AttributeValue> preferencesToModelCollection(Long pupilId, Long groupId, Set<AttributeValue> attributeValues){
+        return  CollectionModel.of(attributeValues,
+                linkTo(methodOn(this.getClass()).get(pupilId)).withRel("pupil"),
+                linkTo(methodOn(this.getClass()).getPupilGroups(groupId)).withRel("group"),
+                linkTo(methodOn(this.getClass()).getAttributeValues(pupilId, groupId)).withSelfRel()
+        );
     }
 }

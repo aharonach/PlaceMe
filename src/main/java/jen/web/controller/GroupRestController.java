@@ -4,9 +4,11 @@ import jen.web.assembler.GroupModelAssembler;
 import jen.web.assembler.PupilModelAssembler;
 import jen.web.assembler.TemplateModelAssembler;
 import jen.web.entity.Group;
+import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
 import jen.web.entity.Template;
 import jen.web.service.GroupService;
+import jen.web.service.PupilService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,11 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/groups")
@@ -23,6 +30,7 @@ public class GroupRestController extends BaseRestController<Group> {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupRestController.class);
     private final GroupService groupService;
+    private final PupilService pupilService;
     private final GroupModelAssembler groupAssembler;
     private final TemplateModelAssembler templateAssembler;
     private final PupilModelAssembler pupilAssembler;
@@ -91,5 +99,56 @@ public class GroupRestController extends BaseRestController<Group> {
         return ResponseEntity
                 .ok()
                 .body(allEntities);
+    }
+
+    @GetMapping("/{groupId}/preferences")
+    public ResponseEntity<?> getPreferences(@PathVariable Long groupId){
+        Set<Preference> preferences = groupService.getOr404(groupId).getPreferences();
+        CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+
+        return ResponseEntity
+                .ok()
+                .body(allEntities);
+    }
+
+    @GetMapping("/{groupId}/preferences/{pupilId}")
+    public ResponseEntity<?> getPreferencesForPupil(@PathVariable Long groupId, @PathVariable Long pupilId){
+        Group group = groupService.getOr404(groupId);
+        Pupil pupil = pupilService.getOr404(pupilId);
+        Set<Preference> preferences = groupService.getAllPreferencesForPupil(pupil, group);
+        CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+
+        return ResponseEntity
+                .ok()
+                .body(allEntities);
+    }
+
+    @PutMapping("/{groupId}/preferences/{selectorId}/{SelectedId}")
+    public ResponseEntity<?> addPreference(@RequestBody Preference preference) {
+
+        groupService.addPupilPreference(preference);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{groupId}/preferences/{selectorId}/{SelectedId}")
+    public ResponseEntity<?> deletePreference(@PathVariable Long groupId,
+                                              @PathVariable Long selectorId,
+                                              @PathVariable Long SelectedId) {
+
+        Group group = groupService.getOr404(groupId);
+        Set<Preference> preferences = group.getPreferencesForPupils(selectorId, SelectedId);
+
+        for(Preference preference : preferences){
+            groupService.deletePupilPreferences(preference);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    private CollectionModel<Preference> preferencesToModelCollection(Long groupId, Set<Preference> preferences){
+        return  CollectionModel.of(preferences,
+                linkTo(methodOn(this.getClass()).get(groupId)).withRel("group"),
+                linkTo(methodOn(this.getClass()).getPreferences(groupId)).withSelfRel()
+        );
     }
 }

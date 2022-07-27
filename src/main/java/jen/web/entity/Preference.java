@@ -1,4 +1,6 @@
 package jen.web.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -9,32 +11,47 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Table(name = "preferences")
-public class Preference extends BaseEntity {
-    // todo: maybe use embedded
+@NoArgsConstructor
+public class Preference {
+    @EmbeddedId
+    //@JsonIgnore
+    private SelectorSelectedId selectorSelectedId = new SelectorSelectedId();
 
-    @OneToOne
-    private Pupil selector;
-
-    @OneToOne
-    private Pupil selected;
-
-    private Boolean preference; // True = Selector wants to be with Selected
+    private Boolean isSelectorWantToBeWithSelected;
 
     @ManyToOne
-    private Placement placement;
+    @JoinColumn(name = "group_id")
+    @ToString.Exclude
+    @JsonIgnore
+    private Group group;
+
+    public Preference(Pupil selector, Pupil selected, boolean isSelectorWantToBeWithSelected, Group group) throws SamePupilException {
+        if(selector.getId().equals(selected.getId())){
+            throw new SamePupilException();
+        }
+        this.selectorSelectedId.setSelectorId(selector.getId());
+        this.selectorSelectedId.setSelectedId(selected.getId());
+        this.isSelectorWantToBeWithSelected = isSelectorWantToBeWithSelected;
+        this.group = group;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Preference preference = (Preference) o;
-        return id != null && Objects.equals(id, preference.id);
+        Preference that = (Preference) o;
+        return selectorSelectedId != null && Objects.equals(selectorSelectedId, that.selectorSelectedId);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(selectorSelectedId);
+    }
+
+    public static class SamePupilException extends Exception{
+        public SamePupilException(){
+            super("Selector pupil cannot be equal to selected pupil");
+        }
     }
 }

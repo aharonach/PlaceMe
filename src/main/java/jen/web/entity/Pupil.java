@@ -1,7 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jen.web.util.IsraeliIdValidator;
+import jen.web.exception.BadRequest;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -11,7 +11,7 @@ import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @NoArgsConstructor
 @Table(name = "pupils")
 public class Pupil extends BaseEntity {
+    public static final String DIGITS_REGEX = "\\d+";
+
     @NaturalId
     private String givenId;
     private String firstName;
@@ -34,7 +36,7 @@ public class Pupil extends BaseEntity {
 
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany
     @JoinTable(name = "pupils_groups",
             joinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"))
@@ -42,59 +44,59 @@ public class Pupil extends BaseEntity {
     @JsonIgnore
     private Set<Group> groups = new LinkedHashSet<>();
 
-    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate){
-        this.givenId = givenId; // todo: validate that givenId contains only digits
+    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate) throws BadGivenIdException {
+        setGivenId(givenId);
         this.firstName = firstName;
         this.lastName = lastName;
         this.gender = gender;
         this.birthDate = birthDate;
     }
 
-    /**
-     * Validate an Israeli ID Number.
-     *
-     * @param israeliId the id to validate
-     * @return bool
-     */
-    public static boolean isGivenIdValid(String israeliId) {
-        return IsraeliIdValidator.isValid(israeliId);
+    public void setGivenId(String givenId) {
+        if(!givenId.matches(DIGITS_REGEX)){
+            throw new BadGivenIdException("Given id must contain only digits.");
+        }
+
+//        if(!IsraeliIdValidator.isValid(givenId)){
+//            throw new BadGivenIdException("Given id is not valid.");
+//        }
     }
 
-    public void addAttributeValue(Group group, Long attributeId, Double value) throws NotBelongToGroupException {
-        verifyPupilInGroup(group);
+    public void addAttributeValue(Group group, Long attributeId, Double value) throws Template.NotExistInTemplateException, Group.NotBelongToGroupException {
 
-        // First find the attribute object inside the group's template.
+        verifyPupilInGroup(group);
+        Attribute attribute = group.getTemplate().getAttribute(attributeId);
+
         // Then find if the attribute is already has a value for pupil,
         // If it does, update the value, otherwise create a new AttributeValue.
-        // todo: add to the Group class method for getting attribute by ID
-        group.getTemplate()
-                .getAttributes().stream()
-                .filter(attribute -> attribute.getId().equals(attributeId))
+        attributeValues.stream()
+                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
                 .findFirst()
-                .ifPresent(attribute -> this.getAttributeValues().stream()
-                        .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                        .findFirst()
-                        .ifPresentOrElse(attributeValue -> attributeValue.setValue(value),
-                                () -> this.getAttributeValues().add(new AttributeValue(this, attribute, value))));
+                .ifPresentOrElse(attributeValue -> attributeValue.setValue(value),
+                        () -> attributeValues.add(new AttributeValue(this, attribute, value)));
     }
 
-    public PupilAttributeId removeAttributeValue(Group group, Long attributeId) throws NotBelongToGroupException {
+    public Set<AttributeValue> getAttributeValues(Group group, Set<Long> attributeIds) throws Group.NotBelongToGroupException {
+
         verifyPupilInGroup(group);
+        Template template = group.getTemplate();
 
-        AtomicReference<PupilAttributeId> removed = new AtomicReference<>();
+        // get all AttributeValues by attribute ids for specific group
+        return getAttributeValues().stream()
+                .filter(attributeValue ->  template.getAttributes().contains(attributeValue.getAttribute()))
+                .filter(attributeValue ->  attributeIds.contains(attributeValue.getAttribute().getId()))
+                .collect(Collectors.toSet());
+    }
 
-        // todo: add to the Group class method for getting attribute by ID
-        group.getTemplate()
-                .getAttributes().stream()
-                .filter(attribute -> attribute.getId().equals(attributeId))
-                .findFirst().flatMap(attribute -> this.getAttributeValues().stream()
-                        .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                        .findFirst()).ifPresent(attributeValue -> {
-                            this.getAttributeValues().remove(attributeValue);
-                            removed.set(attributeValue.getPupilAttributeId());
-                        });
+    public Set<AttributeValue> getAttributeValues(Group group) throws Group.NotBelongToGroupException {
 
-        return removed.get();
+        verifyPupilInGroup(group);
+        Template template = group.getTemplate();
+
+        // get all AttributeValues by attribute ids for specific group
+        return getAttributeValues().stream()
+                .filter(attributeValue ->  template.getAttributes().contains(attributeValue.getAttribute()))
+                .collect(Collectors.toSet());
     }
 
     public void setGroups(Set<Group> newGroups){
@@ -117,18 +119,18 @@ public class Pupil extends BaseEntity {
         return Collections.unmodifiableSet(groups);
     }
 
-    private void verifyPupilInGroup(Group group) throws NotBelongToGroupException {
-        if (!isInGroup(group)) {
-            throw new NotBelongToGroupException("Pupil '" + this.getFirstName() + "' is not in '" + group.getName() + "' group.");
-        }
-    }
-
     public double getPupilScore() {
         double totalScore = 0;
         for(AttributeValue attributeValue : attributeValues){
             totalScore += attributeValue.getScore();
         }
         return totalScore;
+    }
+
+    private void verifyPupilInGroup(Group group) throws Group.NotBelongToGroupException {
+        if(!isInGroup(group)){
+            throw new Group.NotBelongToGroupException("Pupil '" + this.getFirstName() + "' is not in '" + group.getName() + "' group.");
+        }
     }
 
     @Override
@@ -144,13 +146,13 @@ public class Pupil extends BaseEntity {
         return getClass().hashCode();
     }
 
-    public static class NotBelongToGroupException extends Exception{
-        public NotBelongToGroupException(String message){
-            super(message);
-        }
-    }
-
     public enum Gender {
         MALE, FEMALE
+    }
+
+    public static class BadGivenIdException extends BadRequest {
+        public BadGivenIdException(String message){
+            super(message);
+        }
     }
 }

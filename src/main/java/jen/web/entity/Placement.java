@@ -24,16 +24,18 @@ public class Placement extends BaseEntity {
     @JoinColumn
     @Fetch(FetchMode.JOIN)
     private Group group;
+
     @OneToMany
     @ToString.Exclude
-    //@JsonIgnore
     @MapKey(name = "id")
+    @JsonIgnore
     private Map<Long, PlacementResult> results;
 
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;
         this.numberOfClasses = numberOfClasses;
         this.group = group;
+        group.getPlacements().add(this);
     }
 
     @Override

@@ -1,8 +1,13 @@
 package jen.web.service;
 
-import jen.web.entity.Group;
+import jen.web.entity.*;
+import jen.web.exception.BadRequest;
+import jen.web.exception.EntityAlreadyExists;
+import jen.web.exception.NotAcceptable;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
+import jen.web.repository.PreferenceRepository;
+import jen.web.repository.PupilRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -12,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,23 +26,31 @@ public class GroupService implements EntityService<Group> {
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     @Getter
-    private final GroupRepository repository;
+    private final GroupRepository groupRepository;
+    @Getter
+    private final PreferenceRepository preferenceRepository;
+
+    private final PupilRepository pupilRepository;
 
     @Override
     @Transactional
     public Group add(Group group) {
-        // todo: validate that id dont exists
-        return repository.save(group);
+        Long id = group.getId();
+        if (id != null && groupRepository.existsById(id)) {
+            throw new EntityAlreadyExists("Group with Id '" + id + "' already exists.");
+        }
+
+        return groupRepository.save(group);
     }
 
     @Override
     public Group getOr404(Long id) {
-        return repository.findById(id).orElseThrow(() -> new NotFound("Could not find group " + id));
+        return groupRepository.findById(id).orElseThrow(() -> new NotFound("Could not find group " + id));
     }
 
     @Override
     public List<Group> all() {
-        return repository.findAll();
+        return groupRepository.findAll();
     }
 
     @Override
@@ -49,16 +63,73 @@ public class GroupService implements EntityService<Group> {
         group.setTemplate(newGroup.getTemplate());
         group.setPupils(newGroup.getPupils());
 
-        return repository.save(group);
+        return groupRepository.save(group);
     }
 
     @Override
     public void deleteById(Long id) {
         Group group = getOr404(id);
-        repository.delete(group);
+        verifyGroupNotAssociated(group);
+
+        deleteAllPreferencesFromGroup(group);
+        RemoveAllPupilsFromGroup(group);
+
+        groupRepository.delete(group);
     }
 
     public Set<Group> getByIds(Set<Long> ids) {
-        return repository.getAllByIdIn(ids);
+        return groupRepository.getAllByIdIn(ids);
+    }
+
+    public void addPupilPreference(Preference preference){
+        try {
+            Group group = preference.getGroup();
+            Pupil selector = group.getPupilById(preference.getSelectorSelectedId().getSelectorId());
+            Pupil selected = group.getPupilById(preference.getSelectorSelectedId().getSelectedId());
+            group.addPreference(selector, selected, preference.getIsSelectorWantToBeWithSelected());
+
+            preferenceRepository.saveAllAndFlush(group.getPreferences());
+
+        } catch (Group.NotBelongToGroupException | Preference.SamePupilException e) {
+            throw new BadRequest(e.getMessage());
+        }
+    }
+
+    public void deletePupilPreferences(Preference preference) {
+        Group group = preference.getGroup();
+        Long selectorId = preference.getSelectorSelectedId().getSelectorId();
+        Long selectedId = preference.getSelectorSelectedId().getSelectedId();
+
+        Set<SelectorSelectedId> selectorSelectedIds = group.getPreferencesForPupils(selectorId, selectedId)
+                .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
+        preferenceRepository.deleteAllById(selectorSelectedIds);
+    }
+
+    public void deletePupilPreferences(Pupil pupil, Group group){
+        Set<SelectorSelectedId> selectorSelectedIds = group.getAllPreferencesForPupil(pupil.getId())
+                .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
+        preferenceRepository.deleteAllById(selectorSelectedIds);
+    }
+
+    public void deleteAllPreferencesFromGroup(Group group){
+        Set<SelectorSelectedId> selectorSelectedIds = group.getPreferences().stream()
+                .map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
+        preferenceRepository.deleteAllById(selectorSelectedIds);
+    }
+
+    public Set<Preference> getAllPreferencesForPupil(Pupil pupil, Group group){
+        return group.getAllPreferencesForPupil(pupil.getId());
+    }
+
+    public void RemoveAllPupilsFromGroup(Group group){
+        group.getPupils().forEach(pupil -> pupil.removeFromGroup(group));
+        pupilRepository.saveAll(group.getPupils());
+    }
+
+    private void verifyGroupNotAssociated(Group group){
+        if(group.getPlacements().size() > 0){
+            Placement placement = group.getPlacements().stream().findFirst().get();
+            throw new NotAcceptable("Group is associated with Placement " + placement.getId() + " (" + placement.getName() + ")");
+        }
     }
 }

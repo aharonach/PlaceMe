@@ -1,6 +1,6 @@
 package jen.web.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import jen.web.dto.PupilsConnectionsDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,7 +8,10 @@ import lombok.Setter;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -21,9 +24,16 @@ public class PlacementClassroom extends BaseEntity {
     private PlacementResult placementResult;
     @ManyToMany
     private List<Pupil> pupils;
+    private transient PupilsConnectionsDto connectionsToInclude = new PupilsConnectionsDto(new HashMap<>());
+    private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
 
-    public PlacementClassroom(List<Pupil> pupils){
+    private transient List<Long> pupilIds;
+
+    public PlacementClassroom(List<Pupil> pupils, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
         this.pupils = pupils;
+        this.connectionsToInclude = connectionsToInclude;
+        this.connectionsToExclude = connectionsToExclude;
+        pupilIds = pupils.stream().map(Pupil::getId).toList();
     }
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
@@ -68,28 +78,28 @@ public class PlacementClassroom extends BaseEntity {
 
     public int getNumberOfWrongConnectionsToInclude(){
         int wrongConnections = 0;
-//        Map<Pupil, List<Pupil>> connectionsMap = connectionsToInclude.getValues();
-//
-//        for(Pupil pupil : pupils){
-//            if(connectionsMap.containsKey(pupil)){
-//                long numOfIncludedPupil = connectionsMap.get(pupil).stream().filter(pupils::contains).count();
-//                if(numOfIncludedPupil < 1){
-//                    wrongConnections++;
-//                }
-//            }
-//        }
+        Map<Long, Set<Long>> connectionsMap = connectionsToInclude.getValues();
+
+        for(Pupil pupil : pupils){
+            if(connectionsMap.containsKey(pupil.getId())){
+                long numOfIncludedPupil = connectionsMap.get(pupil.getId()).stream().filter(pupilIds::contains).count();
+                if(numOfIncludedPupil < 1){
+                    wrongConnections++;
+                }
+            }
+        }
         return wrongConnections;
     }
 
     public int getNumberOfWrongConnectionsToExclude(){
         int wrongConnections = 0;
-//        Map<Pupil, List<Pupil>> connectionsMap = connectionsToExclude.getValues();
-//
-//        for(Pupil pupil : pupils){
-//            if(connectionsMap.containsKey(pupil)){
-//                wrongConnections += connectionsMap.get(pupil).stream().filter(pupils::contains).count();
-//            }
-//        }
+        Map<Long, Set<Long>> connectionsMap = connectionsToExclude.getValues();
+
+        for(Pupil pupil : pupils){
+            if(connectionsMap.containsKey(pupil.getId())){
+                wrongConnections += connectionsMap.get(pupil.getId()).stream().filter(pupilIds::contains).count();
+            }
+        }
         return wrongConnections;
     }
 }

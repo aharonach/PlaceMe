@@ -5,22 +5,32 @@ import io.jenetics.engine.Codec;
 import io.jenetics.engine.Constraint;
 import io.jenetics.engine.Engine;
 import io.jenetics.util.IntRange;
-import jen.web.entity.Placement;
-import jen.web.entity.PlacementClassroom;
-import jen.web.entity.PlacementResult;
-import jen.web.entity.Pupil;
+import jen.web.dto.PupilsConnectionsDto;
+import jen.web.entity.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PlaceEngine {
 
     private final Placement placement;
     private final List<Pupil> pupils;
+    private final PupilsConnectionsDto connectionsToInclude;
+    private final PupilsConnectionsDto connectionsToExclude;
 
     public PlaceEngine(Placement placement){
         this.placement = placement;
         this.pupils = placement.getGroup().getPupils().stream().toList();
+        this. connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, true));
+        this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, false));
+    }
+
+    private Set<SelectorSelectedId> getSelectorSelectedIds(Placement placement, boolean isWantToBeWithSelected){
+        return placement.getGroup().getPreferences().stream()
+                .filter(preference -> preference.getIsSelectorWantToBeWithSelected().equals(isWantToBeWithSelected))
+                .map(Preference::getSelectorSelectedId)
+                .collect(Collectors.toSet());
     }
 
     public Engine<BitGene, Double> getEngine(){
@@ -157,9 +167,7 @@ public class PlaceEngine {
         gt.forEach(chromosome -> {
             List<Pupil> pupilsInClass = new ArrayList<>(getNumOfPupils());
             chromosome.as(BitChromosome.class).ones().forEach(index -> pupilsInClass.add(pupils.get(index)));
-            allClasses.add(new PlacementClassroom(pupilsInClass));
-            // todo: complete it (connectionsToInclude, connectionsToExclude)
-            //allClasses.add(new PlacementClassroom(pupilsInClass, connectionsToInclude, connectionsToExclude));
+            allClasses.add(new PlacementClassroom(pupilsInClass, connectionsToInclude, connectionsToExclude));
         });
 
         return new PlacementResult(allClasses);

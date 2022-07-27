@@ -8,6 +8,7 @@ import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Setter
@@ -23,13 +24,17 @@ public class Group extends BaseEntity {
     private Template template;
     @ToString.Exclude
     @JsonIgnore
-    @ManyToMany(mappedBy = "groups", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "groups", cascade = {CascadeType.ALL})
     @Fetch(FetchMode.JOIN)
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
-//    @OneToMany
-//    @ToString.Exclude
-//    private Set<Placement> placements = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "group")
+    @JsonIgnore
+    private Set<Preference> preferences = new LinkedHashSet<>();
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<Placement> placements = new LinkedHashSet<>();
 
 
     public Group(String name, String description, Template template){
@@ -61,6 +66,36 @@ public class Group extends BaseEntity {
         return Collections.unmodifiableSet(pupils);
     }
 
+    public Pupil getPupilById(Long pupilId) throws NotBelongToGroupException {
+        Optional<Pupil> pupil = pupils.stream()
+                .filter(p -> p.getId().equals(pupilId))
+                .findFirst();
+
+        if(pupil.isEmpty()){
+            throw new NotBelongToGroupException("Pupil Id '" + pupilId + "' is not in '" + this.getName() + "' group.");
+        }
+
+        return pupil.get();
+    }
+
+    public void addPreference(Pupil selector, Pupil selected, boolean wantToBeTogether) throws Preference.SamePupilException {
+        preferences.add(new Preference(selector, selected, wantToBeTogether, this));
+    }
+
+    public Set<Preference> getPreferencesForPupils(Long selectorId, Long selectedId){
+        return preferences.stream()
+                .filter(preference -> preference.getSelectorSelectedId().getSelectorId().equals(selectorId))
+                .filter(preference -> preference.getSelectorSelectedId().getSelectedId().equals(selectedId))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<Preference> getAllPreferencesForPupil(Long pupilId){
+        return preferences.stream()
+                .filter(preference -> preference.getSelectorSelectedId().getSelectorId().equals(pupilId)
+                        || preference.getSelectorSelectedId().getSelectedId().equals(pupilId))
+                .collect(Collectors.toSet());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -72,5 +107,11 @@ public class Group extends BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public static class NotBelongToGroupException extends Exception{
+        public NotBelongToGroupException(String message){
+            super(message);
+        }
     }
 }
