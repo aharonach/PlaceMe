@@ -74,10 +74,6 @@ public class PlacementClassroom extends BaseEntity {
         return pupils.stream().mapToDouble(Pupil::getPupilScore).sum();
     }
 
-//    public double getSumMaxScoreOfPupils(){
-//        return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
-//    }
-
     public long getNumOfPupils(){
         return pupils.size();
     }

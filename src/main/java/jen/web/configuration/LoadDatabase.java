@@ -41,7 +41,7 @@ public class LoadDatabase {
             createAttributeValues();
             createPlacements();
             addPreferences();
-            //createPlacementResult();
+            createPlacementResult();
 
 
             // print
@@ -67,10 +67,18 @@ public class LoadDatabase {
             System.out.println("Prefs:");
             System.out.println(groupService.all().get(0).getPreferences());
 
-//            System.out.println("Result:");
-//            PlacementResult placementResult = placementService.getOr404(1L).getResults();
-//            System.out.println(placementResult);
-//            placementResult.printClassInfo();
+            System.out.println("Result:");
+            PlacementResult placementResult = placementService.getOr404(1L).getResultById(1L);
+            System.out.println(placementResult);
+            placementResult.getClasses().forEach(classInfo -> {
+                System.out.print("[Pupils: " + classInfo.getNumOfPupils() + " (Males: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.MALE) + " ,Females: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.FEMALE) + " ,Delta: " + classInfo.getDeltaBetweenMalesAndFemales() + ") ");
+                System.out.print("Pupils Score: " + classInfo.getSumScoreOfPupils() + " Class Score: " + classInfo.getClassScore() + " ");
+                System.out.print("Include is OK: " + (classInfo.getNumberOfWrongConnectionsToInclude() == 0) + ", ");
+                System.out.print("Exclude is OK: " + (classInfo.getNumberOfWrongConnectionsToExclude() == 0));
+                System.out.print("] | ");
+                System.out.println(classInfo.getPupils());
+            });
+
         };
     }
 

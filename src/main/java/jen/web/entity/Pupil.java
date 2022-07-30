@@ -1,6 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jen.web.util.IsraeliIdValidator;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -53,14 +54,13 @@ public class Pupil extends BaseEntity {
     }
 
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
+
         if(!givenId.matches(DIGITS_REGEX)){
             throw new GivenIdContainsProhibitedCharsException();
         }
-
-//        @todo: enable validation
-//        if(!IsraeliIdValidator.isValid(givenId)){
-//            throw new GivenIdIsNotValidException();
-//        }
+        if(!IsraeliIdValidator.isValid(givenId)){
+            throw new GivenIdIsNotValidException();
+        }
 
         this.givenId = givenId;
     }
