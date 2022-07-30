@@ -57,9 +57,12 @@ public class Pupil extends BaseEntity {
             throw new BadGivenIdException("Given id must contain only digits.");
         }
 
+        // @todo: enable validation
 //        if(!IsraeliIdValidator.isValid(givenId)){
 //            throw new BadGivenIdException("Given id is not valid.");
 //        }
+
+        this.givenId = givenId;
     }
 
     public void addAttributeValue(Group group, Long attributeId, Double value) throws Template.NotExistInTemplateException, Group.NotBelongToGroupException {
