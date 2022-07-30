@@ -1,7 +1,6 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jen.web.exception.BadRequest;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -44,7 +43,8 @@ public class Pupil extends BaseEntity {
     @JsonIgnore
     private Set<Group> groups = new LinkedHashSet<>();
 
-    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate) throws BadGivenIdException {
+    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate)
+            throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         setGivenId(givenId);
         this.firstName = firstName;
         this.lastName = lastName;
@@ -52,20 +52,20 @@ public class Pupil extends BaseEntity {
         this.birthDate = birthDate;
     }
 
-    public void setGivenId(String givenId) {
+    public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         if(!givenId.matches(DIGITS_REGEX)){
-            throw new BadGivenIdException("Given id must contain only digits.");
+            throw new GivenIdContainsProhibitedCharsException();
         }
 
-        // @todo: enable validation
+//        @todo: enable validation
 //        if(!IsraeliIdValidator.isValid(givenId)){
-//            throw new BadGivenIdException("Given id is not valid.");
+//            throw new GivenIdIsNotValidException();
 //        }
 
         this.givenId = givenId;
     }
 
-    public void addAttributeValue(Group group, Long attributeId, Double value) throws Template.NotExistInTemplateException, Group.NotBelongToGroupException {
+    public void addAttributeValue(Group group, Long attributeId, Double value) throws Group.PupilNotBelongException, Template.AttributeNotBelongException {
 
         verifyPupilInGroup(group);
         Attribute attribute = group.getTemplate().getAttribute(attributeId);
@@ -79,7 +79,7 @@ public class Pupil extends BaseEntity {
                         () -> attributeValues.add(new AttributeValue(this, attribute, value)));
     }
 
-    public Set<AttributeValue> getAttributeValues(Group group, Set<Long> attributeIds) throws Group.NotBelongToGroupException {
+    public Set<AttributeValue> getAttributeValues(Group group, Set<Long> attributeIds) throws Group.PupilNotBelongException {
 
         verifyPupilInGroup(group);
         Template template = group.getTemplate();
@@ -91,7 +91,7 @@ public class Pupil extends BaseEntity {
                 .collect(Collectors.toSet());
     }
 
-    public Set<AttributeValue> getAttributeValues(Group group) throws Group.NotBelongToGroupException {
+    public Set<AttributeValue> getAttributeValues(Group group) throws Group.PupilNotBelongException {
 
         verifyPupilInGroup(group);
         Template template = group.getTemplate();
@@ -130,9 +130,9 @@ public class Pupil extends BaseEntity {
         return totalScore;
     }
 
-    private void verifyPupilInGroup(Group group) throws Group.NotBelongToGroupException {
+    private void verifyPupilInGroup(Group group) throws Group.PupilNotBelongException {
         if(!isInGroup(group)){
-            throw new Group.NotBelongToGroupException("Pupil '" + this.getFirstName() + "' is not in '" + group.getName() + "' group.");
+            throw new Group.PupilNotBelongException(getId(), group);
         }
     }
 
@@ -153,9 +153,15 @@ public class Pupil extends BaseEntity {
         MALE, FEMALE
     }
 
-    public static class BadGivenIdException extends BadRequest {
-        public BadGivenIdException(String message){
-            super(message);
+    public static class GivenIdContainsProhibitedCharsException extends Exception {
+        public GivenIdContainsProhibitedCharsException(){
+            super("Given id must contain only digits.");
+        }
+    }
+
+    public static class GivenIdIsNotValidException extends Exception {
+        public GivenIdIsNotValidException(){
+            super("Given id is not valid.");
         }
     }
 }

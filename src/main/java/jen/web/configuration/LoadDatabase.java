@@ -1,11 +1,5 @@
 package jen.web.configuration;
 
-import io.jenetics.BitGene;
-import io.jenetics.Phenotype;
-import io.jenetics.engine.Engine;
-import io.jenetics.engine.EvolutionResult;
-import io.jenetics.engine.Limits;
-import jen.web.engine.PlaceEngine;
 import jen.web.entity.*;
 import jen.web.service.GroupService;
 import jen.web.service.PlacementService;
@@ -47,7 +41,7 @@ public class LoadDatabase {
             createAttributeValues();
             createPlacements();
             addPreferences();
-            createPlacementResult(); // result is printed here, will change it after the service will be ready
+            //createPlacementResult();
 
 
             // print
@@ -73,6 +67,10 @@ public class LoadDatabase {
             System.out.println("Prefs:");
             System.out.println(groupService.all().get(0).getPreferences());
 
+//            System.out.println("Result:");
+//            PlacementResult placementResult = placementService.getOr404(1L).getResults();
+//            System.out.println(placementResult);
+//            placementResult.printClassInfo();
         };
     }
 
@@ -90,7 +88,7 @@ public class LoadDatabase {
         ))));
     }
 
-    private void createPupils(){
+    private void createPupils() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
         logger.info("Preloading " + pupilService.add(
                 new Pupil("204054845", "Gal", "Yeshua", Pupil.Gender.MALE, LocalDate.of(1992, 7, 28))
         ));
@@ -113,14 +111,18 @@ public class LoadDatabase {
         logger.info("Preloading " + groupService.updateById(group.getId(), group));
     }
 
-    private void createAttributeValues(){
+    private void createAttributeValues() throws Group.PupilNotBelongException {
         Group group = groupService.getOr404(1L);
         Template template = group.getTemplate();
 
         pupilService.all().forEach(pupil -> {
             Map<Long, Double> attributeValues = new HashMap<>(template.getAttributes().size());
             template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
-            pupilService.addAttributeValues(pupil, group, attributeValues);
+            try {
+                pupilService.addAttributeValues(pupil, group, attributeValues);
+            } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         pupilService.removeAttributeValues(pupilService.all().get(0), group, Set.of(1L));
@@ -131,7 +133,7 @@ public class LoadDatabase {
         logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
     }
 
-    private void addPreferences() throws Preference.SamePupilException {
+    private void addPreferences() throws Preference.SamePupilException, Group.PupilNotBelongException {
         Group group = groupService.all().get(0);
         Pupil pupil1 = pupilService.getOr404(1L);
         Pupil pupil2 = pupilService.getOr404(2L);
@@ -144,24 +146,6 @@ public class LoadDatabase {
 
     private void createPlacementResult(){
         Placement placement = placementService.all().get(0);
-
-        PlaceEngine placeEngine = new PlaceEngine(placement);
-        Engine<BitGene, Double> engine = placeEngine.getEngine();
-
-        final Phenotype<BitGene, Double> best = engine
-                .stream()
-                .limit(Limits.bySteadyFitness(7))
-                .limit(100)
-                .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
-                .collect(EvolutionResult.toBestPhenotype());
-
-        PlacementResult placementResult = placeEngine.decode(best.genotype());
-
-        System.out.println("Result:");
-        System.out.println(placementResult);
-        placementResult.printClassInfo();
-        System.out.println("is valid: " + PlaceEngine.isValid(best.genotype()));
-
-        // save it from the service
+        placementService.generatePlacementResult(placement);
     }
 }

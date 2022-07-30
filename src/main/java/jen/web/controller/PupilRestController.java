@@ -4,8 +4,9 @@ import jen.web.assembler.GroupModelAssembler;
 import jen.web.assembler.PupilModelAssembler;
 import jen.web.entity.AttributeValue;
 import jen.web.entity.Group;
-import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
+import jen.web.entity.Template;
+import jen.web.exception.BadRequest;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
 import lombok.RequiredArgsConstructor;
@@ -150,12 +151,6 @@ public class PupilRestController extends BaseRestController<Pupil> {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Create attribute values of a pupil within a template.
-     *
-     * @param id the pupil ID
-     * @param groupId group ID which the pupil belongs to
-     */
     @RequestMapping(path="/{pupilId}/groups/{groupId}/attributes", method = {RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<?> updateAttributeValues(@PathVariable Long pupilId,
                                                    @PathVariable Long groupId,
@@ -163,17 +158,15 @@ public class PupilRestController extends BaseRestController<Pupil> {
         Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
-        pupilService.addAttributeValues(pupil, group, attributeValues);
-        return ResponseEntity.ok().build();
+        try {
+            pupilService.addAttributeValues(pupil, group, attributeValues);
+            return ResponseEntity.ok().build();
+
+        } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
-    /**
-     * Create attribute values of a pupil within a template.
-     *
-     * @param id the pupil ID
-     * @param groupId group ID which the pupil belongs to
-     * @param attributeIds a set of attribute ids to delete
-     */
     @DeleteMapping("/{pupilId}/groups/{groupId}/attributes")
     public ResponseEntity<?> deleteAttributeValues(@PathVariable Long pupilId,
                                                    @PathVariable Long groupId,
@@ -181,8 +174,13 @@ public class PupilRestController extends BaseRestController<Pupil> {
         Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
-        pupilService.removeAttributeValues(pupil, group, attributeIds);
-        return ResponseEntity.ok().build();
+        try {
+            pupilService.removeAttributeValues(pupil, group, attributeIds);
+            return ResponseEntity.ok().build();
+
+        } catch (Group.PupilNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @GetMapping("/{pupilId}/groups/{groupId}/attributes")
@@ -191,14 +189,16 @@ public class PupilRestController extends BaseRestController<Pupil> {
         Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
-        pupilService.getAttributeValues(pupil, group);
+        try {
+            pupilService.getAttributeValues(pupil, group);
+            Set<AttributeValue> attributeValues = pupilService.getAttributeValues(pupil, group);
 
-        Set<AttributeValue> attributeValues = pupilService.getAttributeValues(pupil, group);
-        CollectionModel<AttributeValue> allEntities = preferencesToModelCollection(pupil.getId(), group.getId(), attributeValues);
+            CollectionModel<AttributeValue> allEntities = preferencesToModelCollection(pupil.getId(), group.getId(), attributeValues);
+            return ResponseEntity.ok().body(allEntities);
 
-        return ResponseEntity
-                .ok()
-                .body(allEntities);
+        } catch (Group.PupilNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     private CollectionModel<AttributeValue> preferencesToModelCollection(Long pupilId, Long groupId, Set<AttributeValue> attributeValues){

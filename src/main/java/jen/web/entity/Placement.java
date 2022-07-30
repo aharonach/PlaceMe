@@ -7,8 +7,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Getter
@@ -25,11 +24,15 @@ public class Placement extends BaseEntity {
     @Fetch(FetchMode.JOIN)
     private Group group;
 
-    @OneToMany
-    @ToString.Exclude
-    @MapKey(name = "id")
+//    @OneToMany
+//    @ToString.Exclude
+//    @MapKey(name = "id")
+//    @JsonIgnore
+//    private Map<Long, PlacementResult> results = new HashMap<>();
+
+    @OneToMany(fetch = FetchType.EAGER)
     @JsonIgnore
-    private Map<Long, PlacementResult> results;
+    private Set<PlacementResult> results = new LinkedHashSet<>();
 
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;
@@ -50,4 +53,16 @@ public class Placement extends BaseEntity {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+//    public Pupil getResultById(Long resultId) {
+//        Optional<PlacementResult> result = results.stream()
+//                .filter(r -> r.getId().equals(resultId))
+//                .findFirst();
+//
+//        if(result.isEmpty()){
+//            throw new Group.NotBelongToGroupException("Pupil Id '" + pupilId + "' is not in '" + this.getName() + "' group.");
+//        }
+//
+//        return result.get();
+//    }
 }

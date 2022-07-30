@@ -56,11 +56,11 @@ public class Template extends BaseEntity {
         return Collections.unmodifiableList(attributes);
     }
 
-    public Attribute getAttribute(Long id) throws NotExistInTemplateException {
+    public Attribute getAttribute(Long id) throws AttributeNotBelongException {
         Optional<Attribute> attribute = attributes.stream().filter(attr -> attr.getId().equals(id)).findFirst();
 
         if(attribute.isEmpty()){
-            throw new NotExistInTemplateException("Template does not contain attribute with id: " + id);
+            throw new AttributeNotBelongException(id);
         }
 
         return attribute.get();
@@ -92,9 +92,9 @@ public class Template extends BaseEntity {
         return getClass().hashCode();
     }
 
-    public static class NotExistInTemplateException extends Exception{
-        public NotExistInTemplateException(String message){
-            super(message);
+    public static class AttributeNotBelongException extends Exception{
+        public AttributeNotBelongException(Long attributeId){
+            super("Template does not contain attribute with id: " + attributeId);
         }
     }
 }

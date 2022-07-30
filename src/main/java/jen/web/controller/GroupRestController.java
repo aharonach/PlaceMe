@@ -7,6 +7,7 @@ import jen.web.entity.Group;
 import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
 import jen.web.entity.Template;
+import jen.web.exception.BadRequest;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
 import lombok.RequiredArgsConstructor;
@@ -126,8 +127,14 @@ public class GroupRestController extends BaseRestController<Group> {
     @PutMapping("/{groupId}/preferences/{selectorId}/{SelectedId}")
     public ResponseEntity<?> addPreference(@RequestBody Preference preference) {
 
-        groupService.addPupilPreference(preference);
-        return ResponseEntity.ok().build();
+        try {
+            groupService.addPupilPreference(preference);
+            return ResponseEntity.ok().build();
+
+        } catch (Group.PupilNotBelongException | Preference.SamePupilException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
     }
 
     @DeleteMapping("/{groupId}/preferences/{selectorId}/{SelectedId}")

@@ -1,7 +1,6 @@
 package jen.web.service;
 
 import jen.web.entity.*;
-import jen.web.exception.BadRequest;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotAcceptable;
 import jen.web.exception.NotFound;
@@ -67,6 +66,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         Group group = getOr404(id);
         verifyGroupNotAssociated(group);
@@ -81,20 +81,17 @@ public class GroupService implements EntityService<Group> {
         return groupRepository.getAllByIdIn(ids);
     }
 
-    public void addPupilPreference(Preference preference){
-        try {
-            Group group = preference.getGroup();
-            Pupil selector = group.getPupilById(preference.getSelectorSelectedId().getSelectorId());
-            Pupil selected = group.getPupilById(preference.getSelectorSelectedId().getSelectedId());
-            group.addPreference(selector, selected, preference.getIsSelectorWantToBeWithSelected());
+    @Transactional
+    public void addPupilPreference(Preference preference) throws Group.PupilNotBelongException, Preference.SamePupilException {
+        Group group = preference.getGroup();
+        Pupil selector = group.getPupilById(preference.getSelectorSelectedId().getSelectorId());
+        Pupil selected = group.getPupilById(preference.getSelectorSelectedId().getSelectedId());
+        group.addPreference(selector, selected, preference.getIsSelectorWantToBeWithSelected());
 
-            preferenceRepository.saveAllAndFlush(group.getPreferences());
-
-        } catch (Group.NotBelongToGroupException | Preference.SamePupilException e) {
-            throw new BadRequest(e.getMessage());
-        }
+        preferenceRepository.saveAllAndFlush(group.getPreferences());
     }
 
+    @Transactional
     public void deletePupilPreferences(Preference preference) {
         Group group = preference.getGroup();
         Long selectorId = preference.getSelectorSelectedId().getSelectorId();
@@ -105,12 +102,14 @@ public class GroupService implements EntityService<Group> {
         preferenceRepository.deleteAllById(selectorSelectedIds);
     }
 
+    @Transactional
     public void deletePupilPreferences(Pupil pupil, Group group){
         Set<SelectorSelectedId> selectorSelectedIds = group.getAllPreferencesForPupil(pupil.getId())
                 .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
         preferenceRepository.deleteAllById(selectorSelectedIds);
     }
 
+    @Transactional
     public void deleteAllPreferencesFromGroup(Group group){
         Set<SelectorSelectedId> selectorSelectedIds = group.getPreferences().stream()
                 .map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
@@ -121,15 +120,22 @@ public class GroupService implements EntityService<Group> {
         return group.getAllPreferencesForPupil(pupil.getId());
     }
 
+    @Transactional
     public void RemoveAllPupilsFromGroup(Group group){
         group.getPupils().forEach(pupil -> pupil.removeFromGroup(group));
         pupilRepository.saveAll(group.getPupils());
     }
 
-    private void verifyGroupNotAssociated(Group group){
+    private void verifyGroupNotAssociated(Group group) throws GroupIsAssociatedException {
         if(group.getPlacements().size() > 0){
             Placement placement = group.getPlacements().stream().findFirst().get();
-            throw new NotAcceptable("Group is associated with Placement " + placement.getId() + " (" + placement.getName() + ")");
+            throw new GroupIsAssociatedException(placement);
+        }
+    }
+
+    public static class GroupIsAssociatedException extends NotAcceptable {
+        public GroupIsAssociatedException(Placement placement){
+            super("Group is associated with Placement " + placement.getId() + " (" + placement.getName() + ")");
         }
     }
 }

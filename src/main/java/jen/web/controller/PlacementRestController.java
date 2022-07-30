@@ -60,7 +60,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
     //@GetMapping("/{id}/start")
     public ResponseEntity<?> startPlacement(@PathVariable Long id) {
         Placement placement = service.getOr404(id);
-        PlacementResult placementResult = service.startPlacement(placement);
+        PlacementResult placementResult = service.generatePlacementResult(placement);
 
         return ResponseEntity
                 .ok()

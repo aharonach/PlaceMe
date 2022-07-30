@@ -59,6 +59,7 @@ public class TemplateService implements EntityService<Template> {
         templateRepository.delete(template);
     }
 
+    // @todo: handle it (all the section)
     // handle attributes
     public Template deleteAttributeForTemplateById(Long templateId, Long attributeId){
         Template template = getOr404(templateId);
