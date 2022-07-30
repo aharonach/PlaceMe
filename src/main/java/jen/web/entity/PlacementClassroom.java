@@ -35,15 +35,11 @@ public class PlacementClassroom extends BaseEntity {
     @JsonIgnore
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
-    @JsonIgnore
-    @ToString.Exclude
-    private transient List<Long> pupilIds;
 
     public PlacementClassroom(List<Pupil> pupils, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
         this.pupils = pupils;
         this.connectionsToInclude = connectionsToInclude;
         this.connectionsToExclude = connectionsToExclude;
-        pupilIds = pupils.stream().map(Pupil::getId).toList();
     }
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
@@ -82,13 +78,18 @@ public class PlacementClassroom extends BaseEntity {
         return pupils.stream().filter(p -> p.getGender()==gender).count();
     }
 
+    @JsonIgnore
+    private List<Long> getPupilIds(){
+        return pupils.stream().map(Pupil::getId).toList();
+    }
+
     public int getNumberOfWrongConnectionsToInclude(){
         int wrongConnections = 0;
         Map<Long, Set<Long>> connectionsMap = connectionsToInclude.getValues();
 
         for(Pupil pupil : pupils){
             if(connectionsMap.containsKey(pupil.getId())){
-                long numOfIncludedPupil = connectionsMap.get(pupil.getId()).stream().filter(pupilIds::contains).count();
+                long numOfIncludedPupil = connectionsMap.get(pupil.getId()).stream().filter(getPupilIds()::contains).count();
                 if(numOfIncludedPupil < 1){
                     wrongConnections++;
                 }
@@ -103,7 +104,7 @@ public class PlacementClassroom extends BaseEntity {
 
         for(Pupil pupil : pupils){
             if(connectionsMap.containsKey(pupil.getId())){
-                wrongConnections += connectionsMap.get(pupil.getId()).stream().filter(pupilIds::contains).count();
+                wrongConnections += connectionsMap.get(pupil.getId()).stream().filter(getPupilIds()::contains).count();
             }
         }
         return wrongConnections;
