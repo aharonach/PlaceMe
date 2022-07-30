@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 const useAxios = () => {
-    const [response, setResponse] = useState([]);
+    const [response, setResponse] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [controller, setController] = useState();
@@ -25,8 +25,7 @@ const useAxios = () => {
             // console.log(res);
             setResponse(res.data);
         } catch (err) {
-            // console.log(err.message);
-            setError(err.message);
+            setError(err?.response?.data?.message ?err.response.data.message : err.message);
         } finally {
             setLoading(false);
         }

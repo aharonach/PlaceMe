@@ -12,10 +12,9 @@ function App() {
             <Routes>
                 <Route path="/" element={<Pages.Home />}></Route>
                 <Route path="/pupils" element={<Pages.Pupils />}>
-                    <Route path="" element={<Pupil.PupilsList />}></Route>
+                    <Route index element={<Pupil.PupilsList />}></Route>
                     <Route path="add" element={<Pupil.AddPupil />}></Route>
                     <Route path=":pupilId" element={<Pupil.Profile />}></Route>
-                    <Route path=":pupilId/edit" element={<Pupil.EditPupil />}></Route>
                 </Route>
                 <Route path="/groups" element={<Pages.Groups />}></Route>
                 <Route path="/templates" element={<Pages.Templates />}></Route>

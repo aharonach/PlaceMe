@@ -1,11 +1,32 @@
-import React from "react";
+import React from 'react';
 import {useForm} from "react-hook-form";
-import {useParams} from "react-router-dom";
+import HtmlForm from "../Forms/HtmlForm";
+import useAxios from "../../hooks/useAxios";
+import Api from '../../api';
+import { Alert } from 'react-bootstrap';
+import FormFields from './FormFields';
 
-export default function EditPupil() {
-    let {register, handleSubmit, watch, formState: { errors }} = useForm();
-    let { pupilId } = useParams();
+export default function EditPupil({ pupil }) {
+    const [response, error, loading, axiosFetch] = useAxios();
+
+    let methods = useForm({
+        defaultValues: {...pupil}
+    });
+
+    const onSubmit = data => {
+        axiosFetch({
+            axiosInstance: Api,
+            method: 'post',
+            url: `/pupils/${pupil.id}`,
+            requestConfig: {...data}
+        });
+    };
+
     return (
-        <p>Edit Pupil {pupilId}</p>
+        <>
+            {error && <Alert variant="danger">{error}</Alert>}
+            {response && !error && <Alert variant="success">Pupil {pupil.givenId} updated</Alert>}
+            <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading} submitLabel="Update" />
+        </>
     );
 }

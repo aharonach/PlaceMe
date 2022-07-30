@@ -4,10 +4,9 @@ import {Form} from "react-bootstrap";
 
 const FIELD_TYPES = ['text', 'email', 'tel', 'date', 'number'];
 
-export default function Input({ settings, formProps, bsProps = {} }) {
+export default function Input({ settings, formProps }) {
     const error = formProps.formState.errors[settings.id];
-
-    console.log(error);
+    const hasError = !!error;
 
     return (
         <Form.Group controlId={settings.id} className="mb-3">
@@ -18,10 +17,10 @@ export default function Input({ settings, formProps, bsProps = {} }) {
                 rules={settings.rules}
                 render={({ field }) => {
                     const type = settings.type && FIELD_TYPES.includes( settings.type ) ? settings.type : 'text';
-                    return <Form.Control type={type} {...field} {...bsProps} isInvalid={!!error} />
+                    return <Form.Control type={type} {...field} {...settings?.bsProps} isInvalid={hasError} />
                 }}
             />
-            {error && <div className="invalid-feedback">{error.message ? error.message : "Error"}</div>}
+            {hasError && <div className="invalid-feedback">{error.message ? error.message : "Error"}</div>}
             {settings.description && <Form.Text muted>{settings.description}</Form.Text>}
         </Form.Group>
     )

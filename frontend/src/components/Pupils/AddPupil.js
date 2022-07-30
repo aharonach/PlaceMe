@@ -1,9 +1,14 @@
 import React from 'react';
 import {useForm} from "react-hook-form";
-import Form from "../Form/Form";
+import HtmlForm from "../Forms/HtmlForm";
+import useAxios from "../../hooks/useAxios";
+import Api from '../../api';
+import { Alert } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
+import FormFields from "./FormFields";
 
 export default function AddPupil() {
-    const onSubmit = data => console.log(data);
+    const [pupil, error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
         defaultValues: {
@@ -11,34 +16,28 @@ export default function AddPupil() {
             firstName: '',
             lastName: '',
             birthDate: '',
+            gender: 'MALE',
         }
     });
 
-    const fields = [
-        {
-            id: 'givenId',
-            label: 'Given ID',
-            rules: { required: "This field is required." },
-        },
-        {
-            id: 'firstName',
-            label: 'First Name',
-            rules: { required: "This field is required." },
-        },
-        {
-            id: 'lastName',
-            label: 'Last Name',
-            rules: { required: "This field is required." },
-        },
-        {
-            id: 'birthDate',
-            label: 'Birth Date',
-            type: 'date',
-            rules: { required: "This field is required.", },
-        }
-    ];
+    let navigate = useNavigate();
+
+    const onSubmit = (data) => {
+        axiosFetch({
+            axiosInstance: Api,
+            method: 'put',
+            url: '/pupils',
+            requestConfig: {...data}
+        });
+    };
+
+    pupil && !error && navigate('/pupils');
 
     return (
-        <Form fields={fields} formProps={methods} submitCallback={onSubmit} />
+        <>
+            <h2>Add Pupil</h2>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading}></HtmlForm>
+        </>
     );
 }
