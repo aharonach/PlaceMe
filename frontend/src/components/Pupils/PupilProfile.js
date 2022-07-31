@@ -5,17 +5,27 @@ import Api from "../../api";
 import Loading from "../Loading";
 import {Alert, Button} from "react-bootstrap";
 import EditPupil from './EditPupil';
+import Groups from "./Groups";
 
 function PupilProfile() {
     let { pupilId } = useParams();
     const [pupil, error, loading, axiosFetch] = useAxios();
+    const [groups, errorGroups, loadingGroups, axiosFetchGroups] = useAxios();
     let navigate = useNavigate();
 
-    const getData = () => {
+    const getPupil = () => {
         axiosFetch({
             axiosInstance: Api,
             method: 'get',
             url: `/pupils/${pupilId}`,
+        });
+    }
+
+    const getGroups = () => {
+        axiosFetchGroups({
+            axiosInstance: Api,
+            method: 'get',
+            url: `/pupils/${pupilId}/groups`,
         });
     }
 
@@ -28,8 +38,11 @@ function PupilProfile() {
         !error && navigate('/pupils', { replace: true });
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => getData(), []);
+    useEffect(() => {
+        getPupil();
+        getGroups();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <>
@@ -38,8 +51,13 @@ function PupilProfile() {
             {!loading && !error && pupil &&
                 <article className="pupil">
                     <h2>{pupil.firstName} {pupil.lastName}</h2>
-                    <Button variant="danger" onClick={handleDelete}>Delete</Button>
+                    <Button variant="danger" onClick={handleDelete}>Delete Pupil</Button>
                     <EditPupil pupil={pupil} />
+
+                    {/** Groups **/}
+                    {loadingGroups && <Loading />}
+                    {!loadingGroups && errorGroups && <Alert variant="danger">{errorGroups}</Alert>}
+                    {!loadingGroups && !errorGroups && groups && <Groups pupilGroups={groups} />}
                 </article>
             }
         </>

@@ -31,7 +31,7 @@ export default function AddPupil() {
         });
     };
 
-    pupil && !error && navigate('/pupils');
+    pupil && !error && navigate(`/pupils/${pupil.id}`);
 
     return (
         <>
