@@ -66,13 +66,13 @@ public class Group extends BaseEntity {
         return Collections.unmodifiableSet(pupils);
     }
 
-    public Pupil getPupilById(Long pupilId) throws NotBelongToGroupException {
+    public Pupil getPupilById(Long pupilId) throws PupilNotBelongException {
         Optional<Pupil> pupil = pupils.stream()
                 .filter(p -> p.getId().equals(pupilId))
                 .findFirst();
 
         if(pupil.isEmpty()){
-            throw new NotBelongToGroupException("Pupil Id '" + pupilId + "' is not in '" + this.getName() + "' group.");
+            throw new PupilNotBelongException(pupilId, this);
         }
 
         return pupil.get();
@@ -109,9 +109,9 @@ public class Group extends BaseEntity {
         return getClass().hashCode();
     }
 
-    public static class NotBelongToGroupException extends Exception{
-        public NotBelongToGroupException(String message){
-            super(message);
+    public static class PupilNotBelongException extends Exception {
+        public PupilNotBelongException(Long pupilId, Group group){
+            super("Pupil Id '" + pupilId + "' is not in '" + group.getName() + "' group.");
         }
     }
 }

@@ -30,6 +30,7 @@ public class Preference {
         if(selector.getId().equals(selected.getId())){
             throw new SamePupilException();
         }
+
         this.selectorSelectedId.setSelectorId(selector.getId());
         this.selectorSelectedId.setSelectedId(selected.getId());
         this.isSelectorWantToBeWithSelected = isSelectorWantToBeWithSelected;
@@ -49,7 +50,7 @@ public class Preference {
         return Objects.hash(selectorSelectedId);
     }
 
-    public static class SamePupilException extends Exception{
+    public static class SamePupilException extends Exception {
         public SamePupilException(){
             super("Selector pupil cannot be equal to selected pupil");
         }

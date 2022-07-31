@@ -33,7 +33,7 @@ public class PupilService implements EntityService<Pupil>{
             throw new EntityAlreadyExists("Pupil with Id '" + id + "' already exists.");
         }
 
-        validateGivenId(pupil.getGivenId());
+        validateGivenIdNotExists(pupil.getGivenId());
         return pupilRepository.save(pupil);
     }
 
@@ -53,8 +53,13 @@ public class PupilService implements EntityService<Pupil>{
         Pupil pupil = getOr404(id);
 
         if (!(newPupil.getGivenId() == null || pupil.getGivenId().equals(newPupil.getGivenId()))) {
-            validateGivenId(pupil.getGivenId());
-            pupil.setGivenId(newPupil.getGivenId());
+            // @todo: its not should be newPupil.getGivenId?
+            validateGivenIdNotExists(pupil.getGivenId());
+            try {
+                pupil.setGivenId(newPupil.getGivenId());
+            } catch (Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         pupil.setFirstName(newPupil.getFirstName());
@@ -84,47 +89,39 @@ public class PupilService implements EntityService<Pupil>{
         pupilRepository.delete(pupil);
     }
 
-    public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) {
+    public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) throws Group.PupilNotBelongException, Template.AttributeNotBelongException {
 
-        try {
-            for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
-                pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());
-            }
-        } catch (Group.NotBelongToGroupException | Template.NotExistInTemplateException e) {
-            throw new BadRequest(e.getMessage());
+        for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
+            pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());
         }
 
         attributeValueRepository.saveAllAndFlush(pupil.getAttributeValues());
     }
 
-    public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) {
+    public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) throws Group.PupilNotBelongException {
 
-        try {
-            Set<AttributeValue> attributeValues = pupil.getAttributeValues(group, attributeIds);
-            attributeValueRepository.deleteAll(attributeValues);
+        Set<AttributeValue> attributeValues = pupil.getAttributeValues(group, attributeIds);
+        attributeValueRepository.deleteAll(attributeValues);
 
-        }  catch (Group.NotBelongToGroupException e) {
-            throw new BadRequest(e.getMessage());
-        }
     }
 
-    public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) {
+    public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) throws Group.PupilNotBelongException {
 
-        try {
-            Set<AttributeValue> attributeValues = pupil.getAttributeValues(group);
-            return attributeValues;
+        Set<AttributeValue> attributeValues = pupil.getAttributeValues(group);
+        return attributeValues;
 
-        }  catch (Group.NotBelongToGroupException e) {
-            throw new BadRequest(e.getMessage());
-        }
     }
 
-    public boolean pupilExists(String givenId) {
+    public boolean isPupilExists(String givenId) {
         return givenId != null && pupilRepository.existsByGivenId(givenId);
     }
 
-    private void validateGivenId(String givenId){
-        if(pupilExists(givenId)){
+    private void validateGivenIdNotExists(String givenId){
+        if(givenId == null){
+            throw new BadRequest("given ID cannot be null");
+        }
+
+        if(isPupilExists(givenId)){
             throw new BadRequest("pupil with given ID " + givenId + " already exists");
         }
     }

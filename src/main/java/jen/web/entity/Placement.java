@@ -7,8 +7,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Getter
@@ -25,11 +24,10 @@ public class Placement extends BaseEntity {
     @Fetch(FetchMode.JOIN)
     private Group group;
 
-    @OneToMany
-    @ToString.Exclude
-    @MapKey(name = "id")
+    @OneToMany(fetch = FetchType.EAGER)
     @JsonIgnore
-    private Map<Long, PlacementResult> results;
+    @ToString.Exclude
+    private Set<PlacementResult> results = new LinkedHashSet<>();
 
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;
@@ -49,5 +47,23 @@ public class Placement extends BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public PlacementResult getResultById(Long resultId) throws ResultNotExistsException {
+        Optional<PlacementResult> result = results.stream()
+                .filter(r -> r.getId().equals(resultId))
+                .findFirst();
+
+        if(result.isEmpty()){
+            throw new ResultNotExistsException(resultId);
+        }
+
+        return result.get();
+    }
+
+    public static class ResultNotExistsException extends Exception {
+        public ResultNotExistsException(Long resutlId){
+            super("Placement does not have result with Id '" + resutlId + "'.");
+        }
     }
 }

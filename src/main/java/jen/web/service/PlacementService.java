@@ -12,12 +12,14 @@ import jen.web.entity.PlacementResult;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
+import jen.web.repository.PlacementClassroomRepository;
 import jen.web.repository.PlacementRepository;
 import jen.web.repository.PlacementResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,9 +33,12 @@ public class PlacementService implements EntityService<Placement> {
 
     private final PlacementResultRepository placementResultRepository;
 
+    private final PlacementClassroomRepository placementClassroomRepository;
+
     private final GroupRepository groupRepository;
 
     @Override
+    @Transactional
     public Placement add(Placement placement) {
         Long id = placement.getId();
         if (id != null && placementRepository.existsById(id)) {
@@ -67,6 +72,7 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         Placement placement = getOr404(id);
         Group group = placement.getGroup();
@@ -77,20 +83,27 @@ public class PlacementService implements EntityService<Placement> {
         placementRepository.delete(placement);
     }
 
-    public void addPlacementResult(Placement placement, PlacementResult placementResult){
+    @Transactional
+    public void savePlacementResult(Placement placement, PlacementResult placementResult){
         placementResult.setPlacement(placement);
         PlacementResult savedResult = placementResultRepository.save(placementResult);
 
-        placement.getResults().put(savedResult.getId(), savedResult);
+        savedResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(savedResult));
+        placementClassroomRepository.saveAll(savedResult.getClasses());
+
+        placement.getResults().add(savedResult);
+        //placement.getResults().put(savedResult.getId(), savedResult);
+
         placementRepository.save(placement);
     }
 
+    //@Transactional
 //    public void deletePlacementResultById(Long id, Long resultId){
 //        Placement placement = getOr404(id);
 //        placementResultRepository.delete(placement.getResults().get(resultId));
 //    }
 
-    public PlacementResult startPlacement(Placement placement) {
+    public PlacementResult generatePlacementResult(Placement placement) {
         PlaceEngine placeEngine = new PlaceEngine(placement);
         Engine<BitGene, Double> engine = placeEngine.getEngine();
 
@@ -102,7 +115,9 @@ public class PlacementService implements EntityService<Placement> {
                 .collect(EvolutionResult.toBestPhenotype());
 
         PlacementResult placementResult = placeEngine.decode(best.genotype());
-        addPlacementResult(placement, placementResult);
+        System.out.println("Placement result is valid: " + PlaceEngine.isValid(best.genotype()));
+
+        savePlacementResult(placement, placementResult);
         return placementResult;
     }
 }

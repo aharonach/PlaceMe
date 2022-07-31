@@ -1,11 +1,14 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jen.web.dto.PupilsConnectionsDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import java.util.HashMap;
@@ -20,13 +23,20 @@ import java.util.Set;
 public class PlacementClassroom extends BaseEntity {
     private String name;
     @ManyToOne
-    //@JsonIgnore
+    @JoinColumn
+    @JsonIgnore
+    @ToString.Exclude
     private PlacementResult placementResult;
     @ManyToMany
     private List<Pupil> pupils;
+    @JsonIgnore
+    @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToInclude = new PupilsConnectionsDto(new HashMap<>());
+    @JsonIgnore
+    @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
-
+    @JsonIgnore
+    @ToString.Exclude
     private transient List<Long> pupilIds;
 
     public PlacementClassroom(List<Pupil> pupils, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
@@ -63,10 +73,6 @@ public class PlacementClassroom extends BaseEntity {
     public double getSumScoreOfPupils(){
         return pupils.stream().mapToDouble(Pupil::getPupilScore).sum();
     }
-
-//    public double getSumMaxScoreOfPupils(){
-//        return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
-//    }
 
     public long getNumOfPupils(){
         return pupils.size();

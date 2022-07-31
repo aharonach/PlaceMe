@@ -1,13 +1,18 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @Table(name = "placement_results")
 public class PlacementResult extends BaseEntity {
@@ -18,8 +23,17 @@ public class PlacementResult extends BaseEntity {
     @JoinColumn(name = "placement_id")
     private Placement placement;
 
-    @OneToMany(mappedBy = "placementResult")
-    private List<PlacementClassroom> classes;
+    @ToString.Exclude
+    @JsonIgnore
+    private transient List<PlacementClassroom> classes = new ArrayList<>(); // list is needed for the algorithm
+
+    @Getter(value = AccessLevel.NONE)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "placementResult")
+    private Set<PlacementClassroom> classesToSave; // set is better for hibernate
+
+    public Set<PlacementClassroom> getClasses() {
+        return new HashSet<>(classes);
+    }
 
     public PlacementResult(List<PlacementClassroom> classes){
         this.classes = classes;
@@ -31,7 +45,6 @@ public class PlacementResult extends BaseEntity {
         return getSumOfDeltasBetweenNumOfPupils() * 10
                 + getSumOfDeltasBetweenPupilsScores() * 15
                 + getSumOfDeltasBetweenClassScores() * 10;
-
 
 //        return getPercentageOfPupilsNumber() * 0.15
 //                + getPercentageOfClassScores() * 0.25
@@ -92,25 +105,4 @@ public class PlacementResult extends BaseEntity {
 //
 //        return (scoreOfAllPupils / maxScoreOfAllPupils) * 100;
 //    }
-
-
-    public void printClassInfo(){
-        getClasses().forEach(classInfo -> {
-            System.out.print("[Pupils: " + classInfo.getNumOfPupils() + " (Males: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.MALE) + " ,Females: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.FEMALE) + " ,Delta: " + classInfo.getDeltaBetweenMalesAndFemales() + ") ");
-            System.out.print("Pupils Score: " + classInfo.getSumScoreOfPupils() + " Class Score: " + classInfo.getClassScore() + " ");
-            System.out.print("Include is OK: " + (classInfo.getNumberOfWrongConnectionsToInclude() == 0) + ", ");
-            System.out.print("Exclude is OK: " + (classInfo.getNumberOfWrongConnectionsToExclude() == 0));
-            System.out.print("] | ");
-            System.out.println(classInfo.getPupils());
-        });
-    }
-    @Override
-    public String toString() {
-        return "PlacementResult{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", placement=" + placement +
-                ", classes=" + classes +
-                '}';
-    }
 }
