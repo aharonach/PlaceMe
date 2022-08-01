@@ -37,8 +37,8 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @Override
     @GetMapping("/{templateId}")
-    public ResponseEntity<?> get(@PathVariable Long id) {
-        EntityModel<Template> entity = assembler.toModel(service.getOr404(id));
+    public ResponseEntity<?> get(@PathVariable Long templateId) {
+        EntityModel<Template> entity = assembler.toModel(service.getOr404(templateId));
 
         return ResponseEntity
                 .ok()
@@ -57,8 +57,8 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @Override
     @PostMapping("/{templateId}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Template updatedRecord) {
-        EntityModel<Template> entity = assembler.toModel(service.updateById(id, updatedRecord));
+    public ResponseEntity<?> update(@PathVariable Long templateId, @RequestBody Template updatedRecord) {
+        EntityModel<Template> entity = assembler.toModel(service.updateById(templateId, updatedRecord));
 
         return ResponseEntity
                 .ok()
@@ -67,8 +67,8 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @Override
     @DeleteMapping("/{templateId}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        service.deleteById(id);
+    public ResponseEntity<?> delete(@PathVariable Long templateId) {
+        service.deleteById(templateId);
         return ResponseEntity.ok().build();
     }
 
