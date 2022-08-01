@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { LinkContainer } from 'react-router-bootstrap'
 import {Outlet} from "react-router-dom";
 
-function Pupils() {
+export default function Pupils() {
     return (
         <main>
             <h1>Pupils</h1>
@@ -12,5 +12,3 @@ function Pupils() {
         </main>
     );
 }
-
-export default Pupils;

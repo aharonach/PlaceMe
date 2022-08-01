@@ -4,6 +4,7 @@ import Header from "./layouts/Header";
 import Footer from "./layouts/Footer";
 import * as Pages from './pages';
 import * as Pupil from "./components/Pupils";
+import * as Group from "./components/Groups";
 
 function App() {
     return (
@@ -16,7 +17,11 @@ function App() {
                     <Route path="add" element={<Pupil.AddPupil />}></Route>
                     <Route path=":pupilId" element={<Pupil.Profile />}></Route>
                 </Route>
-                <Route path="/groups" element={<Pages.Groups />}></Route>
+                <Route path="/groups" element={<Pages.Groups />}>
+                    <Route index element={<Group.GroupsList />} />
+                    <Route path="add" element={<Group.AddGroup />} />
+                    <Route path=":groupId" element={<Group.GroupPage />} />
+                </Route>
                 <Route path="/templates" element={<Pages.Templates />}></Route>
                 <Route path="/attributes" element={<Pages.Attributes />}></Route>
                 <Route path="/placements" element={<Pages.Placements />}></Route>
