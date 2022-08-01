@@ -2,19 +2,10 @@ package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jen.web.dto.PupilsConnectionsDto;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.persistence.*;
+import java.util.*;
 
 @Entity
 @Getter
@@ -27,8 +18,16 @@ public class PlacementClassroom extends BaseEntity {
     @JsonIgnore
     @ToString.Exclude
     private PlacementResult placementResult;
-    @ManyToMany
-    private List<Pupil> pupils;
+
+    @ToString.Exclude
+    @JsonIgnore
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    private transient List<Pupil> pupilsForAlgorithm;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Pupil> pupils;
+
     @JsonIgnore
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToInclude = new PupilsConnectionsDto(new HashMap<>());
@@ -36,8 +35,10 @@ public class PlacementClassroom extends BaseEntity {
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
 
-    public PlacementClassroom(List<Pupil> pupils, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
-        this.pupils = pupils;
+    public PlacementClassroom(List<Pupil> pupilsForAlgorithm, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
+        this.pupilsForAlgorithm = pupilsForAlgorithm;
+        this.pupils = new HashSet<>(this.pupilsForAlgorithm);
+
         this.connectionsToInclude = connectionsToInclude;
         this.connectionsToExclude = connectionsToExclude;
     }
@@ -108,5 +109,9 @@ public class PlacementClassroom extends BaseEntity {
             }
         }
         return wrongConnections;
+    }
+
+    public void removePupilFromClass(Pupil pupil){
+        pupils.remove(pupil);
     }
 }
