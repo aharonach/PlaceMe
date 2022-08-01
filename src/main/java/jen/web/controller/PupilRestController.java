@@ -130,7 +130,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(path="/{pupilId}/groups/{groupId}/attributes", method = {RequestMethod.POST, RequestMethod.PUT})
+    @PostMapping(path="/{pupilId}/groups/{groupId}/attributes")
     public ResponseEntity<?> updateAttributeValues(@PathVariable Long pupilId,
                                                    @PathVariable Long groupId,
                                                    @RequestBody Map<Long, Double> attributeValues) {
