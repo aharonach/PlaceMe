@@ -111,7 +111,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
         Pupil pupil = pupilService.getOr404(pupilId);
 
         pupil.setGroups(groupService.getByIds(groupIds));
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupilService.updateById(pupilId, pupil).getGroups());
+        Pupil updatedPupil = pupilService.updateById(pupilId, pupil);
+        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(updatedPupil.getGroups());
 
         return ResponseEntity
                 .ok()

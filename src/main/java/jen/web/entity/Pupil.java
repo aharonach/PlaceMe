@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class Pupil extends BaseEntity {
     public static final String DIGITS_REGEX = "\\d+";
 
-    @NaturalId
+    @NaturalId(mutable=true)
     private String givenId;
     private String firstName;
     private String lastName;

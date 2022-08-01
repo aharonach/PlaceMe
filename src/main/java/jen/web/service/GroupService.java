@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,7 +79,13 @@ public class GroupService implements EntityService<Group> {
     }
 
     public Set<Group> getByIds(Set<Long> ids) {
-        return groupRepository.getAllByIdIn(ids);
+        Set<Group> groups = new HashSet<>(ids.size());
+        for(Long id : ids){
+            groups.add(getOr404(id));
+        }
+        return groups;
+        // @todo: decide what to do, this line gets the same result but its not throwing exception for non existing ids
+        //return groupRepository.getAllByIdIn(ids);
     }
 
     @Transactional

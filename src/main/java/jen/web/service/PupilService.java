@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +24,6 @@ public class PupilService implements EntityService<Pupil>{
     private final PupilRepository pupilRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final GroupService groupService;
-
-    private final PlacementService placementService;
 
 
     @Override
@@ -62,13 +61,17 @@ public class PupilService implements EntityService<Pupil>{
         Pupil pupil = getOr404(id);
 
         if (!(newPupil.getGivenId() == null || pupil.getGivenId().equals(newPupil.getGivenId()))) {
-            // @todo: its not should be newPupil.getGivenId?
-            validateGivenIdNotExists(pupil.getGivenId());
+            validateGivenIdNotExists(newPupil.getGivenId());
             try {
                 pupil.setGivenId(newPupil.getGivenId());
             } catch (Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        Set<Long> newGroupIds = newPupil.getGroups().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        if(!newGroupIds.isEmpty()){
+            pupil.setGroups(groupService.getByIds(newGroupIds));
         }
 
         pupil.setFirstName(newPupil.getFirstName());
