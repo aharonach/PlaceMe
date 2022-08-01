@@ -47,9 +47,9 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
 
     @Override
-    @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable Long id) {
-        EntityModel<Pupil> entity = pupilAssembler.toModel(pupilService.getOr404(id));
+    @GetMapping("/{pupilId}")
+    public ResponseEntity<?> get(@PathVariable Long pupilId) {
+        EntityModel<Pupil> entity = pupilAssembler.toModel(pupilService.getOr404(pupilId));
 
         return ResponseEntity
                 .ok()
@@ -67,9 +67,9 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
 
     @Override
-    @PostMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Pupil updatedRecord) {
-        EntityModel<Pupil> entity = pupilAssembler.toModel(pupilService.updateById(id, updatedRecord));
+    @PostMapping("/{pupilId}")
+    public ResponseEntity<?> update(@PathVariable Long pupilId, @RequestBody Pupil updatedRecord) {
+        EntityModel<Pupil> entity = pupilAssembler.toModel(pupilService.updateById(pupilId, updatedRecord));
 
         return ResponseEntity
                 .ok()
@@ -77,76 +77,54 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
 
     @Override
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        pupilService.deleteById(id);
+    @DeleteMapping("/{pupilId}")
+    public ResponseEntity<?> delete(@PathVariable Long pupilId) {
+        pupilService.deleteById(pupilId);
         return ResponseEntity.ok().build();
     }
-
-    /**
-     * Get pupil's group.
-     *
-     * @param id the pupil ID
-     * @return List of pupil groups
-     */
-    @GetMapping("/{id}/groups")
-    public ResponseEntity<?> getPupilGroups(@PathVariable Long id) {
-        Pupil pupil = pupilService.getOr404(id);
+    
+    @GetMapping("/{pupilId}/groups")
+    public ResponseEntity<?> getPupilGroups(@PathVariable Long pupilId) {
+        Pupil pupil = pupilService.getOr404(pupilId);
         CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupil.getGroups());
 
         return ResponseEntity
                 .ok()
                 .body(allEntities);
     }
-
-    /**
-     * Delete a group from pupil.
-     *
-     * @param id pupil ID
-     */
-    @PutMapping("/{id}/groups")
-    public ResponseEntity<?> assignGroupForPupil(@PathVariable Long id, @RequestBody Long groupId) {
-        Pupil pupil = pupilService.getOr404(id);
+    
+    @PutMapping("/{pupilId}/groups")
+    public ResponseEntity<?> assignGroupForPupil(@PathVariable Long pupilId, @RequestBody Long groupId) {
+        Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
         pupil.addToGroup(group);
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupilService.updateById(id, pupil).getGroups());
+        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupilService.updateById(pupilId, pupil).getGroups());
 
         return ResponseEntity
                 .ok()
                 .body(allEntities);
     }
-
-    /**
-     * Assign pupil to a group.
-     *
-     * @param id the pupil ID
-     * @param groupIds list of group IDs
-     */
-    @PostMapping(path = "/{id}/groups")
-    public ResponseEntity<?> updatePupilGroup(@PathVariable Long id, @RequestBody Set<Long> groupIds) {
-        Pupil pupil = pupilService.getOr404(id);
+    
+    @PostMapping(path = "/{pupilId}/groups")
+    public ResponseEntity<?> updatePupilGroup(@PathVariable Long pupilId, @RequestBody Set<Long> groupIds) {
+        Pupil pupil = pupilService.getOr404(pupilId);
 
         pupil.setGroups(groupService.getByIds(groupIds));
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupilService.updateById(id, pupil).getGroups());
+        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupilService.updateById(pupilId, pupil).getGroups());
 
         return ResponseEntity
                 .ok()
                 .body(allEntities);
     }
-
-    /**
-     * Delete a group from pupil.
-     *
-     * @param id pupil ID
-     */
-    @DeleteMapping("/{id}/groups")
-    public ResponseEntity<?> deleteGroupFromPupil(@PathVariable Long id, @RequestBody Long groupId) {
-        Pupil pupil = pupilService.getOr404(id);
+    
+    @DeleteMapping("/{pupilId}/groups")
+    public ResponseEntity<?> deleteGroupFromPupil(@PathVariable Long pupilId, @RequestBody Long groupId) {
+        Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
         pupil.removeFromGroup(group);
-        pupilService.updateById(id, pupil);
+        pupilService.updateById(pupilId, pupil);
 
         return ResponseEntity.ok().build();
     }
