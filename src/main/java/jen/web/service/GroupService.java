@@ -7,6 +7,7 @@ import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
 import jen.web.repository.PupilRepository;
+import jen.web.repository.TemplateRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ public class GroupService implements EntityService<Group> {
     private final PreferenceRepository preferenceRepository;
 
     private final PupilRepository pupilRepository;
+    private final TemplateRepository templateRepository;
 
     @Override
     @Transactional
@@ -57,12 +59,15 @@ public class GroupService implements EntityService<Group> {
     @Transactional
     public Group updateById(Long id, Group newGroup) {
         Group group = getOr404(id);
+        Template template = newGroup.getTemplate();
 
         group.setName(newGroup.getName());
         group.setDescription(newGroup.getDescription());
-        group.setTemplate(newGroup.getTemplate());
         group.setPupils(newGroup.getPupils());
+        group.setTemplate(template);
 
+        template.getGroups().add(group);
+        templateRepository.save(template);
         return groupRepository.save(group);
     }
 

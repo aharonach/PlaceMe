@@ -58,7 +58,8 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PostMapping("/{templateId}")
     public ResponseEntity<?> update(@PathVariable Long templateId, @RequestBody Template updatedRecord) {
-        EntityModel<Template> entity = assembler.toModel(service.updateById(templateId, updatedRecord));
+        Template updatedTemplate = service.updateById(templateId, updatedRecord);
+        EntityModel<Template> entity = assembler.toModel(updatedTemplate);
 
         return ResponseEntity
                 .ok()

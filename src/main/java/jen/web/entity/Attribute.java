@@ -1,5 +1,6 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({@JsonSubTypes.Type(value = RangeAttribute.class, name = "range")})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "attributes")
 public abstract class Attribute extends BaseEntity {
     protected String name;
