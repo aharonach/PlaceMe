@@ -5,12 +5,13 @@ import useAxios from "../../hooks/useAxios";
 import Api from '../../api';
 import { Alert } from 'react-bootstrap';
 import FormFields from './FormFields';
+import {getDefaultValuesByFields} from "../../utils";
 
 export default function EditPupil({ pupil }) {
     const [response, error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
-        defaultValues: {...pupil}
+        defaultValues: { ...getDefaultValuesByFields(FormFields(), pupil) }
     });
 
     const onSubmit = data => {
@@ -18,7 +19,7 @@ export default function EditPupil({ pupil }) {
             axiosInstance: Api,
             method: 'post',
             url: `/pupils/${pupil.id}`,
-            requestConfig: {...data}
+            data: {...data}
         });
     };
 

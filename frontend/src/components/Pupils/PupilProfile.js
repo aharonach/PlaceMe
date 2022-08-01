@@ -1,16 +1,16 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useParams, useNavigate} from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
 import Loading from "../Loading";
 import {Alert, Button} from "react-bootstrap";
 import EditPupil from './EditPupil';
-import Groups from "./Groups";
+import EditGroups from "./EditGroups";
 
 function PupilProfile() {
     let { pupilId } = useParams();
     const [pupil, error, loading, axiosFetch] = useAxios();
-    const [groups, errorGroups, loadingGroups, axiosFetchGroups] = useAxios();
+    const [deleted, setDeleted] = useState(false);
     let navigate = useNavigate();
 
     const getPupil = () => {
@@ -21,26 +21,21 @@ function PupilProfile() {
         });
     }
 
-    const getGroups = () => {
-        axiosFetchGroups({
-            axiosInstance: Api,
-            method: 'get',
-            url: `/pupils/${pupilId}/groups`,
-        });
-    }
-
     const handleDelete = () => {
         axiosFetch({
             axiosInstance: Api,
             method: 'delete',
             url: `/pupils/${pupilId}`,
         });
-        !error && navigate('/pupils', { replace: true });
+        setDeleted(true);
     }
 
     useEffect(() => {
         getPupil();
-        getGroups();
+
+        if ( deleted ) {
+            navigate('/pupils', { replace: true });
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -55,9 +50,7 @@ function PupilProfile() {
                     <EditPupil pupil={pupil} />
 
                     {/** Groups **/}
-                    {loadingGroups && <Loading />}
-                    {!loadingGroups && errorGroups && <Alert variant="danger">{errorGroups}</Alert>}
-                    {!loadingGroups && !errorGroups && groups && <Groups pupilGroups={groups} />}
+                    <EditGroups pupil={pupil} />
                 </article>
             }
         </>

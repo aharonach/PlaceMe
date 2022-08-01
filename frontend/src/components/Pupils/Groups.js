@@ -1,21 +1,18 @@
 import React, {useEffect} from "react";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
-// import {useParams} from "react-router-dom";
 import HtmlForm from "../Forms/HtmlForm";
 import {useForm} from "react-hook-form";
 import Loading from "../Loading";
 import {Alert} from "react-bootstrap";
-import { ExtractList, PrepareCheckboxGroup } from "../../utils";
+import { extractListFromAPI, prepareCheckboxGroup } from "../../utils";
 
-export default function Groups({ pupilGroups }) {
-    const mapCallback = PrepareCheckboxGroup('id', 'name');
-    // const { pupilId } = useParams();
+export default function Groups({ pupilGroups, onSubmit, updated }) {
     const [groups, error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
         defaultValues: {
-            groups: ExtractList(pupilGroups, 'groupList', mapCallback)
+            groups: extractListFromAPI(pupilGroups, 'groupList', group => group.id.toString() )
         }
     });
 
@@ -27,16 +24,11 @@ export default function Groups({ pupilGroups }) {
         });
     };
 
-    const onSubmit = data => {
-        console.log(data);
-    };
-
-    const groupsCheckboxes = ExtractList(groups, 'groupList', mapCallback);
     const fields = [
         {
             id: 'groups',
             type: 'checkbox',
-            options: groupsCheckboxes
+            options: extractListFromAPI(groups, 'groupList', prepareCheckboxGroup('id', 'name')),
         }
     ];
 
@@ -52,6 +44,7 @@ export default function Groups({ pupilGroups }) {
             {!loading && !error && (
                 <>
                     <h3>Groups</h3>
+                    {updated && <Alert variant="success">Groups updated</Alert>}
                     <HtmlForm formProps={methods} fields={fields} submitCallback={onSubmit} submitLabel={"Update Groups"} />
                 </>
             )}

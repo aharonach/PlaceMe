@@ -11,6 +11,7 @@ const useAxios = () => {
             axiosInstance,
             method,
             url,
+            data = null,
             requestConfig = {}
         } = configObj;
 
@@ -18,22 +19,25 @@ const useAxios = () => {
             setLoading(true);
             const ctrl = new AbortController();
             setController(ctrl);
-            const res = await axiosInstance[method.toLowerCase()](url, {
-                ...requestConfig,
-                signal: ctrl.signal
+            const res = await axiosInstance({
+                method: method.toLowerCase(),
+                url: url,
+                data: data,
+                config: {
+                    ...requestConfig,
+                    signal: ctrl.signal
+                }
             });
             // console.log(res);
             setResponse(res.data);
         } catch (err) {
-            setError(err?.response?.data?.message ?err.response.data.message : err.message);
+            setError(err?.response?.data?.message ? err.response.data.message : err.message);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        // console.log(controller)
-
         // useEffect cleanup function
         return () => controller && controller.abort();
 

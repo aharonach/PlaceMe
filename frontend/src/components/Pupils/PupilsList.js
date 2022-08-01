@@ -4,7 +4,7 @@ import useAxios from "../../hooks/useAxios";
 import Loading from "../Loading";
 import Api from "../../api";
 import {Alert} from "react-bootstrap";
-import { ExtractList } from "../../utils";
+import { extractListFromAPI } from "../../utils";
 
 function PupilsList() {
     const [pupils, error, loading, axiosFetch] = useAxios();
@@ -36,7 +36,7 @@ function PupilsList() {
         <>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && pupils && <TableList basePath="/pupils/" items={ExtractList(pupils, 'pupilList')} columns={columns} />}
+            {!loading && !error && pupils && <TableList basePath="/pupils/" items={extractListFromAPI(pupils, 'pupilList')} columns={columns} />}
         </>
     )
 }

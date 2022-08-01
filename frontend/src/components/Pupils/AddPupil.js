@@ -27,7 +27,7 @@ export default function AddPupil() {
             axiosInstance: Api,
             method: 'put',
             url: '/pupils',
-            requestConfig: {...data}
+            data: {...data}
         });
     };
 

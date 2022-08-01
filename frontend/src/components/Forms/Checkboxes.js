@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { Form } from "react-bootstrap";
 import {Controller, useController} from "react-hook-form";
 
-export default function Checkbox({ settings, formProps }) {
+export default function Checkboxes({ settings, formProps }) {
     const error = formProps.formState.errors[settings.id];
     const hasError = !!error;
 
@@ -10,7 +10,24 @@ export default function Checkbox({ settings, formProps }) {
     const control = formProps.control;
     const { field } = useController({ control, name });
 
-    const [value, setValue] = useState(Array.isArray( field.value ) ? field.value.map( v => v.value ) : [] );
+    const [value, setValue] = useState(field.value || [] );
+
+    const onChange = (e) => {
+        let valueCopy = [...value];
+
+        // update checkbox value
+        if ( e.target.checked ) {
+            ! valueCopy.includes(e.target.value) && valueCopy.push(e.target.value);
+        } else {
+            valueCopy = valueCopy.filter( val => val !== e.target.value );
+        }
+
+        // send data to react hook form
+        field.onChange(valueCopy);
+
+        // update local state
+        setValue(valueCopy);
+    };
 
     return (
         <Form.Group controlId={settings.id} className="mb-3">
@@ -22,12 +39,8 @@ export default function Checkbox({ settings, formProps }) {
                 render={({ field } ) => {
                     return (
                         <div className={hasError ? 'is-invalid' : ''}>
-                            {settings.options && settings.options.map( (option, index) => {
-                                    const checked = field.value &&
-                                        (
-                                            ( Array.isArray(field.value) && field.value.find( val => val.value === option.value ) )
-                                            || field.value === option.value
-                                        );
+                            {settings.options && settings.options.map( option => {
+                                    const checked = field.value && field.value.find( val => val === option.value.toString() );
 
                                     return (
                                         <Form.Check
@@ -35,21 +48,9 @@ export default function Checkbox({ settings, formProps }) {
                                             id={`${settings.id}-${option.value}`}
                                             type={settings.type}
                                             label={option.label}
-                                            checked={checked ? true : null}
+                                            defaultChecked={checked}
                                             {...field}
-                                            onChange={(e) => {
-                                                let valueCopy = [...value];
-
-                                                // update checkbox value
-                                                valueCopy[index] = e.target.checked ? e.target.value : null;
-                                                valueCopy = valueCopy.filter(Boolean);
-
-                                                // send data to react hook form
-                                                field.onChange(valueCopy);
-
-                                                // update local state
-                                                setValue(valueCopy);
-                                            }}
+                                            onChange={onChange}
                                             value={option.value}
                                             {...settings?.bsProps}
                                             isInvalid={hasError}
