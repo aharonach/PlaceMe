@@ -24,6 +24,8 @@ public class PupilService implements EntityService<Pupil>{
     private final AttributeValueRepository attributeValueRepository;
     private final GroupService groupService;
 
+    private final PlacementService placementService;
+
 
     @Override
     @Transactional
@@ -88,12 +90,20 @@ public class PupilService implements EntityService<Pupil>{
 
         attributeValueRepository.deleteAll(pupil.getAttributeValues());
         for(Group group : pupil.getGroups()){
+            group.getPlacements().forEach(placement -> placement.removePupilFromAllResults(pupil));
             group.removePupil(pupil);
             pupil.removeFromGroup(group);
             groupService.deletePupilPreferences(pupil, group);
         }
 
         pupilRepository.delete(pupil);
+    }
+
+    private void verifyGroupNotAssociated(Group group) throws GroupService.GroupIsAssociatedException {
+        if(group.getPlacements().size() > 0){
+            Placement placement = group.getPlacements().stream().findFirst().get();
+            throw new GroupService.GroupIsAssociatedException(placement);
+        }
     }
 
     public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) throws Group.PupilNotBelongException, Template.AttributeNotBelongException {
