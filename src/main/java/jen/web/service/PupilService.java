@@ -34,6 +34,11 @@ public class PupilService implements EntityService<Pupil>{
         }
 
         validateGivenIdNotExists(pupil.getGivenId());
+        pupil.getGroups().stream().map(BaseEntity::getId).forEach(groupId -> {
+            Group group = groupService.getOr404(groupId);
+            pupil.addToGroup(group);
+        });
+
         return pupilRepository.save(pupil);
     }
 
@@ -41,6 +46,8 @@ public class PupilService implements EntityService<Pupil>{
     public Pupil getOr404(Long id) {
         return pupilRepository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
+
+    // @todo: add method for getting pupil by given id
 
     @Override
     public List<Pupil> all() {
