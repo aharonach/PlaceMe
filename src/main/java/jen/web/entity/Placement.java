@@ -61,6 +61,14 @@ public class Placement extends BaseEntity {
         return result.get();
     }
 
+    public void removePupilFromAllResults(Pupil pupil){
+        getResults().forEach(placementResult -> {
+            placementResult.getClasses().forEach(placementClassroom -> {
+                placementClassroom.removePupilFromClass(pupil);
+            });
+        });
+    }
+
     public static class ResultNotExistsException extends Exception {
         public ResultNotExistsException(Long resutlId){
             super("Placement does not have result with Id '" + resutlId + "'.");

@@ -20,6 +20,7 @@ public class Group extends BaseEntity {
     private String name;
     private String description;
     @JsonIgnore
+    @ToString.Exclude
     @ManyToOne
     private Template template;
     @ToString.Exclude

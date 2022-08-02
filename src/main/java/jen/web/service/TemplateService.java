@@ -1,9 +1,12 @@
 package jen.web.service;
 
 import jen.web.entity.Attribute;
+import jen.web.entity.BaseEntity;
+import jen.web.entity.Group;
 import jen.web.entity.Template;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
+import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -12,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +25,8 @@ public class TemplateService implements EntityService<Template> {
     private static final Logger logger = LoggerFactory.getLogger(TemplateService.class);
 
     private final TemplateRepository templateRepository;
+
+    private final PupilService pupilService;
 
     @Override
     public Template add(Template template) {
@@ -54,8 +61,28 @@ public class TemplateService implements EntityService<Template> {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         Template template = getOr404(id);
+        Set<Long> attributeIds = template.getAttributes().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+
+        for (Long attributeId : attributeIds) {
+            deleteAttributeForTemplateById(template.getId(), attributeId);
+        }
+
+        // @todo: simplify it and remove attr values when deleting a template
+        template.getGroups().forEach(group -> {
+            group.getPupils().forEach(pupil -> {
+                try {
+                    pupilService.removeAttributeValues(pupil, group, attributeIds);
+                } catch (Group.PupilNotBelongException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            group.setTemplate(null);
+            template.getGroups().remove(group);
+        });
+
         templateRepository.delete(template);
     }
 

@@ -8,6 +8,7 @@ import io.jenetics.engine.Limits;
 import jen.web.engine.PlaceEngine;
 import jen.web.entity.Group;
 import jen.web.entity.Placement;
+import jen.web.entity.PlacementClassroom;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -78,7 +81,7 @@ public class PlacementService implements EntityService<Placement> {
         Group group = placement.getGroup();
 
         group.getPlacements().remove(placement);
-        // @todo: delete placement results
+        deleteAllPlacementResults(placement);
 
         placementRepository.delete(placement);
     }
@@ -92,16 +95,32 @@ public class PlacementService implements EntityService<Placement> {
         placementClassroomRepository.saveAll(savedResult.getClasses());
 
         placement.getResults().add(savedResult);
-        //placement.getResults().put(savedResult.getId(), savedResult);
-
         placementRepository.save(placement);
     }
 
-    //@Transactional
-//    public void deletePlacementResultById(Long id, Long resultId){
-//        Placement placement = getOr404(id);
-//        placementResultRepository.delete(placement.getResults().get(resultId));
-//    }
+    public void deleteAllPlacementResults(Placement placement) {
+        for(PlacementResult placementResult : placement.getResults()){
+            try {
+                deletePlacementResultById(placement, placementResult.getId());
+            } catch (Placement.ResultNotExistsException ignored) {
+            }
+        }
+    }
+
+    @Transactional
+    public void deletePlacementResultById(Placement placement, Long resultId) throws Placement.ResultNotExistsException {
+        PlacementResult placementResult = placement.getResultById(resultId);
+
+        placement.getResults().remove(placementResult);
+        placementResult.setPlacement(null);
+        placementResult.getClasses().forEach(placementClassroom -> {
+            placementClassroom.setPlacementResult(null);
+            placementClassroom.setPupils(new HashSet<>());
+        });
+
+        placementClassroomRepository.deleteAll(placementResult.getClasses());
+        placementResultRepository.deleteById(resultId);
+    }
 
     public PlacementResult generatePlacementResult(Placement placement) {
         PlaceEngine placeEngine = new PlaceEngine(placement);

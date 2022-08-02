@@ -85,12 +85,12 @@ public class LoadDatabase {
     private void createTemplates(){
         logger.info("Preloading " + templateService.add(new Template("template 1", "template 1 desc")));
 
-        logger.info("Preloading " + templateService.add(new Template("template 2", "template 2 desc", Arrays.asList(
+        logger.info("Preloading " + templateService.add(new Template("template 2", "template 2 desc", Set.of(
                 new RangeAttribute("attr 1", "attr 1 for template 2", 10),
                 new RangeAttribute("attr 2", "attr 2 for template 2", 20)
         ))));
 
-        logger.info("Preloading " + templateService.add(new Template("template 3", "template 3 desc", Arrays.asList(
+        logger.info("Preloading " + templateService.add(new Template("template 3", "template 3 desc", Set.of(
                 new RangeAttribute("attr_1", "attr 1 for template 3", 45),
                 new RangeAttribute("attr_2", "attr 2 for template 3", 24)
         ))));

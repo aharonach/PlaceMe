@@ -7,6 +7,7 @@ import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
 import jen.web.repository.PupilRepository;
+import jen.web.repository.TemplateRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ public class GroupService implements EntityService<Group> {
     private final PreferenceRepository preferenceRepository;
 
     private final PupilRepository pupilRepository;
+    private final TemplateRepository templateRepository;
 
     @Override
     @Transactional
@@ -56,12 +59,15 @@ public class GroupService implements EntityService<Group> {
     @Transactional
     public Group updateById(Long id, Group newGroup) {
         Group group = getOr404(id);
+        Template template = newGroup.getTemplate();
 
         group.setName(newGroup.getName());
         group.setDescription(newGroup.getDescription());
-        group.setTemplate(newGroup.getTemplate());
         group.setPupils(newGroup.getPupils());
+        group.setTemplate(template);
 
+        template.getGroups().add(group);
+        templateRepository.save(template);
         return groupRepository.save(group);
     }
 
@@ -78,7 +84,13 @@ public class GroupService implements EntityService<Group> {
     }
 
     public Set<Group> getByIds(Set<Long> ids) {
-        return groupRepository.getAllByIdIn(ids);
+        Set<Group> groups = new HashSet<>(ids.size());
+        for(Long id : ids){
+            groups.add(getOr404(id));
+        }
+        return groups;
+        // @todo: decide what to do, this line gets the same result but its not throwing exception for non existing ids
+        //return groupRepository.getAllByIdIn(ids);
     }
 
     @Transactional

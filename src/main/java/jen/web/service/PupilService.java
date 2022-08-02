@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,11 @@ public class PupilService implements EntityService<Pupil>{
         }
 
         validateGivenIdNotExists(pupil.getGivenId());
+        pupil.getGroups().stream().map(BaseEntity::getId).forEach(groupId -> {
+            Group group = groupService.getOr404(groupId);
+            pupil.addToGroup(group);
+        });
+
         return pupilRepository.save(pupil);
     }
 
@@ -41,6 +47,8 @@ public class PupilService implements EntityService<Pupil>{
     public Pupil getOr404(Long id) {
         return pupilRepository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
+
+    // @todo: add method for getting pupil by given id
 
     @Override
     public List<Pupil> all() {
@@ -53,13 +61,17 @@ public class PupilService implements EntityService<Pupil>{
         Pupil pupil = getOr404(id);
 
         if (!(newPupil.getGivenId() == null || pupil.getGivenId().equals(newPupil.getGivenId()))) {
-            // @todo: its not should be newPupil.getGivenId?
-            validateGivenIdNotExists(pupil.getGivenId());
+            validateGivenIdNotExists(newPupil.getGivenId());
             try {
                 pupil.setGivenId(newPupil.getGivenId());
             } catch (Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        Set<Long> newGroupIds = newPupil.getGroups().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        if(!newGroupIds.isEmpty()){
+            pupil.setGroups(groupService.getByIds(newGroupIds));
         }
 
         pupil.setFirstName(newPupil.getFirstName());
@@ -81,12 +93,20 @@ public class PupilService implements EntityService<Pupil>{
 
         attributeValueRepository.deleteAll(pupil.getAttributeValues());
         for(Group group : pupil.getGroups()){
+            group.getPlacements().forEach(placement -> placement.removePupilFromAllResults(pupil));
             group.removePupil(pupil);
             pupil.removeFromGroup(group);
             groupService.deletePupilPreferences(pupil, group);
         }
 
         pupilRepository.delete(pupil);
+    }
+
+    private void verifyGroupNotAssociated(Group group) throws GroupService.GroupIsAssociatedException {
+        if(group.getPlacements().size() > 0){
+            Placement placement = group.getPlacements().stream().findFirst().get();
+            throw new GroupService.GroupIsAssociatedException(placement);
+        }
     }
 
     public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) throws Group.PupilNotBelongException, Template.AttributeNotBelongException {

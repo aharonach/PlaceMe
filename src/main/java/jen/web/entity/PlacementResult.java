@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -25,18 +26,16 @@ public class PlacementResult extends BaseEntity {
 
     @ToString.Exclude
     @JsonIgnore
-    private transient List<PlacementClassroom> classes = new ArrayList<>(); // list is needed for the algorithm
-
     @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    private transient List<PlacementClassroom> classesForAlgorithm = new ArrayList<>(); // list is needed for the algorithm
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "placementResult")
-    private Set<PlacementClassroom> classesToSave; // set is better for hibernate
+    private Set<PlacementClassroom> classes; // Set is better for hibernate
 
-    public Set<PlacementClassroom> getClasses() {
-        return new HashSet<>(classes);
-    }
-
-    public PlacementResult(List<PlacementClassroom> classes){
-        this.classes = classes;
+    public PlacementResult(List<PlacementClassroom> classesForAlgorithm){
+        this.classesForAlgorithm = classesForAlgorithm;
+        this.classes = new HashSet<>(this.classesForAlgorithm);
     }
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
@@ -52,57 +51,28 @@ public class PlacementResult extends BaseEntity {
     }
 
     private double getSumOfDeltasBetweenNumOfPupils(){
-        double avgNumOfStudents = classes.stream().mapToDouble(PlacementClassroom::getNumOfPupils).sum() / classes.size();
+        double avgNumOfStudents = classesForAlgorithm.stream().mapToDouble(PlacementClassroom::getNumOfPupils).sum() / classesForAlgorithm.size();
 
-        return classes.stream()
+        return classesForAlgorithm.stream()
                 .map(classInfo -> Math.abs(classInfo.getNumOfPupils() - avgNumOfStudents))
                 .reduce(0d, Double::sum);
     }
 
     private double getSumOfDeltasBetweenClassScores(){
-        double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
-        double avgScore = scoreOfAllClasses / classes.size();
+        double scoreOfAllClasses = classesForAlgorithm.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
+        double avgScore = scoreOfAllClasses / classesForAlgorithm.size();
 
-        return classes.stream()
+        return classesForAlgorithm.stream()
                 .map(classInfo -> Math.abs(classInfo.getClassScore() - avgScore))
                 .reduce(0d, Double::sum);
     }
 
     private double getSumOfDeltasBetweenPupilsScores(){
-        double scoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumScoreOfPupils).sum();
-        double avgScore = scoreOfAllPupils / classes.size();
+        double scoreOfAllPupils = classesForAlgorithm.stream().mapToDouble(PlacementClassroom::getSumScoreOfPupils).sum();
+        double avgScore = scoreOfAllPupils / classesForAlgorithm.size();
 
-        return classes.stream()
+        return classesForAlgorithm.stream()
                 .map(classInfo -> Math.abs(classInfo.getSumScoreOfPupils() - avgScore))
                 .reduce(0d, Double::sum);
     }
-
-//    private double getPercentageOfPupilsNumber(){
-//        double numOfStudents = classes.stream().mapToDouble(PlacementClassroom::getNumOfPupils).sum();
-//        double avgNumOfStudents = numOfStudents / classes.size();
-//
-//        double deltaBetweenNumOfStudents = classes.stream()
-//                .map(placementClassroom -> Math.abs(placementClassroom.getNumOfPupils() - avgNumOfStudents))
-//                .reduce(0d, Double::sum);
-//
-//        return (deltaBetweenNumOfStudents / numOfStudents) * 100;
-//    }
-//
-//    private double getPercentageOfClassScores(){
-//        double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
-//        double avgScore = scoreOfAllClasses / classes.size();
-//
-//        double deltaBetweenClassScores = classes.stream()
-//                .map(placementClassroom -> Math.abs(placementClassroom.getClassScore() - avgScore))
-//                .reduce(0d, Double::sum);
-//
-//        return (deltaBetweenClassScores / scoreOfAllClasses) * 100;
-//    }
-//
-//    private double getPercentageOfPupilsScores(){
-//        double scoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumScoreOfPupils).sum();
-//        double maxScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumMaxScoreOfPupils).sum();
-//
-//        return (scoreOfAllPupils / maxScoreOfAllPupils) * 100;
-//    }
 }

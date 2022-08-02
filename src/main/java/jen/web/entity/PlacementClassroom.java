@@ -2,19 +2,10 @@ package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jen.web.dto.PupilsConnectionsDto;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.persistence.*;
+import java.util.*;
 
 @Entity
 @Getter
@@ -27,23 +18,29 @@ public class PlacementClassroom extends BaseEntity {
     @JsonIgnore
     @ToString.Exclude
     private PlacementResult placementResult;
-    @ManyToMany
-    private List<Pupil> pupils;
+
+    @ToString.Exclude
+    @JsonIgnore
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    private transient List<Pupil> pupilsForAlgorithm;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Pupil> pupils;
+
     @JsonIgnore
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToInclude = new PupilsConnectionsDto(new HashMap<>());
     @JsonIgnore
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
-    @JsonIgnore
-    @ToString.Exclude
-    private transient List<Long> pupilIds;
 
-    public PlacementClassroom(List<Pupil> pupils, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
-        this.pupils = pupils;
+    public PlacementClassroom(List<Pupil> pupilsForAlgorithm, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
+        this.pupilsForAlgorithm = pupilsForAlgorithm;
+        this.pupils = new HashSet<>(this.pupilsForAlgorithm);
+
         this.connectionsToInclude = connectionsToInclude;
         this.connectionsToExclude = connectionsToExclude;
-        pupilIds = pupils.stream().map(Pupil::getId).toList();
     }
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
@@ -82,13 +79,18 @@ public class PlacementClassroom extends BaseEntity {
         return pupils.stream().filter(p -> p.getGender()==gender).count();
     }
 
+    @JsonIgnore
+    private List<Long> getPupilIds(){
+        return pupils.stream().map(Pupil::getId).toList();
+    }
+
     public int getNumberOfWrongConnectionsToInclude(){
         int wrongConnections = 0;
         Map<Long, Set<Long>> connectionsMap = connectionsToInclude.getValues();
 
         for(Pupil pupil : pupils){
             if(connectionsMap.containsKey(pupil.getId())){
-                long numOfIncludedPupil = connectionsMap.get(pupil.getId()).stream().filter(pupilIds::contains).count();
+                long numOfIncludedPupil = connectionsMap.get(pupil.getId()).stream().filter(getPupilIds()::contains).count();
                 if(numOfIncludedPupil < 1){
                     wrongConnections++;
                 }
@@ -103,9 +105,13 @@ public class PlacementClassroom extends BaseEntity {
 
         for(Pupil pupil : pupils){
             if(connectionsMap.containsKey(pupil.getId())){
-                wrongConnections += connectionsMap.get(pupil.getId()).stream().filter(pupilIds::contains).count();
+                wrongConnections += connectionsMap.get(pupil.getId()).stream().filter(getPupilIds()::contains).count();
             }
         }
         return wrongConnections;
+    }
+
+    public void removePupilFromClass(Pupil pupil){
+        pupils.remove(pupil);
     }
 }

@@ -1,6 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jen.web.util.IsraeliIdValidator;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 public class Pupil extends BaseEntity {
     public static final String DIGITS_REGEX = "\\d+";
 
-    @NaturalId
+    @NaturalId(mutable=true)
     private String givenId;
     private String firstName;
     private String lastName;
@@ -41,7 +42,6 @@ public class Pupil extends BaseEntity {
             joinColumns = @JoinColumn(name = "pupils_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "groups_id", referencedColumnName = "id"))
     @Fetch(FetchMode.JOIN)
-    @JsonIgnore
     private Set<Group> groups = new LinkedHashSet<>();
 
     public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate)
@@ -102,8 +102,18 @@ public class Pupil extends BaseEntity {
                 .collect(Collectors.toSet());
     }
 
+    @JsonProperty
     public void setGroups(Set<Group> newGroups){
         groups = newGroups;
+    }
+
+    @JsonIgnore
+    public Set<Group> getGroups(){
+        return Collections.unmodifiableSet(groups);
+    }
+
+    public List<Long> getGroupIds(){
+        return groups.stream().map(BaseEntity::getId).collect(Collectors.toList());
     }
 
     public boolean isInGroup(Group group){
@@ -118,10 +128,7 @@ public class Pupil extends BaseEntity {
         groups.remove(group);
     }
 
-    public Set<Group> getGroups(){
-        return Collections.unmodifiableSet(groups);
-    }
-
+    @JsonIgnore
     public double getPupilScore() {
         double totalScore = 0;
         for(AttributeValue attributeValue : attributeValues){

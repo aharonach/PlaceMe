@@ -22,7 +22,7 @@ public class PlaceEngine {
     public PlaceEngine(Placement placement){
         this.placement = placement;
         this.pupils = placement.getGroup().getPupils().stream().toList();
-        this. connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, true));
+        this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, true));
         this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, false));
     }
 

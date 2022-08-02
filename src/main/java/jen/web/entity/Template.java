@@ -1,5 +1,6 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -17,14 +18,17 @@ public class Template extends BaseEntity {
     private String description;
     @Setter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Attribute> attributes = new ArrayList<>();
+    private Set<Attribute> attributes = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Group> groups = new HashSet<>();
 
     public Template(String name, String description){
         this.name = name;
         this.description = description;
     }
 
-    public Template(String name, String description, List<Attribute> attributes){
+    public Template(String name, String description, Set<Attribute> attributes){
         this.name = name;
         this.description = description;
         this.attributes = attributes;
@@ -52,8 +56,8 @@ public class Template extends BaseEntity {
                 });
     }
 
-    public List<Attribute> getAttributes(){
-        return Collections.unmodifiableList(attributes);
+    public Set<Attribute> getAttributes(){
+        return Collections.unmodifiableSet(attributes);
     }
 
     public Attribute getAttribute(Long id) throws AttributeNotBelongException {
@@ -65,7 +69,7 @@ public class Template extends BaseEntity {
 
         return attribute.get();
     }
-    public void updateAttributes(List<Attribute> newAttributes){
+    public void updateAttributes(Set<Attribute> newAttributes){
         List<Long> newAttributeIds = newAttributes.stream().map(Attribute::getId).filter(Objects::nonNull).toList();
         List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
         attributes.removeAll(attributesToDelete);
