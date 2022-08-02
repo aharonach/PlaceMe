@@ -20,6 +20,7 @@ public class Template extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Attribute> attributes = new HashSet<>();
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Group> groups = new HashSet<>();
 
@@ -81,6 +82,9 @@ public class Template extends BaseEntity {
                 updateAttribute(attribute.getId(), attribute);
             }
         });
+    }
+    public void removeFromGroup(Group group) {
+        groups.remove(group);
     }
 
     @Override

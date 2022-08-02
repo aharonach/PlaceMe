@@ -6,6 +6,7 @@ import jen.web.entity.Group;
 import jen.web.entity.Template;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
+import jen.web.repository.AttributeRepository;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,10 @@ public class TemplateService implements EntityService<Template> {
     private final TemplateRepository templateRepository;
 
     private final PupilService pupilService;
+
+    private final AttributeRepository attributeRepository;
+
+    private final AttributeValueRepository attributeValueRepository;
 
     @Override
     public Template add(Template template) {
@@ -64,30 +69,19 @@ public class TemplateService implements EntityService<Template> {
     @Transactional
     public void deleteById(Long id) {
         Template template = getOr404(id);
-        Set<Long> attributeIds = template.getAttributes().stream().map(BaseEntity::getId).collect(Collectors.toSet());
 
-        for (Long attributeId : attributeIds) {
-            deleteAttributeForTemplateById(template.getId(), attributeId);
-        }
-
-        // @todo: simplify it and remove attr values when deleting a template
+        template.getAttributes().forEach(attribute -> {
+            attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
+        });
         template.getGroups().forEach(group -> {
-            group.getPupils().forEach(pupil -> {
-                try {
-                    pupilService.removeAttributeValues(pupil, group, attributeIds);
-                } catch (Group.PupilNotBelongException e) {
-                    throw new RuntimeException(e);
-                }
-            });
             group.setTemplate(null);
             template.getGroups().remove(group);
         });
 
+        attributeRepository.deleteAll(template.getAttributes());
         templateRepository.delete(template);
     }
 
-    // @todo: handle it (all the section)
-    // handle attributes
     public Template deleteAttributeForTemplateById(Long templateId, Long attributeId){
         Template template = getOr404(templateId);
         template.deleteAttribute(attributeId);
