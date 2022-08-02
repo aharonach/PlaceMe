@@ -55,7 +55,7 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     @Transactional
-    // its updates attrs with id, add attrs witout id and delete attrs that not in the new template
+    // its updates attrs with id, add attrs without id and delete attrs that not in the new template
     public Template updateById(Long id, Template newTemplate) {
         Template template = getOr404(id);
 
