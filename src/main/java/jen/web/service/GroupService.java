@@ -77,7 +77,9 @@ public class GroupService implements EntityService<Group> {
         Group group = getOr404(id);
         verifyGroupNotAssociated(group);
 
-        group.getTemplate().getGroups().remove(group);
+        if(group.getTemplate() != null){
+            group.getTemplate().getGroups().remove(group);
+        }
         group.setTemplate(null);
         deleteAllPreferencesFromGroup(group);
         RemoveAllPupilsFromGroup(group);
