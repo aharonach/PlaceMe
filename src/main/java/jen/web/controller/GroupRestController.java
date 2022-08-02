@@ -47,9 +47,9 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @Override
-    @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable Long id) {
-        EntityModel<Group> entity = groupAssembler.toModel(groupService.getOr404(id));
+    @GetMapping("/{groupId}")
+    public ResponseEntity<?> get(@PathVariable Long groupId) {
+        EntityModel<Group> entity = groupAssembler.toModel(groupService.getOr404(groupId));
 
         return ResponseEntity
                 .ok()
@@ -67,9 +67,9 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @Override
-    @PostMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Group updatedRecord) {
-        EntityModel<Group> entity = groupAssembler.toModel(groupService.updateById(id, updatedRecord));
+    @PostMapping("/{groupId}")
+    public ResponseEntity<?> update(@PathVariable Long groupId, @RequestBody Group updatedRecord) {
+        EntityModel<Group> entity = groupAssembler.toModel(groupService.updateById(groupId, updatedRecord));
 
         return ResponseEntity
                 .ok()
@@ -77,25 +77,25 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @Override
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        groupService.deleteById(id);
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<?> delete(@PathVariable Long groupId) {
+        groupService.deleteById(groupId);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}/template")
-    public ResponseEntity<?> getGroupTemplate(@PathVariable Long id){
-        EntityModel<Template> entity = templateAssembler.toModel(groupService.getOr404(id).getTemplate());
+    @GetMapping("/{groupId}/template")
+    public ResponseEntity<?> getGroupTemplate(@PathVariable Long groupId){
+        EntityModel<Template> entity = templateAssembler.toModel(groupService.getOr404(groupId).getTemplate());
 
         return ResponseEntity
                 .ok()
                 .body(entity);
     }
 
-    @GetMapping("/{id}/pupils")
-    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long id){
+    @GetMapping("/{groupId}/pupils")
+    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId){
         CollectionModel<EntityModel<Pupil>> allEntities =
-                pupilAssembler.toCollectionModel(groupService.getOr404(id).getPupils());
+                pupilAssembler.toCollectionModel(groupService.getOr404(groupId).getPupils());
 
         return ResponseEntity
                 .ok()
