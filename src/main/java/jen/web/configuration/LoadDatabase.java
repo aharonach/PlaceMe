@@ -114,9 +114,11 @@ public class LoadDatabase {
         Template template = templateService.getOr404(2L);
 
         Group group = groupService.add(new Group("group 1", "group 1 desc", template));
-        pupilService.all().forEach(group::addPupil);
+        pupilService.all().forEach(pupil -> groupService.addPupilToGroup(group, pupil));
 
-        logger.info("Preloading " + groupService.updateById(group.getId(), group));
+        logger.info("Preloading " + group);
+
+        //logger.info("Preloading " + groupService.updateById(group.getId(), group));
     }
 
     private void createAttributeValues() throws Group.PupilNotBelongException {

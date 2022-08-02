@@ -28,7 +28,6 @@ public class TemplateService implements EntityService<Template> {
     private static final Logger logger = LoggerFactory.getLogger(TemplateService.class);
 
     private final TemplateRepository templateRepository;
-    private final GroupService groupService;
     private final AttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
 

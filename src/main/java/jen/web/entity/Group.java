@@ -1,6 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class Group extends BaseEntity {
     private String name;
     private String description;
-    @JsonIgnore
+
     @ToString.Exclude
     @ManyToOne
     private Template template;
@@ -50,9 +51,18 @@ public class Group extends BaseEntity {
         }
         return null;
     }
+    @JsonIgnore
+    public Template getTemplate() {
+        return template;
+    }
+
+    @JsonProperty
+    public void setTemplate(Template template) {
+        this.template = template;
+    }
 
     public void setPupils(Set<Pupil> pupils) {
-        getPupils().forEach(this::removePupil);
+        this.pupils.forEach(this::removePupil);
         pupils.forEach(this::addPupil);
     }
 
