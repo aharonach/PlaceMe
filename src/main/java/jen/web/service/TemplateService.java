@@ -48,6 +48,10 @@ public class TemplateService implements EntityService<Template> {
         return templateRepository.findById(id).orElseThrow(() -> new NotFound("Could not find template " + id));
     }
 
+    public Attribute getAttributeOr404(Long id) {
+        return attributeRepository.findById(id).orElseThrow(() -> new NotFound("Could not find attribute " + id));
+    }
+
     @Override
     public List<Template> all() {
         return templateRepository.findAll();
@@ -61,11 +65,13 @@ public class TemplateService implements EntityService<Template> {
 
         List<Long> newAttributeIds = newTemplate.getAttributes().stream().map(Attribute::getId).filter(Objects::nonNull).toList();
         List<Attribute> attributesToDelete = template.getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
-        for(Attribute attribute: attributesToDelete){
-            attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
-            template.deleteAttribute(attribute.getId());
+
+        for(Attribute attribute : attributesToDelete){
+            try {
+                deleteAttributeForTemplateById(template, attribute);
+            } catch (Template.AttributeNotBelongException ignored) {
+            }
         }
-        attributeRepository.deleteAll(attributesToDelete);
 
         template.updateAttributes(newTemplate.getAttributes());
         template.setName(newTemplate.getName());
@@ -91,20 +97,21 @@ public class TemplateService implements EntityService<Template> {
         templateRepository.delete(template);
     }
 
-    public Template deleteAttributeForTemplateById(Long templateId, Long attributeId){
-        Template template = getOr404(templateId);
-        template.deleteAttribute(attributeId);
+    @Transactional
+    public void deleteAttributeForTemplateById(Template template, Attribute attribute) throws Template.AttributeNotBelongException {
+        template.verifyAttributeBelongsToTemplate(attribute.getId());
+        attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
+        template.deleteAttribute(attribute.getId());
+        attributeRepository.delete(attribute);
+    }
+
+    public Template updateAttributeForTemplateById(Template template, Attribute oldAttribute, Attribute newAttribute) throws Template.AttributeNotBelongException {
+        template.verifyAttributeBelongsToTemplate(oldAttribute.getId());
+        template.updateAttribute(oldAttribute.getId(), newAttribute);
         return templateRepository.save(template);
     }
 
-    public Template updateAttributeForTemplateById(Long templateId, Long attributeId, Attribute newAttribute){
-        Template template = getOr404(templateId);
-        template.updateAttribute(attributeId, newAttribute);
-        return templateRepository.save(template);
-    }
-
-    public Template addAttributeForTemplateById(Long templateId, Attribute newAttribute){
-        Template template = getOr404(templateId);
+    public Template addAttributeForTemplateById(Template template, Attribute newAttribute){
         template.addAttribute(newAttribute);
         return templateRepository.save(template);
     }

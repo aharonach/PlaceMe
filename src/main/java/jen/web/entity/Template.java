@@ -1,8 +1,5 @@
 package jen.web.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -63,15 +60,21 @@ public class Template extends BaseEntity {
         return Collections.unmodifiableSet(attributes);
     }
 
-    public Attribute getAttribute(Long id) throws AttributeNotBelongException {
-        Optional<Attribute> attribute = attributes.stream().filter(attr -> attr.getId().equals(id)).findFirst();
+    public Attribute getAttribute(Long attributeId) throws AttributeNotBelongException {
+        Optional<Attribute> attribute = attributes.stream().filter(attr -> attr.getId().equals(attributeId)).findFirst();
 
         if(attribute.isEmpty()){
-            throw new AttributeNotBelongException(id);
+            throw new AttributeNotBelongException(attributeId);
         }
 
         return attribute.get();
     }
+
+    public boolean verifyAttributeBelongsToTemplate(Long attributeId) throws AttributeNotBelongException {
+        getAttribute(attributeId);
+        return true;
+    }
+
     public void updateAttributes(Set<Attribute> newAttributes){
         newAttributes.forEach(attribute -> {
             if(attribute.getId() == null){
@@ -95,7 +98,7 @@ public class Template extends BaseEntity {
         return getClass().hashCode();
     }
 
-    public static class AttributeNotBelongException extends Exception{
+    public static class AttributeNotBelongException extends Exception {
         public AttributeNotBelongException(Long attributeId){
             super("Template does not contain attribute with id: " + attributeId);
         }
