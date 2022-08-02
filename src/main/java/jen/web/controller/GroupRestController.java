@@ -83,15 +83,6 @@ public class GroupRestController extends BaseRestController<Group> {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{groupId}/template")
-    public ResponseEntity<?> getGroupTemplate(@PathVariable Long groupId){
-        EntityModel<Template> entity = templateAssembler.toModel(groupService.getOr404(groupId).getTemplate());
-
-        return ResponseEntity
-                .ok()
-                .body(entity);
-    }
-
     @GetMapping("/{groupId}/pupils")
     public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId){
         CollectionModel<EntityModel<Pupil>> allEntities =

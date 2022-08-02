@@ -44,6 +44,13 @@ public class Group extends BaseEntity {
         this.template = template;
     }
 
+    public Long getTemplateId(){
+        if(template != null){
+            return template.getId();
+        }
+        return null;
+    }
+
     public void setPupils(Set<Pupil> pupils) {
         getPupils().forEach(this::removePupil);
         pupils.forEach(this::addPupil);
