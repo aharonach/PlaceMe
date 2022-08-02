@@ -8,6 +8,7 @@ import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeRepository;
 import jen.web.repository.AttributeValueRepository;
+import jen.web.repository.GroupRepository;
 import jen.web.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,11 +28,8 @@ public class TemplateService implements EntityService<Template> {
     private static final Logger logger = LoggerFactory.getLogger(TemplateService.class);
 
     private final TemplateRepository templateRepository;
-
-    private final PupilService pupilService;
-
+    private final GroupService groupService;
     private final AttributeRepository attributeRepository;
-
     private final AttributeValueRepository attributeValueRepository;
 
     @Override
@@ -40,6 +39,7 @@ public class TemplateService implements EntityService<Template> {
             throw new EntityAlreadyExists("Template with Id '" + id + "' already exists.");
         }
 
+        template.getGroups().clear();
         return templateRepository.save(template);
     }
 
@@ -55,12 +55,21 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     @Transactional
+    // its updates attrs with id, add attrs witout id and delete attrs that not in the new template
     public Template updateById(Long id, Template newTemplate) {
         Template template = getOr404(id);
 
+        List<Long> newAttributeIds = newTemplate.getAttributes().stream().map(Attribute::getId).filter(Objects::nonNull).toList();
+        List<Attribute> attributesToDelete = template.getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
+        for(Attribute attribute: attributesToDelete){
+            attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
+            template.deleteAttribute(attribute.getId());
+        }
+        attributeRepository.deleteAll(attributesToDelete);
+
+        template.updateAttributes(newTemplate.getAttributes());
         template.setName(newTemplate.getName());
         template.setDescription(newTemplate.getDescription());
-        template.updateAttributes(newTemplate.getAttributes());
 
         return templateRepository.save(template);
     }

@@ -1,6 +1,8 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -71,10 +73,6 @@ public class Template extends BaseEntity {
         return attribute.get();
     }
     public void updateAttributes(Set<Attribute> newAttributes){
-        List<Long> newAttributeIds = newAttributes.stream().map(Attribute::getId).filter(Objects::nonNull).toList();
-        List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
-        attributes.removeAll(attributesToDelete);
-
         newAttributes.forEach(attribute -> {
             if(attribute.getId() == null){
                 addAttribute(attribute);
@@ -82,9 +80,6 @@ public class Template extends BaseEntity {
                 updateAttribute(attribute.getId(), attribute);
             }
         });
-    }
-    public void removeFromGroup(Group group) {
-        groups.remove(group);
     }
 
     @Override
