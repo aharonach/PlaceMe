@@ -8,7 +8,14 @@ export default function FormFields() {
         {
             id: "description",
             label: "Description",
-            type: "textarea",
+        },
+        {
+            id: "priority",
+            label: "Priority",
+            type: "number",
+            bsProps: {
+                min: 1,
+            }
         }
-    ];
+    ]
 }

@@ -5,6 +5,7 @@ import Footer from "./layouts/Footer";
 import * as Pages from './pages';
 import * as Pupil from "./components/Pupils";
 import * as Group from "./components/Groups";
+import * as Template from "./components/Templates";
 
 function App() {
     return (
@@ -22,8 +23,11 @@ function App() {
                     <Route path="add" element={<Group.AddGroup />} />
                     <Route path=":groupId" element={<Group.GroupPage />} />
                 </Route>
-                <Route path="/templates" element={<Pages.Templates />}></Route>
-                <Route path="/attributes" element={<Pages.Attributes />}></Route>
+                <Route path="/templates" element={<Pages.Templates />}>
+                    <Route index element={<Template.TemplatesList />} />
+                    <Route path="add" element={<Template.AddTemplate />} />
+                    <Route path=":templateId" element={<Template.TemplatePage />} />
+                </Route>
                 <Route path="/placements" element={<Pages.Placements />}></Route>
                 <Route path="*" element={<Pages.ErrorPage />}></Route>
             </Routes>

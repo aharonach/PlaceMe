@@ -4,7 +4,7 @@ export default function FormFields() {
             id: 'givenId',
             label: 'Given ID',
             rules: {
-                required: "This field is required.",
+                required: true,
                 maxLength: {
                     value: 9,
                     message: "9 digits only."
@@ -19,12 +19,12 @@ export default function FormFields() {
         {
             id: 'firstName',
             label: 'First Name',
-            rules: { required: "This field is required." },
+            rules: { required: true },
         },
         {
             id: 'lastName',
             label: 'Last Name',
-            rules: { required: "This field is required." },
+            rules: { required: true },
         },
         {
             id: 'gender',
@@ -41,7 +41,7 @@ export default function FormFields() {
             id: 'birthDate',
             label: 'Birth Date',
             type: 'date',
-            rules: { required: "This field is required.", },
+            rules: { required: true },
         }
     ];
 }

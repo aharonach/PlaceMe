@@ -4,6 +4,7 @@ import Select from "./Select";
 import Input from "./Input";
 import Checkbox from './Checkbox';
 import Checkboxes from './Checkboxes';
+import Textarea from "./Textarea";
 
 export default function HtmlForm({ fields, submitCallback, formProps, loading, submitLabel, children }) {
     const formFields = 'function' === typeof ( fields ) ? fields() : fields;
@@ -22,6 +23,12 @@ export default function HtmlForm({ fields, submitCallback, formProps, loading, s
 
                     case 'select':
                         return <Select key={field.id} settings={field} formProps={formProps} />;
+
+                    case 'repeater':
+                        return '';
+
+                    case 'textarea':
+                        return <Textarea key={field.id} settings={field} formProps={formProps} />;
 
                     default:
                         return <Input key={field.id} settings={field} formProps={formProps} />;

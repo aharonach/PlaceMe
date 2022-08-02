@@ -4,9 +4,7 @@ import {Form} from "react-bootstrap";
 import Label from "./Label";
 import FieldFeedback from "./FieldFeedback";
 
-const FIELD_TYPES = ['text', 'email', 'tel', 'date', 'number'];
-
-export default function Input({ settings, formProps }) {
+export default function Textarea({ settings, formProps }) {
     const error = formProps.formState.errors[settings.id];
     const hasError = !!error;
 
@@ -18,8 +16,7 @@ export default function Input({ settings, formProps }) {
                 control={formProps.control}
                 rules={settings.rules}
                 render={({ field }) => {
-                    const type = settings.type && FIELD_TYPES.includes( settings.type ) ? settings.type : 'text';
-                    return <Form.Control type={type} {...field} {...settings?.bsProps} isInvalid={hasError} />
+                    return <Form.Control as="textarea" {...field} {...settings?.bsProps} isInvalid={hasError} />
                 }}
             />
             <FieldFeedback hasError={hasError} error={error} />

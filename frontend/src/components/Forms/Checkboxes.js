@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import { Form } from "react-bootstrap";
 import {Controller, useController} from "react-hook-form";
+import FieldFeedback from "./FieldFeedback";
+import Label from "./Label";
 
 export default function Checkboxes({ settings, formProps }) {
     const error = formProps.formState.errors[settings.id];
@@ -31,7 +33,7 @@ export default function Checkboxes({ settings, formProps }) {
 
     return (
         <Form.Group controlId={settings.id} className="mb-3">
-            {settings.label && <Form.Label>{settings.label}</Form.Label>}
+            <Label settings={settings} />
             <Controller
                 control={control}
                 name={name}
@@ -62,7 +64,7 @@ export default function Checkboxes({ settings, formProps }) {
                     )
                 }}
             />
-            {hasError && <div className="invalid-feedback">{error.message ? error.message : "Error"}</div>}
+            {<FieldFeedback hasError={hasError} error={error} />}
             {settings.description && <Form.Text muted>{settings.description}</Form.Text>}
         </Form.Group>
     )
