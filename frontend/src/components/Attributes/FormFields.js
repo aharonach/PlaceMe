@@ -8,11 +8,23 @@ export default function FormFields() {
         {
             id: "description",
             label: "Description",
+            type: "textarea",
+        },
+        {
+            id: "type",
+            label: "Type",
+            type: "radio",
+            options: [
+                { value: "range", label: "Range" }
+            ],
         },
         {
             id: "priority",
             label: "Priority",
             type: "number",
+            rules: {
+                valueAsNumber: true
+            },
             bsProps: {
                 min: 1,
             }

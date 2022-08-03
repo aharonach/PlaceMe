@@ -1,38 +1,30 @@
 import React from "react";
-import {Button, Form as BSForm, Spinner} from "react-bootstrap";
+import {Button, Col, Form, Spinner} from "react-bootstrap";
 import Select from "./Select";
 import Input from "./Input";
 import Checkbox from './Checkbox';
 import Checkboxes from './Checkboxes';
 import Textarea from "./Textarea";
+import Label from "./Label";
+import FieldFeedback from "./FieldFeedback";
 
-export default function HtmlForm({ fields, submitCallback, formProps, loading, submitLabel, children }) {
+export default function HtmlForm({ fields, submitCallback, formProps, loading, submitLabel, vertical, children }) {
     const formFields = 'function' === typeof ( fields ) ? fields() : fields;
 
     return (
-        <BSForm onSubmit={formProps.handleSubmit(submitCallback)}>
+        <Form onSubmit={formProps.handleSubmit(submitCallback)}>
             {formFields.map( field => {
-                switch(field.type) {
-                    case 'checkbox':
-                        if ( Array.isArray( field.options ) ) {
-                            return <Checkboxes key={field.id} settings={field} formProps={formProps} />
-                        }
-                    // eslint-disable-next-line no-fallthrough
-                    case 'radio':
-                        return <Checkbox key={field.id} settings={field} formProps={formProps} />;
+                const error = formProps.formState.errors[field.id];
+                const hasError = !!error;
 
-                    case 'select':
-                        return <Select key={field.id} settings={field} formProps={formProps} />;
-
-                    case 'repeater':
-                        return '';
-
-                    case 'textarea':
-                        return <Textarea key={field.id} settings={field} formProps={formProps} />;
-
-                    default:
-                        return <Input key={field.id} settings={field} formProps={formProps} />;
-                }
+                return (
+                    <Form.Group key={field.id} as={vertical ? Col : "div"} controlId={field.id} className="mb-3">
+                        <Label settings={field} />
+                        {outputField(field, { field: field, control: formProps.control, hasError: hasError })}
+                        {<FieldFeedback hasError={hasError} error={error} />}
+                        {field.description && <Form.Text muted>{field.description}</Form.Text>}
+                    </Form.Group>
+                )
             })}
             {children}
             <Button type="submit" variant="primary">
@@ -45,6 +37,27 @@ export default function HtmlForm({ fields, submitCallback, formProps, loading, s
                 />}
                 {submitLabel ? submitLabel : 'Submit'}
             </Button>
-        </BSForm>
+        </Form>
     );
+}
+
+function outputField(field, props) {
+    switch(field.type) {
+        case 'checkbox':
+            if ( Array.isArray( field.options ) ) {
+                return <Checkboxes {...props} />
+            }
+        // eslint-disable-next-line no-fallthrough
+        case 'radio':
+            return <Checkbox {...props} />;
+
+        case 'select':
+            return <Select {...props} />;
+
+        case 'textarea':
+            return <Textarea {...props} />;
+
+        default:
+            return <Input {...props} />;
+    }
 }

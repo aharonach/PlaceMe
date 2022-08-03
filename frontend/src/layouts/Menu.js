@@ -1,16 +1,21 @@
 import React from 'react';
-import { NavLink } from "react-router-dom";
+import {Container, Nav, Navbar} from "react-bootstrap";
+import {LinkContainer} from "react-router-bootstrap";
 
 export default function Menu() {
     return (
-        <nav>
-            <ul>
-                <li><NavLink to="/">Home</NavLink></li>
-                <li><NavLink to="/pupils">Pupils</NavLink></li>
-                <li><NavLink to="/groups">Groups</NavLink></li>
-                <li><NavLink to="/templates">Templates</NavLink></li>
-                <li><NavLink to="/placements">Placements</NavLink></li>
-            </ul>
-        </nav>
+        <Navbar>
+            <Container>
+                <LinkContainer to="/"><Navbar.Brand>PlaceMe</Navbar.Brand></LinkContainer>
+                <Navbar.Collapse>
+                    <Nav className="me-auto">
+                        <LinkContainer to="/pupils"><Nav.Link href="#home">Pupils</Nav.Link></LinkContainer>
+                        <LinkContainer to="/groups"><Nav.Link href="#home">Groups</Nav.Link></LinkContainer>
+                        <LinkContainer to="/templates"><Nav.Link href="#home">Templates</Nav.Link></LinkContainer>
+                        <LinkContainer to="/placements"><Nav.Link href="#home">Placements</Nav.Link></LinkContainer>
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
     );
 }
