@@ -2,26 +2,14 @@ import React, {useState} from 'react';
 import TableList from "../TableList";
 import AddAttribute from "../Attributes/AddAttribute";
 import DeleteAttribute from "../Attributes/DeleteAttribute";
-import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
+import EditAttribute from "../Attributes/EditAttribute";
+import {Button} from "react-bootstrap";
 
 export default function Attributes({ template }) {
     const [attributeList, setAttributeList] = useState(template.attributes);
-    const [response, error, loading, axiosFetch] = useAxios();
-
-    const handleDelete = (attributeId) => {
-        axiosFetch({
-            axiosInstance: Api,
-            method: 'delete',
-            url: `/templates/${template.id}/attributes/${attributeId}`,
-        });
-        // attributeList.filter( attribute => attribute.id !== attributeId);
-        // setAttributeList(setAttributeList);
-        // setAttributeList(response.attributes);
-    }
+    const [editAttribute, setEditAttribute] = useState(null);
 
     const columns = {
-        id: "ID",
         name: "Name",
         description: "Description",
         type: "Type",
@@ -30,7 +18,8 @@ export default function Attributes({ template }) {
         actions: {
             label: "",
             callbacks: [
-                (attribute) => <DeleteAttribute key={attribute.id} handleDelete={handleDelete} attributeId={attribute.id} />
+                (attribute) => <DeleteAttribute key={`delete-${attribute.id}`} templateId={template.id} attributeList={attributeList} attributeId={attribute.id} setAttributeList={setAttributeList} />,
+                (attribute) => <Button key={`edit-${attribute.id}`} size="sm" variant="secondary" onClick={() => setEditAttribute(attribute)}>Edit</Button>
             ]
         }
     };
@@ -39,7 +28,8 @@ export default function Attributes({ template }) {
         <>
             <h2>Attributes</h2>
             <AddAttribute templateId={template.id} setAttributeList={setAttributeList} />
-            <TableList basePath={`/templates/${template.id}/attributes`} columns={columns} items={attributeList} />
+            <TableList basePath={`/templates/${template.id}/attributes/`} columns={columns} items={attributeList} />
+            {editAttribute && <EditAttribute templateId={template.id} attribute={editAttribute} setAttribute={setEditAttribute} setAttributeList={setAttributeList} />}
         </>
     );
 }

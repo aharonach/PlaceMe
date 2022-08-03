@@ -18,7 +18,7 @@ export default function EditTemplate({ template }) {
         axiosFetch({
             axiosInstance: Api,
             method: 'post',
-            url: `/template/${template.id}`,
+            url: `/templates/${template.id}`,
             data: {...data}
         });
     };

@@ -2,9 +2,9 @@ import React from "react";
 import {useForm} from "react-hook-form";
 import HtmlForm from "../Forms/HtmlForm";
 import FormFields from "./FormFields";
-import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
 import {Alert} from "react-bootstrap";
+import Api from '../../api';
+import useAxios from "../../hooks/useAxios";
 
 export default function AddAttribute({ templateId, setAttributeList }) {
     let methods = useForm({
@@ -16,9 +16,10 @@ export default function AddAttribute({ templateId, setAttributeList }) {
         }
     });
 
-    const [template, error, loading, axiosFetch] = useAxios();
-
-    template && setAttributeList(template.attributes);
+    const [template, error, loading, axiosFetch] = useAxios((response) => {
+        methods.reset();
+        setAttributeList(response.data.attributes);
+    });
 
     const onSubmit = (data) => {
         axiosFetch({
@@ -33,7 +34,7 @@ export default function AddAttribute({ templateId, setAttributeList }) {
         <>
             <h3>Add Attribute</h3>
             {!loading && error && <Alert variant="danger">{error}</Alert> }
-            <HtmlForm formProps={methods} fields={FormFields} submitCallback={onSubmit} loading={loading}></HtmlForm>
+            <HtmlForm formProps={methods} fields={FormFields} submitCallback={onSubmit} loading={loading} submitLabel={"Add"}></HtmlForm>
         </>
     );
 }

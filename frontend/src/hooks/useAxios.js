@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const useAxios = () => {
+const useAxios = (afterSubmit = null) => {
     const [response, setResponse] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -28,8 +28,13 @@ const useAxios = () => {
                     signal: ctrl.signal
                 }
             });
-            // console.log(res);
-            setResponse(res.data);
+
+            // perform external action
+            if ( afterSubmit ) {
+                afterSubmit(res);
+            } else {
+                setResponse(res.data);
+            }
         } catch (err) {
             setError(err?.response?.data?.message ? err.response.data.message : err.message);
         } finally {
