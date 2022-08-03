@@ -89,8 +89,8 @@ public class TemplateService implements EntityService<Template> {
         });
         template.getGroups().forEach(group -> {
             group.setTemplate(null);
-            template.getGroups().remove(group);
         });
+        template.clearGroups();
 
         attributeRepository.deleteAll(template.getAttributes());
         templateRepository.delete(template);

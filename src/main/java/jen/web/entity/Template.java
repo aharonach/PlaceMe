@@ -47,6 +47,10 @@ public class Template extends BaseEntity {
         groups.add(group);
     }
 
+    public void removeGroup(Group group){
+        groups.remove(group);
+    }
+
     @JsonIgnore
     public Set<Long> getGroupIds(){
         return this.groups.stream().map(BaseEntity::getId).collect(Collectors.toSet());

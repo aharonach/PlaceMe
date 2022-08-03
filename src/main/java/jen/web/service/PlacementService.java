@@ -48,6 +48,7 @@ public class PlacementService implements EntityService<Placement> {
 
         if(placement.getGroup() != null){
             Group group = groupService.getOr404(placement.getGroup().getId());
+            group.addPlacement(placement);
             placement.setGroup(group);
         }
 
