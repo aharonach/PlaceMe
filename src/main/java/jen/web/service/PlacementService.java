@@ -97,7 +97,7 @@ public class PlacementService implements EntityService<Placement> {
         Placement placement = getOr404(id);
         Group group = placement.getGroup();
 
-        group.getPlacements().remove(placement);
+        group.removePlacement(placement);
         deleteAllPlacementResults(placement);
 
         placementRepository.delete(placement);
@@ -128,7 +128,7 @@ public class PlacementService implements EntityService<Placement> {
     public void deletePlacementResultById(Placement placement, Long resultId) throws Placement.ResultNotExistsException {
         PlacementResult placementResult = placement.getResultById(resultId);
 
-        placement.getResults().remove(placementResult);
+        placement.removeResult(placementResult);
         placementResult.setPlacement(null);
         placementResult.getClasses().forEach(placementClassroom -> {
             placementClassroom.setPlacementResult(null);

@@ -73,6 +73,10 @@ public class Group extends BaseEntity {
         placements.add(placement);
     }
 
+    public void removePlacement(Placement placement){
+        placements.remove(placement);
+    }
+
     public void setPupils(Set<Pupil> pupils) {
         this.pupils.forEach(this::removePupil);
         pupils.forEach(this::addPupil);

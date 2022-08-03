@@ -48,6 +48,10 @@ public class Placement extends BaseEntity {
         results.add(placementResult);
     }
 
+    public void removeResult(PlacementResult placementResult){
+        results.remove(placementResult);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
