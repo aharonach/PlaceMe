@@ -1,6 +1,5 @@
 package jen.web.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -20,6 +19,7 @@ public class Template extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Attribute> attributes = new HashSet<>();
 
+    @Setter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Group> groups = new HashSet<>();
 
@@ -60,20 +60,22 @@ public class Template extends BaseEntity {
         return Collections.unmodifiableSet(attributes);
     }
 
-    public Attribute getAttribute(Long id) throws AttributeNotBelongException {
-        Optional<Attribute> attribute = attributes.stream().filter(attr -> attr.getId().equals(id)).findFirst();
+    public Attribute getAttribute(Long attributeId) throws AttributeNotBelongException {
+        Optional<Attribute> attribute = attributes.stream().filter(attr -> attr.getId().equals(attributeId)).findFirst();
 
         if(attribute.isEmpty()){
-            throw new AttributeNotBelongException(id);
+            throw new AttributeNotBelongException(attributeId);
         }
 
         return attribute.get();
     }
-    public void updateAttributes(Set<Attribute> newAttributes){
-        List<Long> newAttributeIds = newAttributes.stream().map(Attribute::getId).filter(Objects::nonNull).toList();
-        List<Attribute> attributesToDelete = getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
-        attributes.removeAll(attributesToDelete);
 
+    public boolean verifyAttributeBelongsToTemplate(Long attributeId) throws AttributeNotBelongException {
+        getAttribute(attributeId);
+        return true;
+    }
+
+    public void updateAttributes(Set<Attribute> newAttributes){
         newAttributes.forEach(attribute -> {
             if(attribute.getId() == null){
                 addAttribute(attribute);
@@ -96,7 +98,7 @@ public class Template extends BaseEntity {
         return getClass().hashCode();
     }
 
-    public static class AttributeNotBelongException extends Exception{
+    public static class AttributeNotBelongException extends Exception {
         public AttributeNotBelongException(Long attributeId){
             super("Template does not contain attribute with id: " + attributeId);
         }

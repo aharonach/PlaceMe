@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AttributeValueRepository extends JpaRepository<AttributeValue, PupilAttributeId> {
     void deleteAllByPupilAttributeId_PupilId(Long pupilId);
+    void deleteAttributeValuesByAttributeId(Long attributeId);
 }

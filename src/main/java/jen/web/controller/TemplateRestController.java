@@ -3,6 +3,7 @@ package jen.web.controller;
 import jen.web.assembler.TemplateModelAssembler;
 import jen.web.entity.Attribute;
 import jen.web.entity.Template;
+import jen.web.exception.BadRequest;
 import jen.web.service.TemplateService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.w3c.dom.Attr;
 
 
 @RestController
@@ -76,28 +78,41 @@ public class TemplateRestController extends BaseRestController<Template> {
     //Manage attributes
     @DeleteMapping("/{templateId}/attributes/{attributeId}")
     public ResponseEntity<?> deleteAttributeForTemplate(@PathVariable Long templateId, @PathVariable Long attributeId) {
-        EntityModel<Template> entity = assembler.toModel(service.deleteAttributeForTemplateById(templateId, attributeId));
 
-        return ResponseEntity
-                .ok()
-                .body(entity);
+        Template template = service.getOr404(templateId);
+        Attribute attribute = service.getAttributeOr404(attributeId);
+        try {
+            service.deleteAttributeForTemplateById(template, attribute);
+        } catch (Template.AttributeNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{templateId}/attributes/{attributeId}")
     public ResponseEntity<?> updateAttributeForTemplate(@PathVariable Long templateId,
                                         @PathVariable Long attributeId,
                                         @RequestBody Attribute newAttribute) {
-        EntityModel<Template> entity = assembler.toModel(service.updateAttributeForTemplateById(templateId, attributeId, newAttribute));
 
-        return ResponseEntity
-                .ok()
-                .body(entity);
+        Template template = service.getOr404(templateId);
+        Attribute attribute = service.getAttributeOr404(attributeId);
+        try {
+            Template updatedTemplate = service.updateAttributeForTemplateById(template, attribute, newAttribute);
+            EntityModel<Template> entity = assembler.toModel(updatedTemplate);
+            return ResponseEntity.ok().body(entity);
+
+        } catch (Template.AttributeNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @PutMapping("/{templateId}/attributes")
     public ResponseEntity<?> addAttributeForTemplate(@PathVariable Long templateId,
                                      @RequestBody Attribute newAttribute) {
-        EntityModel<Template> entity = assembler.toModel(service.addAttributeForTemplateById(templateId, newAttribute));
+
+        Template template = service.getOr404(templateId);
+        EntityModel<Template> entity = assembler.toModel(service.addAttributeForTemplateById(template, newAttribute));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())

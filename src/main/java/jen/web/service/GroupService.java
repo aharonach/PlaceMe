@@ -33,6 +33,7 @@ public class GroupService implements EntityService<Group> {
 
     private final PupilRepository pupilRepository;
     private final TemplateRepository templateRepository;
+    private final TemplateService templateService;
 
     @Override
     @Transactional
@@ -59,15 +60,17 @@ public class GroupService implements EntityService<Group> {
     @Transactional
     public Group updateById(Long id, Group newGroup) {
         Group group = getOr404(id);
-        Template template = newGroup.getTemplate();
 
         group.setName(newGroup.getName());
         group.setDescription(newGroup.getDescription());
-        group.setPupils(newGroup.getPupils());
-        group.setTemplate(template);
 
-        template.getGroups().add(group);
-        templateRepository.save(template);
+        if(newGroup.getTemplate() != null){
+            Template template = templateService.getOr404(newGroup.getTemplate().getId());
+            group.setTemplate(template);
+            template.getGroups().add(group);
+            templateRepository.save(template);
+        }
+
         return groupRepository.save(group);
     }
 
@@ -77,6 +80,10 @@ public class GroupService implements EntityService<Group> {
         Group group = getOr404(id);
         verifyGroupNotAssociated(group);
 
+        if(group.getTemplate() != null){
+            group.getTemplate().getGroups().remove(group);
+        }
+        group.setTemplate(null);
         deleteAllPreferencesFromGroup(group);
         RemoveAllPupilsFromGroup(group);
 
@@ -91,6 +98,12 @@ public class GroupService implements EntityService<Group> {
         return groups;
         // @todo: decide what to do, this line gets the same result but its not throwing exception for non existing ids
         //return groupRepository.getAllByIdIn(ids);
+    }
+
+
+    public void addPupilToGroup(Group group, Pupil pupil){
+        group.addPupil(pupil);
+        pupilRepository.save(pupil);
     }
 
     @Transactional
