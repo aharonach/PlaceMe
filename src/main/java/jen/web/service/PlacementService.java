@@ -78,14 +78,13 @@ public class PlacementService implements EntityService<Placement> {
         if(isUpdateGroupNeeded){
             Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
 
-            Set<Long> newPlacementIds =placement.getGroup().getPlacementIds();
+            Set<Long> newPlacementIdsForGroup =placement.getGroup().getPlacementIds();
             if(placement.getGroup() != null){
-                newPlacementIds.remove(placement.getGroup().getId());
+                newPlacementIdsForGroup.remove(placement.getId());
             }
-            newPlacementIds.add(newGroup.getId());
 
             placement.setGroup(newGroup);
-            newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIds));
+            newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIdsForGroup));
         }
 
         Placement res = placementRepository.save(placement);
