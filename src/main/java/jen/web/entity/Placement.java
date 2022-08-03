@@ -36,6 +36,10 @@ public class Placement extends BaseEntity {
         group.getPlacements().add(this);
     }
 
+    public Integer getNumberOfResults(){
+        return results.size();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
