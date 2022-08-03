@@ -8,11 +8,9 @@ import io.jenetics.engine.Limits;
 import jen.web.engine.PlaceEngine;
 import jen.web.entity.Group;
 import jen.web.entity.Placement;
-import jen.web.entity.PlacementClassroom;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
-import jen.web.repository.GroupRepository;
 import jen.web.repository.PlacementClassroomRepository;
 import jen.web.repository.PlacementRepository;
 import jen.web.repository.PlacementResultRepository;
@@ -22,9 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -78,7 +76,15 @@ public class PlacementService implements EntityService<Placement> {
 
         if(isUpdateGroupNeeded){
             Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
+
+            Set<Long> newPlacementIds =placement.getGroup().getPlacementIds();
+            if(placement.getGroup() != null){
+                newPlacementIds.remove(placement.getGroup().getId());
+            }
+            newPlacementIds.add(newGroup.getId());
+
             placement.setGroup(newGroup);
+            newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIds));
         }
 
         Placement res = placementRepository.save(placement);
