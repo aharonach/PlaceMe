@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -36,6 +33,10 @@ public class PlacementResult extends BaseEntity {
     public PlacementResult(List<PlacementClassroom> classesForAlgorithm){
         this.classesForAlgorithm = classesForAlgorithm;
         this.classes = new HashSet<>(this.classesForAlgorithm);
+    }
+
+    public Set<PlacementClassroom> getClasses() {
+        return Collections.unmodifiableSet(classes);
     }
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)

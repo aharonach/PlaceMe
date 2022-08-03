@@ -53,6 +53,10 @@ public class Pupil extends BaseEntity {
         this.birthDate = birthDate;
     }
 
+    public Set<AttributeValue> getAttributeValues() {
+        return Collections.unmodifiableSet(attributeValues);
+    }
+
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
 
         if(!givenId.matches(DIGITS_REGEX)){

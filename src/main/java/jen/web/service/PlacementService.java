@@ -111,7 +111,7 @@ public class PlacementService implements EntityService<Placement> {
         savedResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(savedResult));
         placementClassroomRepository.saveAll(savedResult.getClasses());
 
-        placement.getResults().add(savedResult);
+        placement.addResult(savedResult);
         placementRepository.save(placement);
     }
 

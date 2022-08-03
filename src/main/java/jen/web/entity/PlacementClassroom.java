@@ -84,6 +84,10 @@ public class PlacementClassroom extends BaseEntity {
         return pupils.stream().map(Pupil::getId).toList();
     }
 
+    public Set<Pupil> getPupils() {
+        return Collections.unmodifiableSet(pupils);
+    }
+
     public int getNumberOfWrongConnectionsToInclude(){
         int wrongConnections = 0;
         Map<Long, Set<Long>> connectionsMap = connectionsToInclude.getValues();
