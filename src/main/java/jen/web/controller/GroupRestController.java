@@ -115,11 +115,13 @@ public class GroupRestController extends BaseRestController<Group> {
                 .body(allEntities);
     }
 
-    @PutMapping("/{groupId}/preferences/{selectorId}/{SelectedId}")
-    public ResponseEntity<?> addPreference(@RequestBody Preference preference) {
+    @PutMapping("/{groupId}/preferences")
+    public ResponseEntity<?> addOrUpdatePreference(@PathVariable Long groupId,
+                                           @RequestBody Preference preference) {
 
         try {
-            groupService.addPupilPreference(preference);
+            Group group = groupService.getOr404(groupId);
+            groupService.addPupilPreference(group, preference);
             return ResponseEntity.ok().build();
 
         } catch (Group.PupilNotBelongException | Preference.SamePupilException e) {
@@ -134,11 +136,11 @@ public class GroupRestController extends BaseRestController<Group> {
                                               @PathVariable Long SelectedId) {
 
         Group group = groupService.getOr404(groupId);
-        Set<Preference> preferences = group.getPreferencesForPupils(selectorId, SelectedId);
-
-        for(Preference preference : preferences){
-            groupService.deletePupilPreferences(preference);
-        }
+//        Set<Preference> preferences = group.getPreferencesForPupils(selectorId, SelectedId);
+//
+//        for(Preference preference : preferences){
+//            groupService.deletePupilPreferences(preference);
+//        }
 
         return ResponseEntity.ok().build();
     }

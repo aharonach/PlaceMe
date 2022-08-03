@@ -26,7 +26,7 @@ public class Preference {
     @JsonIgnore
     private Group group;
 
-    public Preference(Pupil selector, Pupil selected, boolean isSelectorWantToBeWithSelected, Group group) throws SamePupilException {
+    public Preference(Pupil selector, Pupil selected, boolean isSelectorWantToBeWithSelected) throws SamePupilException {
         if(selector.getId().equals(selected.getId())){
             throw new SamePupilException();
         }
@@ -34,7 +34,6 @@ public class Preference {
         this.selectorSelectedId.setSelectorId(selector.getId());
         this.selectorSelectedId.setSelectedId(selected.getId());
         this.isSelectorWantToBeWithSelected = isSelectorWantToBeWithSelected;
-        this.group = group;
     }
 
     @Override
