@@ -130,17 +130,12 @@ public class GroupRestController extends BaseRestController<Group> {
 
     }
 
-    @DeleteMapping("/{groupId}/preferences/{selectorId}/{SelectedId}")
+    @DeleteMapping("/{groupId}/preferences")
     public ResponseEntity<?> deletePreference(@PathVariable Long groupId,
-                                              @PathVariable Long selectorId,
-                                              @PathVariable Long SelectedId) {
+                                              @RequestBody Preference preference) {
 
         Group group = groupService.getOr404(groupId);
-//        Set<Preference> preferences = group.getPreferencesForPupils(selectorId, SelectedId);
-//
-//        for(Preference preference : preferences){
-//            groupService.deletePupilPreferences(preference);
-//        }
+        groupService.deletePupilPreferences(group, preference);
 
         return ResponseEntity.ok().build();
     }

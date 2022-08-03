@@ -96,7 +96,7 @@ public class PupilService implements EntityService<Pupil>{
             group.getPlacements().forEach(placement -> placement.removePupilFromAllResults(pupil));
             group.removePupil(pupil);
             pupil.removeFromGroup(group);
-            groupService.deletePupilPreferences(pupil, group);
+            groupService.deletePupilPreferences(group, pupil);
         }
 
         pupilRepository.delete(pupil);

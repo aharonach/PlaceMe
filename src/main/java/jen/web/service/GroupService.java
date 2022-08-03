@@ -121,8 +121,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Transactional
-    public void deletePupilPreferences(Preference preference) {
-        Group group = preference.getGroup();
+    public void deletePupilPreferences(Group group, Preference preference) {
         Long selectorId = preference.getSelectorSelectedId().getSelectorId();
         Long selectedId = preference.getSelectorSelectedId().getSelectedId();
 
@@ -132,7 +131,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Transactional
-    public void deletePupilPreferences(Pupil pupil, Group group){
+    public void deletePupilPreferences(Group group, Pupil pupil){
         Set<SelectorSelectedId> selectorSelectedIds = group.getAllPreferencesForPupil(pupil.getId())
                 .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
         preferenceRepository.deleteAllById(selectorSelectedIds);
