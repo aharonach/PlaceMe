@@ -61,6 +61,10 @@ public class Group extends BaseEntity {
         this.template = template;
     }
 
+    public Integer getNumberOfPupils(){
+        return pupils.size();
+    }
+
     public void setPupils(Set<Pupil> pupils) {
         this.pupils.forEach(this::removePupil);
         pupils.forEach(this::addPupil);
@@ -96,15 +100,24 @@ public class Group extends BaseEntity {
         return pupil.get();
     }
 
-    public void addPreference(Pupil selector, Pupil selected, boolean wantToBeTogether) throws Preference.SamePupilException {
-        preferences.add(new Preference(selector, selected, wantToBeTogether, this));
+    public void addOrUpdatePreference(Pupil selector, Pupil selected, boolean wantToBeTogether) throws Preference.SamePupilException {
+        Optional<Preference> optionalPreference = getPreferencesForPupils(selector.getId(), selected.getId());
+        Preference preference;
+        if(optionalPreference.isPresent()){
+            preference = optionalPreference.get();
+            preference.setIsSelectorWantToBeWithSelected(wantToBeTogether);
+        } else {
+            preference = new Preference(selector, selected, wantToBeTogether);
+            preferences.add(preference);
+            preference.setGroup(this);
+        }
     }
 
-    public Set<Preference> getPreferencesForPupils(Long selectorId, Long selectedId){
+    public Optional<Preference> getPreferencesForPupils(Long selectorId, Long selectedId){
         return preferences.stream()
                 .filter(preference -> preference.getSelectorSelectedId().getSelectorId().equals(selectorId))
                 .filter(preference -> preference.getSelectorSelectedId().getSelectedId().equals(selectedId))
-                .collect(Collectors.toSet());
+                .findFirst();
     }
 
     public Set<Preference> getAllPreferencesForPupil(Long pupilId){

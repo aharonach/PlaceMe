@@ -78,7 +78,6 @@ public class GroupService implements EntityService<Group> {
     @Transactional
     public void deleteById(Long id) {
         Group group = getOr404(id);
-        verifyGroupNotAssociated(group);
 
         if(group.getTemplate() != null){
             group.getTemplate().getGroups().remove(group);
@@ -86,6 +85,10 @@ public class GroupService implements EntityService<Group> {
         group.setTemplate(null);
         deleteAllPreferencesFromGroup(group);
         RemoveAllPupilsFromGroup(group);
+
+        group.getPlacements().forEach(placement -> {
+            placement.setGroup(null);
+        });
 
         groupRepository.delete(group);
     }
@@ -107,18 +110,18 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Transactional
-    public void addPupilPreference(Preference preference) throws Group.PupilNotBelongException, Preference.SamePupilException {
-        Group group = preference.getGroup();
+    public void addPupilPreference(Group group, Preference preference) throws Group.PupilNotBelongException, Preference.SamePupilException {
         Pupil selector = group.getPupilById(preference.getSelectorSelectedId().getSelectorId());
         Pupil selected = group.getPupilById(preference.getSelectorSelectedId().getSelectedId());
-        group.addPreference(selector, selected, preference.getIsSelectorWantToBeWithSelected());
+
+        group.addOrUpdatePreference(selector, selected, preference.getIsSelectorWantToBeWithSelected());
 
         preferenceRepository.saveAllAndFlush(group.getPreferences());
+        groupRepository.save(group);
     }
 
     @Transactional
-    public void deletePupilPreferences(Preference preference) {
-        Group group = preference.getGroup();
+    public void deletePupilPreferences(Group group, Preference preference) {
         Long selectorId = preference.getSelectorSelectedId().getSelectorId();
         Long selectedId = preference.getSelectorSelectedId().getSelectedId();
 
@@ -128,7 +131,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Transactional
-    public void deletePupilPreferences(Pupil pupil, Group group){
+    public void deletePupilPreferences(Group group, Pupil pupil){
         Set<SelectorSelectedId> selectorSelectedIds = group.getAllPreferencesForPupil(pupil.getId())
                 .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
         preferenceRepository.deleteAllById(selectorSelectedIds);

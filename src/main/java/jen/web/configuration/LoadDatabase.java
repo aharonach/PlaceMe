@@ -149,9 +149,9 @@ public class LoadDatabase {
         Pupil pupil2 = pupilService.getOr404(2L);
         Pupil pupil3 = pupilService.getOr404(3L);
 
-        groupService.addPupilPreference(new Preference(pupil1, pupil2, true, group));
-        groupService.addPupilPreference(new Preference(pupil2, pupil3, true, group));
-        groupService.addPupilPreference(new Preference(pupil3, pupil1, false, group));
+        groupService.addPupilPreference(group, new Preference(pupil1, pupil2, true));
+        groupService.addPupilPreference(group, new Preference(pupil2, pupil3, true));
+        groupService.addPupilPreference(group, new Preference(pupil3, pupil1, false));
     }
 
     private void createPlacementResult(){
