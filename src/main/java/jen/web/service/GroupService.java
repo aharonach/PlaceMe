@@ -43,6 +43,11 @@ public class GroupService implements EntityService<Group> {
             throw new EntityAlreadyExists("Group with Id '" + id + "' already exists.");
         }
 
+        if(group.getTemplate() != null){
+            Template template = templateService.getOr404(group.getTemplate().getId());
+            group.setTemplate(template);
+        }
+
         return groupRepository.save(group);
     }
 
@@ -67,8 +72,6 @@ public class GroupService implements EntityService<Group> {
         if(newGroup.getTemplate() != null){
             Template template = templateService.getOr404(newGroup.getTemplate().getId());
             group.setTemplate(template);
-            template.getGroups().add(group);
-            templateRepository.save(template);
         }
 
         return groupRepository.save(group);

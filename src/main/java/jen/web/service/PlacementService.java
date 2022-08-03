@@ -38,7 +38,7 @@ public class PlacementService implements EntityService<Placement> {
 
     private final PlacementClassroomRepository placementClassroomRepository;
 
-    private final GroupRepository groupRepository;
+    private final GroupService groupService;
 
     @Override
     @Transactional
@@ -48,8 +48,12 @@ public class PlacementService implements EntityService<Placement> {
             throw new EntityAlreadyExists("Placement with Id '" + id + "' already exists.");
         }
 
+        if(placement.getGroup() != null){
+            Group group = groupService.getOr404(placement.getGroup().getId());
+            placement.setGroup(group);
+        }
+
         Placement res = placementRepository.save(placement);
-        groupRepository.save(placement.getGroup());
         return res;
     }
 
@@ -64,14 +68,21 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     @Override
+    @Transactional
     public Placement updateById(Long id, Placement newPlacement) {
         Placement placement = getOr404(id);
+        boolean isUpdateGroupNeeded = newPlacement.getGroup() != null && !newPlacement.getGroup().equals(placement.getGroup());
 
         placement.setName(newPlacement.getName());
         placement.setNumberOfClasses(newPlacement.getNumberOfClasses());
-        placement.setGroup(newPlacement.getGroup());
 
-        return placementRepository.save(placement);
+        if(isUpdateGroupNeeded){
+            Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
+            placement.setGroup(newGroup);
+        }
+
+        Placement res = placementRepository.save(placement);
+        return res;
     }
 
     @Override

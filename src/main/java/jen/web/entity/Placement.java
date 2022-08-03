@@ -40,6 +40,19 @@ public class Placement extends BaseEntity {
         return results.size();
     }
 
+    public void setGroup(Group group) {
+        // if prev group was defined, remove it
+        if(this.getGroup() != null){
+            this.getGroup().getPlacements().remove(this);
+        }
+
+        if(group != null){
+            group.getPlacements().add(this);
+        }
+
+        this.group = group;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

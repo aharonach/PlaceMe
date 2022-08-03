@@ -59,10 +59,15 @@ public class Group extends BaseEntity {
     @JsonProperty
     public void setTemplate(Template template) {
         this.template = template;
+        template.getGroups().add(this);
     }
 
     public Integer getNumberOfPupils(){
         return pupils.size();
+    }
+
+    public Set<Long> getPlacementsIds(){
+        return placements.stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
 
     public void setPupils(Set<Pupil> pupils) {
