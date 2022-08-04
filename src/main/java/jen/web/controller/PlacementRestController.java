@@ -1,12 +1,16 @@
 package jen.web.controller;
 
 import jen.web.assembler.PlacementModelAssembler;
+import jen.web.assembler.PlacementResultModelAssembler;
 import jen.web.entity.Placement;
 import jen.web.entity.PlacementResult;
+import jen.web.exception.BadRequest;
+import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
@@ -19,24 +23,26 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     private static final Logger logger = LoggerFactory.getLogger(PlacementRestController.class);
     private final PlacementService service;
-    private final PlacementModelAssembler assembler;
+    private final PlacementModelAssembler placementModelAssembler;
+    
+    private final PlacementResultModelAssembler placementResultModelAssembler;
 
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(assembler.toCollectionModel(service.all()));
+        return ResponseEntity.ok(placementModelAssembler.toCollectionModel(service.all()));
     }
 
     @Override
-    @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable Long id) {
-        return ResponseEntity.ok(assembler.toModel(service.getOr404(id)));
+    @GetMapping("/{placementId}")
+    public ResponseEntity<?> get(@PathVariable Long placementId) {
+        return ResponseEntity.ok(placementModelAssembler.toModel(service.getOr404(placementId)));
     }
 
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Placement newRecord) {
-        EntityModel<Placement> entity = assembler.toModel(service.add(newRecord));
+        EntityModel<Placement> entity = placementModelAssembler.toModel(service.add(newRecord));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -44,46 +50,65 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @Override
-    @PostMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Placement updatedRecord) {
-        return ResponseEntity.ok(assembler.toModel(service.updateById(id, updatedRecord)));
+    @PostMapping("/{placementId}")
+    public ResponseEntity<?> update(@PathVariable Long placementId, @RequestBody Placement updatedRecord) {
+        return ResponseEntity.ok(placementModelAssembler.toModel(service.updateById(placementId, updatedRecord)));
     }
 
     @Override
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        service.deleteById(id);
+    @DeleteMapping("/{placementId}")
+    public ResponseEntity<?> delete(@PathVariable Long placementId) {
+        service.deleteById(placementId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{id}/start")
-    //@GetMapping("/{id}/start")
-    public ResponseEntity<?> startPlacement(@PathVariable Long id) {
-        Placement placement = service.getOr404(id);
-        PlacementResult placementResult = service.generatePlacementResult(placement);
+    @PostMapping("/{placementId}/results/generate")
+    public ResponseEntity<?> startPlacement(@PathVariable Long placementId) {
+        Placement placement = service.getOr404(placementId);
+
+        PlacementResult placementResult = null;
+        try {
+            placementResult = service.generatePlacementResult(placement);
+        } catch (PlacementService.PlacementWithoutGroupException e) {
+            throw new PreconditionFailed(e.getMessage());
+        }
 
         return ResponseEntity
                 .ok()
                 .body(EntityModel.of(placementResult));
     }
 
-    @GetMapping("/{id}/results")
-    public ResponseEntity<?> getResults(@PathVariable Long id) {
-        // @todo show an error if not finished to run the algorithm.
-        //CollectionModel<EntityModel<PlacementResult>> allEntities = assembler.toCollectionModel(service.getOr404(id).getResults().values());
-        return ResponseEntity.ok().body(service.getOr404(id).getResults());
+    @GetMapping("/{placementId}/results")
+    public ResponseEntity<?> getResults(@PathVariable Long placementId) {
+        CollectionModel<EntityModel<PlacementResult>> allEntities = placementResultModelAssembler.toCollectionModel(service.getOr404(placementId).getResults());
+        return ResponseEntity.ok().body(allEntities);
     }
 
-//    @GetMapping("/{id}/results/{resultId}")
-//    public ResponseEntity<?> getResult(@PathVariable Long id, @PathVariable Long resultId) {
-//        // @todo show an error if not finished to run the algorithm.
-//        return ResponseEntity.ok().body(service.getOr404(id).getResults().get(resultId));
-//    }
+    @GetMapping("/{placementId}/results/{resultId}")
+    public ResponseEntity<?> getResult(@PathVariable Long placementId, @PathVariable Long resultId) {
 
-//    @DeleteMapping("/{id}/results/{resultId}")
-//    public ResponseEntity<?> deleteResult(@PathVariable Long id, @PathVariable Long resultId) {
-//        // @todo remove an instance of PlacementResult: placement.removeResult(resultId)
-//        service.deletePlacementResultById(id, resultId);
-//        return ResponseEntity.ok().build();
-//    }
+        Placement placement = service.getOr404(placementId);
+
+        try {
+            PlacementResult placementResult = service.getResultById(placement, resultId);
+            EntityModel<PlacementResult> entityModel = placementResultModelAssembler.toModel(placementResult);
+            return ResponseEntity.ok().body(entityModel);
+        } catch (Placement.ResultNotExistsException e) {
+            throw new BadRequest(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{placementId}/results/{resultId}")
+    public ResponseEntity<?> deleteResult(@PathVariable Long placementId, @PathVariable Long resultId) {
+
+        Placement placement = service.getOr404(placementId);
+
+        try {
+            service.deletePlacementResultById(placement, resultId);
+        } catch (Placement.ResultNotExistsException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
+        return ResponseEntity.ok().build();
+    }
 }

@@ -61,6 +61,10 @@ public class PlacementService implements EntityService<Placement> {
         return placementRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
     }
 
+    public PlacementResult getPlacementResultOr404(Long id) {
+        return placementResultRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement result " + id));
+    }
+
     @Override
     public List<Placement> all() {
         return placementRepository.findAll();
@@ -139,7 +143,9 @@ public class PlacementService implements EntityService<Placement> {
         placementResultRepository.deleteById(resultId);
     }
 
-    public PlacementResult generatePlacementResult(Placement placement) {
+    public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException {
+        verifyPlacementContainsDataForGeneration(placement);
+
         PlaceEngine placeEngine = new PlaceEngine(placement);
         Engine<BitGene, Double> engine = placeEngine.getEngine();
 
@@ -155,5 +161,26 @@ public class PlacementService implements EntityService<Placement> {
 
         savePlacementResult(placement, placementResult);
         return placementResult;
+    }
+
+    private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException {
+        if(placement.getGroup() == null){
+            throw new PlacementWithoutGroupException();
+        }
+
+        // @todo: attr values will be empty. should we avoid starting a placement in this case?
+        if(placement.getGroup().getTemplate() == null){
+            System.out.println("group not have template");
+        }
+    }
+
+    public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
+        return placement.getResultById(resultID);
+    }
+
+    public static class PlacementWithoutGroupException extends Exception {
+        public PlacementWithoutGroupException(){
+            super("Placement must be assigned to a Group");
+        }
     }
 }

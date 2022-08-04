@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -79,6 +78,9 @@ public class LoadDatabase {
                 System.out.println(classInfo.getPupils());
             });
 
+            templateService.deleteById(1L);
+            templateService.deleteById(2L);
+            templateService.deleteById(3L);
         };
     }
 
@@ -154,7 +156,7 @@ public class LoadDatabase {
         groupService.addPupilPreference(group, new Preference(pupil3, pupil1, false));
     }
 
-    private void createPlacementResult(){
+    private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException {
         Placement placement = placementService.all().get(0);
         placementService.generatePlacementResult(placement);
     }
