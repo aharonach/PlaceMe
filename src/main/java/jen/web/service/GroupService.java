@@ -43,6 +43,12 @@ public class GroupService implements EntityService<Group> {
             throw new EntityAlreadyExists("Group with Id '" + id + "' already exists.");
         }
 
+        if(group.getTemplate() != null){
+            Template template = templateService.getOr404(group.getTemplate().getId());
+            group.setTemplate(template);
+            template.addGroup(group);
+        }
+
         return groupRepository.save(group);
     }
 
@@ -65,10 +71,15 @@ public class GroupService implements EntityService<Group> {
         group.setDescription(newGroup.getDescription());
 
         if(newGroup.getTemplate() != null){
-            Template template = templateService.getOr404(newGroup.getTemplate().getId());
-            group.setTemplate(template);
-            template.getGroups().add(group);
-            templateRepository.save(template);
+            Template newTemplate = templateService.getOr404(newGroup.getTemplate().getId());
+
+            Set<Long> newGroupIds = newTemplate.getGroupIds();
+            if(group.getTemplate() != null){
+                newGroupIds.remove(group.getTemplate().getId());
+            }
+
+            group.setTemplate(newTemplate);
+            newTemplate.setGroups(groupRepository.getAllByIdIn(newGroupIds));
         }
 
         return groupRepository.save(group);
@@ -80,7 +91,7 @@ public class GroupService implements EntityService<Group> {
         Group group = getOr404(id);
 
         if(group.getTemplate() != null){
-            group.getTemplate().getGroups().remove(group);
+            group.getTemplate().removeGroup(group);
         }
         group.setTemplate(null);
         deleteAllPreferencesFromGroup(group);

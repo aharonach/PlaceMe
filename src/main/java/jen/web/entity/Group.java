@@ -65,6 +65,18 @@ public class Group extends BaseEntity {
         return pupils.size();
     }
 
+    public Set<Long> getPlacementIds(){
+        return placements.stream().map(BaseEntity::getId).collect(Collectors.toSet());
+    }
+
+    public void addPlacement(Placement placement){
+        placements.add(placement);
+    }
+
+    public void removePlacement(Placement placement){
+        placements.remove(placement);
+    }
+
     public void setPupils(Set<Pupil> pupils) {
         this.pupils.forEach(this::removePupil);
         pupils.forEach(this::addPupil);
@@ -86,6 +98,14 @@ public class Group extends BaseEntity {
 
     public Set<Pupil> getPupils(){
         return Collections.unmodifiableSet(pupils);
+    }
+
+    public Set<Preference> getPreferences() {
+        return Collections.unmodifiableSet(preferences);
+    }
+
+    public Set<Placement> getPlacements() {
+        return Collections.unmodifiableSet(placements);
     }
 
     public Pupil getPupilById(Long pupilId) throws PupilNotBelongException {

@@ -80,7 +80,7 @@ public class PupilService implements EntityService<Pupil>{
         pupil.setBirthDate(newPupil.getBirthDate());
 
         if ( !newPupil.getAttributeValues().isEmpty() ) {
-            pupil.setAttributeValues(newPupil.getAttributeValues());
+            pupil.setAttributeValues(new HashSet<>(newPupil.getAttributeValues()));
         }
 
         return pupilRepository.save(pupil);

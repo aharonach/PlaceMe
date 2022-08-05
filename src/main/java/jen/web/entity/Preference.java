@@ -15,7 +15,6 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Preference {
     @EmbeddedId
-    //@JsonIgnore
     private SelectorSelectedId selectorSelectedId = new SelectorSelectedId();
 
     private Boolean isSelectorWantToBeWithSelected;

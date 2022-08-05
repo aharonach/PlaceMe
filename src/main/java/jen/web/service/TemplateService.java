@@ -38,7 +38,7 @@ public class TemplateService implements EntityService<Template> {
             throw new EntityAlreadyExists("Template with Id '" + id + "' already exists.");
         }
 
-        template.getGroups().clear();
+        template.clearGroups();
         return templateRepository.save(template);
     }
 
@@ -89,8 +89,8 @@ public class TemplateService implements EntityService<Template> {
         });
         template.getGroups().forEach(group -> {
             group.setTemplate(null);
-            template.getGroups().remove(group);
         });
+        template.clearGroups();
 
         attributeRepository.deleteAll(template.getAttributes());
         templateRepository.delete(template);

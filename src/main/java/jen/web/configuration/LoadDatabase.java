@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -79,6 +78,9 @@ public class LoadDatabase {
                 System.out.println(classInfo.getPupils());
             });
 
+            templateService.deleteById(1L);
+            templateService.deleteById(2L);
+            templateService.deleteById(3L);
         };
     }
 
@@ -113,12 +115,12 @@ public class LoadDatabase {
     private void createGroups(){
         Template template = templateService.getOr404(2L);
 
-        Group group = groupService.add(new Group("group 1", "group 1 desc", template));
-        pupilService.all().forEach(pupil -> groupService.addPupilToGroup(group, pupil));
+        Group group1 = groupService.add(new Group("group 1", "group 1 desc", template));
+        pupilService.all().forEach(pupil -> groupService.addPupilToGroup(group1, pupil));
+        logger.info("Preloading " + group1);
 
-        logger.info("Preloading " + group);
-
-        //logger.info("Preloading " + groupService.updateById(group.getId(), group));
+        Group group2 = groupService.add(new Group("group 2", "group 2 desc", template));
+        logger.info("Preloading " + group2);
     }
 
     private void createAttributeValues() throws Group.PupilNotBelongException {
@@ -135,7 +137,7 @@ public class LoadDatabase {
             }
         });
 
-        pupilService.removeAttributeValues(pupilService.all().get(0), group, Set.of(1L));
+        //pupilService.removeAttributeValues(pupilService.all().get(0), group, Set.of(1L));
     }
 
     private void createPlacements(){
@@ -154,7 +156,7 @@ public class LoadDatabase {
         groupService.addPupilPreference(group, new Preference(pupil3, pupil1, false));
     }
 
-    private void createPlacementResult(){
+    private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException {
         Placement placement = placementService.all().get(0);
         placementService.generatePlacementResult(placement);
     }

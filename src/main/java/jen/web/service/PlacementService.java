@@ -8,11 +8,9 @@ import io.jenetics.engine.Limits;
 import jen.web.engine.PlaceEngine;
 import jen.web.entity.Group;
 import jen.web.entity.Placement;
-import jen.web.entity.PlacementClassroom;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
-import jen.web.repository.GroupRepository;
 import jen.web.repository.PlacementClassroomRepository;
 import jen.web.repository.PlacementRepository;
 import jen.web.repository.PlacementResultRepository;
@@ -22,9 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +36,7 @@ public class PlacementService implements EntityService<Placement> {
 
     private final PlacementClassroomRepository placementClassroomRepository;
 
-    private final GroupRepository groupRepository;
+    private final GroupService groupService;
 
     @Override
     @Transactional
@@ -48,8 +46,13 @@ public class PlacementService implements EntityService<Placement> {
             throw new EntityAlreadyExists("Placement with Id '" + id + "' already exists.");
         }
 
+        if(placement.getGroup() != null){
+            Group group = groupService.getOr404(placement.getGroup().getId());
+            group.addPlacement(placement);
+            placement.setGroup(group);
+        }
+
         Placement res = placementRepository.save(placement);
-        groupRepository.save(placement.getGroup());
         return res;
     }
 
@@ -58,20 +61,38 @@ public class PlacementService implements EntityService<Placement> {
         return placementRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
     }
 
+    public PlacementResult getPlacementResultOr404(Long id) {
+        return placementResultRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement result " + id));
+    }
+
     @Override
     public List<Placement> all() {
         return placementRepository.findAll();
     }
 
     @Override
+    @Transactional
     public Placement updateById(Long id, Placement newPlacement) {
         Placement placement = getOr404(id);
+        boolean isUpdateGroupNeeded = newPlacement.getGroup() != null && !newPlacement.getGroup().equals(placement.getGroup());
 
         placement.setName(newPlacement.getName());
         placement.setNumberOfClasses(newPlacement.getNumberOfClasses());
-        placement.setGroup(newPlacement.getGroup());
 
-        return placementRepository.save(placement);
+        if(isUpdateGroupNeeded){
+            Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
+
+            Set<Long> newPlacementIdsForGroup =placement.getGroup().getPlacementIds();
+            if(placement.getGroup() != null){
+                newPlacementIdsForGroup.remove(placement.getId());
+            }
+
+            placement.setGroup(newGroup);
+            newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIdsForGroup));
+        }
+
+        Placement res = placementRepository.save(placement);
+        return res;
     }
 
     @Override
@@ -80,7 +101,7 @@ public class PlacementService implements EntityService<Placement> {
         Placement placement = getOr404(id);
         Group group = placement.getGroup();
 
-        group.getPlacements().remove(placement);
+        group.removePlacement(placement);
         deleteAllPlacementResults(placement);
 
         placementRepository.delete(placement);
@@ -94,7 +115,7 @@ public class PlacementService implements EntityService<Placement> {
         savedResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(savedResult));
         placementClassroomRepository.saveAll(savedResult.getClasses());
 
-        placement.getResults().add(savedResult);
+        placement.addResult(savedResult);
         placementRepository.save(placement);
     }
 
@@ -111,7 +132,7 @@ public class PlacementService implements EntityService<Placement> {
     public void deletePlacementResultById(Placement placement, Long resultId) throws Placement.ResultNotExistsException {
         PlacementResult placementResult = placement.getResultById(resultId);
 
-        placement.getResults().remove(placementResult);
+        placement.removeResult(placementResult);
         placementResult.setPlacement(null);
         placementResult.getClasses().forEach(placementClassroom -> {
             placementClassroom.setPlacementResult(null);
@@ -122,7 +143,9 @@ public class PlacementService implements EntityService<Placement> {
         placementResultRepository.deleteById(resultId);
     }
 
-    public PlacementResult generatePlacementResult(Placement placement) {
+    public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException {
+        verifyPlacementContainsDataForGeneration(placement);
+
         PlaceEngine placeEngine = new PlaceEngine(placement);
         Engine<BitGene, Double> engine = placeEngine.getEngine();
 
@@ -138,5 +161,26 @@ public class PlacementService implements EntityService<Placement> {
 
         savePlacementResult(placement, placementResult);
         return placementResult;
+    }
+
+    private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException {
+        if(placement.getGroup() == null){
+            throw new PlacementWithoutGroupException();
+        }
+
+        // @todo: attr values will be empty. should we avoid starting a placement in this case?
+        if(placement.getGroup().getTemplate() == null){
+            System.out.println("group not have template");
+        }
+    }
+
+    public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
+        return placement.getResultById(resultID);
+    }
+
+    public static class PlacementWithoutGroupException extends Exception {
+        public PlacementWithoutGroupException(){
+            super("Placement must be assigned to a Group");
+        }
     }
 }

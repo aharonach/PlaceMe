@@ -1,10 +1,12 @@
 package jen.web.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -19,7 +21,6 @@ public class Template extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Attribute> attributes = new HashSet<>();
 
-    @Setter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Group> groups = new HashSet<>();
 
@@ -32,6 +33,27 @@ public class Template extends BaseEntity {
         this.name = name;
         this.description = description;
         this.attributes = attributes;
+    }
+
+    public Set<Group> getGroups() {
+        return Collections.unmodifiableSet(groups);
+    }
+
+    public void clearGroups(){
+        groups.clear();
+    }
+
+    public void addGroup(Group group){
+        groups.add(group);
+    }
+
+    public void removeGroup(Group group){
+        groups.remove(group);
+    }
+
+    @JsonIgnore
+    public Set<Long> getGroupIds(){
+        return this.groups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
 
     public void addAttribute(Attribute attribute){

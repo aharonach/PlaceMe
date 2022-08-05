@@ -33,7 +33,23 @@ public class Placement extends BaseEntity {
         this.name = name;
         this.numberOfClasses = numberOfClasses;
         this.group = group;
-        group.getPlacements().add(this);
+        group.addPlacement(this); //@todo: check
+    }
+
+    public Integer getNumberOfResults(){
+        return results.size();
+    }
+
+    public Set<PlacementResult> getResults() {
+        return Collections.unmodifiableSet(results);
+    }
+
+    public void addResult(PlacementResult placementResult){
+        results.add(placementResult);
+    }
+
+    public void removeResult(PlacementResult placementResult){
+        results.remove(placementResult);
     }
 
     @Override
