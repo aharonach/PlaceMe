@@ -13,7 +13,8 @@ export default function AddGroup() {
     let methods = useForm({
         defaultValues: {
             name: '',
-            description: ''
+            description: '',
+            templateId: '',
         }
     });
 
@@ -24,7 +25,7 @@ export default function AddGroup() {
             axiosInstance: Api,
             method: 'put',
             url: '/groups',
-            data: {...data}
+            data: {name: data.name, description: data.description, template: { id: data.templateId }}
         });
     };
 

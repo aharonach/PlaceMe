@@ -1,4 +1,8 @@
+import useDynamicOptions from "../../hooks/useDynamicOptions";
+
 export default function FormFields() {
+    const templates = useDynamicOptions( '/templates', 'templateList' );
+
     return [
         {
             id: "name",
@@ -9,6 +13,12 @@ export default function FormFields() {
             id: "description",
             label: "Description",
             type: "textarea",
+        },
+        {
+            id: "templateId",
+            label: "Template",
+            type: "select",
+            options: templates,
         }
     ];
 }

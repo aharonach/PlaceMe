@@ -13,6 +13,8 @@ function PupilPage() {
     const [deleted, setDeleted] = useState(false);
     let navigate = useNavigate();
 
+    deleted && navigate('/pupils', { replace: true });
+
     const getPupil = () => {
         axiosFetch({
             axiosInstance: Api,
@@ -26,16 +28,11 @@ function PupilPage() {
             axiosInstance: Api,
             method: 'delete',
             url: `/pupils/${pupilId}`,
-        });
-        setDeleted(true);
+        }).then(() => setDeleted(true));
     }
 
     useEffect(() => {
         getPupil();
-
-        if ( deleted ) {
-            navigate('/pupils', { replace: true });
-        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

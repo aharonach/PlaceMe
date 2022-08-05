@@ -12,6 +12,8 @@ export default function GroupPage() {
     const [deleted, setDeleted] = useState(false);
     let navigate = useNavigate();
 
+    deleted && navigate('/groups', {replace: true});
+
     const getGroup = () => {
         axiosFetch({
             axiosInstance: Api,
@@ -25,16 +27,11 @@ export default function GroupPage() {
             axiosInstance: Api,
             method: 'delete',
             url: `/groups/${groupId}`,
-        });
-        setDeleted(true);
+        }).then(() => setDeleted(true));
     }
 
     useEffect(() => {
         getGroup();
-
-        return () => {
-            return deleted ? navigate('/groups', {replace: true}) : false
-        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

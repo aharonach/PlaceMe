@@ -8,18 +8,18 @@ import {getDefaultValuesByFields} from "../../utils";
 import FormFields from "./FormFields";
 
 export default function EditGroup({ group }) {
-    const [response, error, loading, axiosFetch] = useAxios();
-
     let methods = useForm({
         defaultValues: { ...getDefaultValuesByFields(FormFields(), group) }
     });
+
+    const [response, error, loading, axiosFetch] = useAxios();
 
     const onSubmit = data => {
         axiosFetch({
             axiosInstance: Api,
             method: 'post',
             url: `/groups/${group.id}`,
-            data: {...data}
+            data: {name: data.name, description: data.description, template: { id: data.templateId }}
         });
     };
 
