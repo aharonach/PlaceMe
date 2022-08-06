@@ -29,9 +29,11 @@ export default function GroupsAttributes({ pupilGroups }) {
                     </Col>
                     <Col sm={9}>
                         <Tab.Content>
-                            <Tab.Pane key={group.id} eventKey={group.id}>
-                                <Attributes group={group} />
-                            </Tab.Pane>
+                            {group && (
+                                <Tab.Pane key={group.id} eventKey={group.id}>
+                                    <Attributes group={group}/>
+                                </Tab.Pane>
+                            )}
                         </Tab.Content>
                     </Col>
                 </Row>

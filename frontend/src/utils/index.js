@@ -2,7 +2,7 @@ export function extractListFromAPI(object, property, mapCallback = null ) {
     const embedded = object?._embedded;
 
     if ( ! ( embedded && embedded[property] ) ) {
-        return null;
+        return [];
     }
 
     if ( mapCallback ) {
