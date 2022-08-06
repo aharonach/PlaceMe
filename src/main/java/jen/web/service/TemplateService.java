@@ -1,14 +1,11 @@
 package jen.web.service;
 
 import jen.web.entity.Attribute;
-import jen.web.entity.BaseEntity;
-import jen.web.entity.Group;
 import jen.web.entity.Template;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeRepository;
 import jen.web.repository.AttributeValueRepository;
-import jen.web.repository.GroupRepository;
 import jen.web.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -18,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
