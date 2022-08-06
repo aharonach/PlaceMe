@@ -10,6 +10,7 @@ export default function Attributes({ template }) {
     const [editAttribute, setEditAttribute] = useState(null);
 
     const columns = {
+        id: "ID",
         name: "Name",
         description: "Description",
         type: "Type",

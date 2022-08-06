@@ -1,18 +1,20 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useMemo} from "react";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
 import HtmlForm from "../Forms/HtmlForm";
 import {useForm} from "react-hook-form";
 import Loading from "../Loading";
 import {Alert} from "react-bootstrap";
-import { extractListFromAPI, prepareCheckboxGroup } from "../../utils";
+import {extractListFromAPI, prepareCheckboxGroup} from "../../utils";
 
 export default function Groups({ pupilGroups, onSubmit, updated }) {
     const [groups, error, loading, axiosFetch] = useAxios();
+    const defaultGroups = useMemo(() => extractListFromAPI(pupilGroups, 'groupList', group => group.id.toString() ), [pupilGroups]);
+    const checkboxes = useMemo(() => extractListFromAPI(groups, 'groupList', prepareCheckboxGroup('id', 'name' )), [groups]);
 
     let methods = useForm({
         defaultValues: {
-            groups: extractListFromAPI(pupilGroups, 'groupList', group => group.id.toString() )
+            groups: defaultGroups
         }
     });
 
@@ -28,7 +30,7 @@ export default function Groups({ pupilGroups, onSubmit, updated }) {
         {
             id: 'groups',
             type: 'checkbox',
-            options: extractListFromAPI(groups, 'groupList', prepareCheckboxGroup('id', 'name')),
+            options: checkboxes,
         }
     ];
 

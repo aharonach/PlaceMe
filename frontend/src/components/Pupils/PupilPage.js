@@ -3,7 +3,7 @@ import {useParams, useNavigate} from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
 import Loading from "../Loading";
-import {Alert, Button} from "react-bootstrap";
+import {Alert, Button, Col, Row} from "react-bootstrap";
 import EditPupil from './EditPupil';
 import EditGroups from "./EditGroups";
 
@@ -41,11 +41,16 @@ export default function PupilPage() {
                 <article className="pupil">
                     <h2>{pupil.firstName} {pupil.lastName}</h2>
                     <Button variant="danger" onClick={handleDelete}>Delete Pupil</Button>
-                    <EditPupil pupil={pupil} />
-
-                    {/** Groups **/}
-                    <EditGroups pupil={pupil} />
+                    <Row className="mt-3">
+                        <Col md={6}>
+                            <EditPupil pupil={pupil} />
+                        </Col>
+                        <Col md={6}>
+                            <EditGroups pupil={pupil} />
+                        </Col>
+                    </Row>
                 </article>
+
             }
         </>
     )

@@ -4,6 +4,7 @@ import Api from "../../api";
 import {Alert} from "react-bootstrap";
 import Loading from "../Loading";
 import Groups from "./Groups";
+import GroupsAttributes from "./GroupsAttributes";
 
 export default function EditGroups({ pupil }) {
     const [groups, error, loading, axiosFetch] = useAxios();
@@ -36,7 +37,12 @@ export default function EditGroups({ pupil }) {
         <>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && groups && <Groups pupilGroups={groups} onSubmit={updateGroups} updated={updated} />}
+            {!loading && !error && groups && (
+                <>
+                    <Groups pupilGroups={groups} onSubmit={updateGroups} updated={updated} />
+                    <GroupsAttributes pupilGroups={groups} />
+                </>
+            )}
         </>
     );
 }

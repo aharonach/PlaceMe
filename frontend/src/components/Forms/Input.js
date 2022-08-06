@@ -12,7 +12,7 @@ export default function Input({ field: settings, control, hasError }) {
             rules={settings.rules}
             render={({ field }) => {
                 const type = settings.type && FIELD_TYPES.includes( settings.type ) ? settings.type : 'text';
-                return <Form.Control type={type} {...field} {...settings?.bsProps} isInvalid={hasError} />
+                return <Form.Control type={type} {...field} value={field.value || settings.defaultValue || ''} {...settings?.bsProps} isInvalid={hasError} />
             }}
         />
     )
