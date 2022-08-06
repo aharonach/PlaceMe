@@ -26,7 +26,7 @@ public class PlacementClassroom extends BaseEntity {
     private transient List<Pupil> pupilsForAlgorithm;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Pupil> pupils;
+    private Set<Pupil> pupils = new LinkedHashSet<>();
 
     @JsonIgnore
     @ToString.Exclude

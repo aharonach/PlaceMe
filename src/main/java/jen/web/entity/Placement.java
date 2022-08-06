@@ -24,7 +24,7 @@ public class Placement extends BaseEntity {
     @Fetch(FetchMode.JOIN)
     private Group group;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy="placement")
     @JsonIgnore
     @ToString.Exclude
     private Set<PlacementResult> results = new LinkedHashSet<>();
