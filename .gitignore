@@ -15,6 +15,7 @@ test.db.*
 # dependencies
 /frontend/node_modules
 /frontend/.pnp
+/frontend/package-lock.json
 .pnp.js
 
 # testing
