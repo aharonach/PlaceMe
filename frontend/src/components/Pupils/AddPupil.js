@@ -28,10 +28,10 @@ export default function AddPupil() {
             method: 'put',
             url: '/pupils',
             data: {...data}
+        }).then((pupil) => {
+            navigate(`/pupils/${pupil.id}`);
         });
     };
-
-    pupil && !error && navigate(`/pupils/${pupil.id}`);
 
     return (
         <>

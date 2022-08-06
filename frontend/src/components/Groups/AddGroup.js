@@ -26,10 +26,10 @@ export default function AddGroup() {
             method: 'put',
             url: '/groups',
             data: {name: data.name, description: data.description, template: { id: data.templateId }}
+        }).then((group) => {
+            navigate(`/groups/${group.id}`);
         });
     };
-
-    group && !error && navigate(`/groups/${group.id}`);
 
     return (
         <>
