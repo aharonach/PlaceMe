@@ -101,7 +101,9 @@ public class PlacementService implements EntityService<Placement> {
         Placement placement = getOr404(id);
         Group group = placement.getGroup();
 
-        group.removePlacement(placement);
+        if(group != null){
+            group.removePlacement(placement);
+        }
         deleteAllPlacementResults(placement);
 
         placementRepository.delete(placement);
