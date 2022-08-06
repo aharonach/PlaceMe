@@ -15,7 +15,6 @@ export default function Select({ field: settings, control, hasError }) {
                             <option
                                 key={option.value ?? `placeholder-${index}`}
                                 value={option.value}
-                                selected={field.value && field.value === option.value ? true : null}
                             >
                                 {option.label}
                             </option>

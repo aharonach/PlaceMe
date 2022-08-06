@@ -7,9 +7,9 @@ const useDynamicOptions = (fetchUrl, property, placeholder, mapCallback) => {
     const [data, setData] = useState([]);
 
     const getData = () => {
-        Api.get('/templates').then(res => {
+        Api.get(fetchUrl).then(res => {
             const options = extractListFromAPI(res.data, property, map);
-            options.unshift([{ value: '', label: 'Select...'}]);
+            options.unshift({ value: '', label: 'Select...'});
             setData(options);
         });
     }
