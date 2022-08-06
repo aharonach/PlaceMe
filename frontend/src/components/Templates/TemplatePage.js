@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useParams, useNavigate} from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
@@ -11,9 +11,6 @@ export default function TemplatePage() {
     let { templateId } = useParams();
     const [template, error, loading, axiosFetch] = useAxios();
     let navigate = useNavigate();
-    const [deleted, setDeleted] = useState(false);
-
-    deleted && navigate('/templates', { replace: true });
 
     const getGroup = () => {
         axiosFetch({
@@ -28,7 +25,7 @@ export default function TemplatePage() {
             axiosInstance: Api,
             method: 'delete',
             url: `/templates/${templateId}`,
-        }).then(() => setDeleted(true));
+        }).then(() => navigate('/templates', { replace: true }));
     }
 
     useEffect(() => {

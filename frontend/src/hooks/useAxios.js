@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 const useAxios = (afterSubmit = null) => {
-    const [response, setResponse] = useState(null);
+    const [response, setResponse] = useState();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [controller, setController] = useState();
@@ -35,8 +35,11 @@ const useAxios = (afterSubmit = null) => {
             } else {
                 setResponse(res.data);
             }
+
+            return res.data;
         } catch (err) {
             setError(err?.response?.data?.message ? err.response.data.message : err.message);
+            return err?.response?.data ?? err;
         } finally {
             setLoading(false);
         }

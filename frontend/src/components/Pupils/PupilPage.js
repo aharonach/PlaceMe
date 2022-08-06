@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useParams, useNavigate} from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
@@ -7,13 +7,10 @@ import {Alert, Button} from "react-bootstrap";
 import EditPupil from './EditPupil';
 import EditGroups from "./EditGroups";
 
-function PupilPage() {
+export default function PupilPage() {
     let { pupilId } = useParams();
     const [pupil, error, loading, axiosFetch] = useAxios();
-    const [deleted, setDeleted] = useState(false);
     let navigate = useNavigate();
-
-    deleted && navigate('/pupils', { replace: true });
 
     const getPupil = () => {
         axiosFetch({
@@ -28,7 +25,7 @@ function PupilPage() {
             axiosInstance: Api,
             method: 'delete',
             url: `/pupils/${pupilId}`,
-        }).then(() => setDeleted(true));
+        }).then(() => navigate('/pupils', { replace: true }));
     }
 
     useEffect(() => {
@@ -53,5 +50,3 @@ function PupilPage() {
         </>
     )
 }
-
-export default PupilPage;

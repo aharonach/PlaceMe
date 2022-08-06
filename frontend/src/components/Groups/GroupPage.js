@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useParams, useNavigate} from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
@@ -9,10 +9,7 @@ import EditGroup from "./EditGroup";
 export default function GroupPage() {
     let { groupId } = useParams();
     const [group, error, loading, axiosFetch] = useAxios();
-    const [deleted, setDeleted] = useState(false);
     let navigate = useNavigate();
-
-    deleted && navigate('/groups', {replace: true});
 
     const getGroup = () => {
         axiosFetch({
@@ -27,7 +24,7 @@ export default function GroupPage() {
             axiosInstance: Api,
             method: 'delete',
             url: `/groups/${groupId}`,
-        }).then(() => setDeleted(true));
+        }).then(() => navigate('/groups', {replace: true}));
     }
 
     useEffect(() => {

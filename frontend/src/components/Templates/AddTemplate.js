@@ -26,10 +26,8 @@ export default function AddTemplate() {
             method: 'put',
             url: '/templates',
             data: {...data}
-        });
+        }).then( template => navigate(`/templates/${template.id}`));
     };
-
-    template && !error && navigate(`/templates/${template.id}`);
 
     return (
         <>
