@@ -19,6 +19,9 @@ export default function FormFields() {
             label: "Template",
             type: "select",
             options: templates,
+            rules: {
+                required: true
+            }
         }
     ];
 }
