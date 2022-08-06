@@ -87,7 +87,7 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public void deleteById(Long id) {
         Pupil pupil = getOr404(id);
 
