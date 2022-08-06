@@ -6,6 +6,7 @@ import * as Pages from './pages';
 import * as Pupil from "./components/Pupils";
 import * as Group from "./components/Groups";
 import * as Template from "./components/Templates";
+import * as Placement from "./components/Placements";
 import {Container} from "react-bootstrap";
 
 function App() {
@@ -30,7 +31,11 @@ function App() {
                         <Route path="add" element={<Template.AddTemplate />} />
                         <Route path=":templateId" element={<Template.TemplatePage />} />
                     </Route>
-                    <Route path="/placements" element={<Pages.Placements />}></Route>
+                    <Route path="/placements" element={<Pages.Placements />}>
+                        <Route index element={<Placement.PlacementsList />}></Route>
+                        <Route path="add" element={<Placement.AddPlacement />}></Route>
+                        <Route path=":placementId" element={<Placement.PlacementPage />}></Route>
+                    </Route>
                     <Route path="*" element={<Pages.ErrorPage />}></Route>
                 </Routes>
                 <Footer />

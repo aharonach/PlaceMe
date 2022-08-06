@@ -44,6 +44,12 @@ public class Pupil extends BaseEntity {
     @Fetch(FetchMode.JOIN)
     private Set<Group> groups = new LinkedHashSet<>();
 
+    @Getter(AccessLevel.NONE)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "pupils_classrooms",
+            joinColumns = @JoinColumn(name = "pupil_id", referencedColumnName = "id"))
+    private Set<PlacementClassroom> classrooms = new LinkedHashSet<>();
+
     public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate)
             throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         setGivenId(givenId);
@@ -130,6 +136,18 @@ public class Pupil extends BaseEntity {
 
     public void removeFromGroup(Group group) {
         groups.remove(group);
+    }
+
+    public Set<Long> getClassroomIds(){
+        return classrooms.stream().map(BaseEntity::getId).collect(Collectors.toSet());
+    }
+
+    public void addToClassrooms(PlacementClassroom placementClassroom){
+        classrooms.add(placementClassroom);
+    }
+
+    public void removeFromClassrooms(PlacementClassroom placementClassroom) {
+        classrooms.remove(placementClassroom);
     }
 
     @JsonIgnore

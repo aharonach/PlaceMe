@@ -34,7 +34,7 @@ public class Group extends BaseEntity {
     @JsonIgnore
     private Set<Preference> preferences = new LinkedHashSet<>();
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "group")
     @JsonIgnore
     private Set<Placement> placements = new LinkedHashSet<>();
 

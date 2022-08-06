@@ -77,10 +77,6 @@ public class LoadDatabase {
                 System.out.print("] | ");
                 System.out.println(classInfo.getPupils());
             });
-
-            templateService.deleteById(1L);
-            templateService.deleteById(2L);
-            templateService.deleteById(3L);
         };
     }
 

@@ -28,7 +28,7 @@ public class PlacementResult extends BaseEntity {
     private transient List<PlacementClassroom> classesForAlgorithm = new ArrayList<>(); // list is needed for the algorithm
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "placementResult")
-    private Set<PlacementClassroom> classes; // Set is better for hibernate
+    private Set<PlacementClassroom> classes = new LinkedHashSet<>(); // Set is better for hibernate
 
     public PlacementResult(List<PlacementClassroom> classesForAlgorithm){
         this.classesForAlgorithm = classesForAlgorithm;

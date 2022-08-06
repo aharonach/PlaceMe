@@ -14,6 +14,7 @@ import jen.web.exception.NotFound;
 import jen.web.repository.PlacementClassroomRepository;
 import jen.web.repository.PlacementRepository;
 import jen.web.repository.PlacementResultRepository;
+import jen.web.repository.PupilRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ public class PlacementService implements EntityService<Placement> {
 
     private final PlacementClassroomRepository placementClassroomRepository;
 
+    private final PupilRepository pupilRepository;
     private final GroupService groupService;
 
     @Override
@@ -101,19 +103,26 @@ public class PlacementService implements EntityService<Placement> {
         Placement placement = getOr404(id);
         Group group = placement.getGroup();
 
-        group.removePlacement(placement);
+        if(group != null){
+            group.removePlacement(placement);
+        }
         deleteAllPlacementResults(placement);
 
         placementRepository.delete(placement);
     }
 
     @Transactional
-    public void savePlacementResult(Placement placement, PlacementResult placementResult){
+    public void savePlacementResult(Placement placement, PlacementResult placementResult) {
         placementResult.setPlacement(placement);
         PlacementResult savedResult = placementResultRepository.save(placementResult);
 
         savedResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(savedResult));
         placementClassroomRepository.saveAll(savedResult.getClasses());
+
+        savedResult.getClasses().forEach(placementClassroom -> {
+            placementClassroom.getPupils().forEach(pupil -> pupil.addToClassrooms(placementClassroom));
+            pupilRepository.saveAll(placementClassroom.getPupils());
+        });
 
         placement.addResult(savedResult);
         placementRepository.save(placement);

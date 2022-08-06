@@ -5,6 +5,7 @@ import jen.web.exception.BadRequest;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
+import jen.web.repository.GroupRepository;
 import jen.web.repository.PupilRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ public class PupilService implements EntityService<Pupil>{
 
     private final PupilRepository pupilRepository;
     private final AttributeValueRepository attributeValueRepository;
+    private final GroupRepository groupRepository;
     private final GroupService groupService;
 
 
@@ -87,12 +89,13 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public void deleteById(Long id) {
         Pupil pupil = getOr404(id);
 
         attributeValueRepository.deleteAll(pupil.getAttributeValues());
-        for(Group group : pupil.getGroups()){
+        Set<Group> groups = groupRepository.getAllByIdIn(pupil.getGroupIds());
+        for(Group group : groups){
             group.getPlacements().forEach(placement -> placement.removePupilFromAllResults(pupil));
             group.removePupil(pupil);
             pupil.removeFromGroup(group);
