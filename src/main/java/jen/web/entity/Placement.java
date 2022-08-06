@@ -36,6 +36,13 @@ public class Placement extends BaseEntity {
         group.addPlacement(this); //@todo: check
     }
 
+    public Long getGroupId(){
+        if(group != null){
+            return group.getId();
+        }
+        return null;
+    }
+
     public Integer getNumberOfResults(){
         return results.size();
     }
