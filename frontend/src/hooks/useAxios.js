@@ -39,7 +39,7 @@ const useAxios = (afterSubmit = null) => {
             return res.data;
         } catch (err) {
             setError(err?.response?.data?.message ? err.response.data.message : err.message);
-            return err?.response?.data ?? err;
+            // return err?.response?.data ?? err;
         } finally {
             setLoading(false);
         }

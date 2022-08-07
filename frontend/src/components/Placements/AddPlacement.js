@@ -30,7 +30,7 @@ export default function AddPlacement(){
             url: '/placements',
             data: {...data}
         }).then((placement) => {
-            navigate(`/placements/${placement.id}`);
+            placement && navigate(`/placements/${placement.id}`);
         });
     };
 

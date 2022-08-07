@@ -29,7 +29,7 @@ export default function AddPupil() {
             url: '/pupils',
             data: {...data}
         }).then((pupil) => {
-            navigate(`/pupils/${pupil.id}`);
+            pupil && navigate(`/pupils/${pupil.id}`);
         });
     };
 

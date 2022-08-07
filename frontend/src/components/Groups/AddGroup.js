@@ -27,7 +27,7 @@ export default function AddGroup() {
             url: '/groups',
             data: {name: data.name, description: data.description, template: { id: data.templateId }}
         }).then((group) => {
-            navigate(`/groups/${group.id}`);
+            group && navigate(`/groups/${group.id}`);
         });
     };
 
