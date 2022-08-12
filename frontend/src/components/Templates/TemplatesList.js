@@ -3,8 +3,9 @@ import TableList from "../TableList";
 import useAxios from "../../hooks/useAxios";
 import Loading from "../Loading";
 import Api from "../../api";
-import {Alert} from "react-bootstrap";
+import {Alert, Button} from "react-bootstrap";
 import { extractListFromAPI } from "../../utils";
+import {LinkContainer} from "react-router-bootstrap";
 
 function TemplatesList() {
     const [templates, error, loading, axiosFetch] = useAxios();
@@ -31,6 +32,7 @@ function TemplatesList() {
 
     return (
         <>
+            <LinkContainer to="add"><Button>Add Template</Button></LinkContainer>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && templates && <TableList linkTo={{field: 'name', basePath: '/templates/'}} items={extractListFromAPI(templates, 'templateList')} columns={columns} />}

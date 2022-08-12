@@ -3,8 +3,9 @@ import TableList from "../TableList";
 import useAxios from "../../hooks/useAxios";
 import Loading from "../Loading";
 import Api from "../../api";
-import {Alert} from "react-bootstrap";
+import {Alert, Button} from "react-bootstrap";
 import { extractListFromAPI } from "../../utils";
+import {LinkContainer} from "react-router-bootstrap";
 
 function PupilsList() {
     const [pupils, error, loading, axiosFetch] = useAxios();
@@ -33,6 +34,7 @@ function PupilsList() {
 
     return (
         <>
+            <LinkContainer to="add"><Button>Add Pupil</Button></LinkContainer>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && pupils && <TableList linkTo={{field: 'givenId', basePath: '/pupils/'}} items={extractListFromAPI(pupils, 'pupilList')} columns={columns} />}
