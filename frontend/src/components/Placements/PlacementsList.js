@@ -11,7 +11,6 @@ function PlacementsList(){
     const [placements, error, loading, axiosFetch] = useAxios();
 
     const columns = {
-        id: "ID",
         name: "Name",
         numberOfClasses: "Number of classes",
         createdTime: "Created Time",
@@ -34,7 +33,7 @@ function PlacementsList(){
         <>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && placements && <TableList basePath="/placements/" items={extractListFromAPI(placements, 'placementList')} columns={columns} />}
+            {!loading && !error && placements && <TableList linkTo={{field: 'name', basePath: '/placements/'}} items={extractListFromAPI(placements, 'placementList')} columns={columns} />}
         </>
     );
 }

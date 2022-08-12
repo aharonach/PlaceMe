@@ -5,7 +5,8 @@ import {Alert, Table} from "react-bootstrap";
 function TableList({
            items,
            columns,
-           basePath = '',
+           linkTo = {field: 'id', basePath: ''},
+           numbering= {enabled: true, startFrom: 1},
            bsProps = { bordered: true, hover: true }
        }) {
 
@@ -15,10 +16,14 @@ function TableList({
         )
     }
 
+    let currentNumber = numbering.startFrom ? Number(numbering.startFrom) : 1;
+
     return (
         <Table {...bsProps}>
             <thead>
                 <tr>
+                    {numbering.enabled && <th>#</th>}
+
                     {columns && Object.keys(columns).map( key => {
                         if ( 'actions' === key ) {
                             return <th key={key}>{columns[key].label}</th>;
@@ -31,10 +36,12 @@ function TableList({
             <tbody>
             {items && items.map( item => (
                 <tr key={item['id']}>
+                    {numbering.enabled && <td>{currentNumber++}</td>}
+
                     {Object.keys(columns).map( key => {
                         // return empty cell for the moment.
-                        if ( 'id' === key ) {
-                            return <td key={key}><Link to={basePath + item[key]}>{item[key]}</Link></td>
+                        if ( linkTo.field === key ) {
+                            return <td key={key}><Link to={linkTo.basePath + item['id']}>{item[key]}</Link></td>
                         }
 
                         if ( 'actions' === key ) {

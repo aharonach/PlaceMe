@@ -10,7 +10,6 @@ function TemplatesList() {
     const [templates, error, loading, axiosFetch] = useAxios();
 
     const columns = {
-        id: "ID",
         name: "Name",
         description: "Description",
         createdTime: "Created Time",
@@ -34,7 +33,7 @@ function TemplatesList() {
         <>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && templates && <TableList basePath="/templates/" items={extractListFromAPI(templates, 'templateList')} columns={columns} />}
+            {!loading && !error && templates && <TableList linkTo={{field: 'name', basePath: '/templates/'}} items={extractListFromAPI(templates, 'templateList')} columns={columns} />}
         </>
     )
 }

@@ -10,7 +10,6 @@ export default function Attributes({ template }) {
     const [editAttribute, setEditAttribute] = useState(null);
 
     const columns = {
-        id: "ID",
         name: "Name",
         description: "Description",
         type: "Type",
@@ -29,7 +28,7 @@ export default function Attributes({ template }) {
         <>
             <h2>Attributes</h2>
             <AddAttribute templateId={template.id} setAttributeList={setAttributeList} />
-            <TableList basePath={`/templates/${template.id}/attributes/`} columns={columns} items={attributeList} />
+            <TableList linkTo={{field: 'name', basePath: `/templates/${template.id}/attributes/`}} columns={columns} items={attributeList} />
             {editAttribute && <EditAttribute templateId={template.id} attribute={editAttribute} setAttribute={setEditAttribute} setAttributeList={setAttributeList} />}
         </>
     );

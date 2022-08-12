@@ -10,7 +10,6 @@ function PupilsList() {
     const [pupils, error, loading, axiosFetch] = useAxios();
 
     const columns = {
-        id: "ID",
         givenId: "Given ID",
         firstName: "First Name",
         lastName: "Last Name",
@@ -36,7 +35,7 @@ function PupilsList() {
         <>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && pupils && <TableList basePath="/pupils/" items={extractListFromAPI(pupils, 'pupilList')} columns={columns} />}
+            {!loading && !error && pupils && <TableList linkTo={{field: 'givenId', basePath: '/pupils/'}} items={extractListFromAPI(pupils, 'pupilList')} columns={columns} />}
         </>
     )
 }
