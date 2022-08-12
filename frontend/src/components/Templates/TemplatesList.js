@@ -14,6 +14,7 @@ function TemplatesList() {
         name: "Name",
         description: "Description",
         createdTime: "Created Time",
+        numberOfAttributes: "Attribues",
     };
 
     const getData = () => {

@@ -35,6 +35,10 @@ public class Template extends BaseEntity {
         this.attributes = attributes;
     }
 
+    public Integer getNumberOfAttributes(){
+        return attributes.size();
+    }
+
     public Set<Group> getGroups() {
         return Collections.unmodifiableSet(groups);
     }

@@ -3,8 +3,9 @@ import TableList from "../TableList";
 import useAxios from "../../hooks/useAxios";
 import Loading from "../Loading";
 import Api from "../../api";
-import {Alert} from "react-bootstrap";
+import {Alert, Button} from "react-bootstrap";
 import { extractListFromAPI } from "../../utils";
+import DeleteAttribute from "../Attributes/DeleteAttribute";
 
 function GroupsList() {
     const [groups, error, loading, axiosFetch] = useAxios();
@@ -14,6 +15,7 @@ function GroupsList() {
         name: "Name",
         description: "Description",
         createdTime: "Created Time",
+        numberOfPupils: "Pupils",
     };
 
     const getData = () => {
