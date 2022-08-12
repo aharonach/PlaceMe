@@ -1,6 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jen.example.placePupils.ClassInfo;
 import lombok.*;
 
 import javax.persistence.*;
@@ -40,40 +41,43 @@ public class PlacementResult extends BaseEntity {
     }
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
-    public double getPlacementScore(){
-        // the target is to get the lowest score (A lower score is better)
-        return getSumOfDeltasBetweenNumOfPupils() * 10
-                + getSumOfDeltasBetweenPupilsScores() * 15
-                + getSumOfDeltasBetweenClassScores() * 10;
+    public double getPlacementScore() {
 
-//        return getPercentageOfPupilsNumber() * 0.15
-//                + getPercentageOfClassScores() * 0.25
-//                + getPercentageOfPupilsScores() * 0.6;
+        return getPercentageOfPupilsNumber() * 0.2
+                + getPercentageOfClassScores() * 0.4
+                + getPercentageOfPupilsScores() * 0.4;
     }
 
-    private double getSumOfDeltasBetweenNumOfPupils(){
-        double avgNumOfStudents = classesForAlgorithm.stream().mapToDouble(PlacementClassroom::getNumOfPupils).sum() / classesForAlgorithm.size();
+    private double getPercentageOfPupilsNumber(){
+        double numOfStudents = classes.stream().mapToDouble(PlacementClassroom::getNumOfPupils).sum();
+        double avgNumOfStudents = numOfStudents / classes.size();
 
-        return classesForAlgorithm.stream()
+        double deltaBetweenNumOfStudents = classes.stream()
                 .map(classInfo -> Math.abs(classInfo.getNumOfPupils() - avgNumOfStudents))
                 .reduce(0d, Double::sum);
+
+        return (deltaBetweenNumOfStudents / numOfStudents) * 100;
     }
 
-    private double getSumOfDeltasBetweenClassScores(){
-        double scoreOfAllClasses = classesForAlgorithm.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
-        double avgScore = scoreOfAllClasses / classesForAlgorithm.size();
+    private double getPercentageOfClassScores(){
+        double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
+        double avgScore = scoreOfAllClasses / classes.size();
 
-        return classesForAlgorithm.stream()
+        double deltaBetweenClassScores = classes.stream()
                 .map(classInfo -> Math.abs(classInfo.getClassScore() - avgScore))
                 .reduce(0d, Double::sum);
+
+        return (deltaBetweenClassScores / scoreOfAllClasses) * 100;
     }
 
-    private double getSumOfDeltasBetweenPupilsScores(){
-        double scoreOfAllPupils = classesForAlgorithm.stream().mapToDouble(PlacementClassroom::getSumScoreOfPupils).sum();
-        double avgScore = scoreOfAllPupils / classesForAlgorithm.size();
+    private double getPercentageOfPupilsScores(){
+        double scoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumScoreOfPupils).sum();
+        double maxScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumMaxScoreOfPupils).sum();
 
-        return classesForAlgorithm.stream()
-                .map(classInfo -> Math.abs(classInfo.getSumScoreOfPupils() - avgScore))
-                .reduce(0d, Double::sum);
+        return (scoreOfAllPupils / maxScoreOfAllPupils) * 100;
+    }
+
+    private int getNumOfPupils(){
+        return (int) classesForAlgorithm.stream().mapToLong(PlacementClassroom::getNumOfPupils).sum();
     }
 }

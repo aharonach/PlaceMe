@@ -68,6 +68,7 @@ public class LoadDatabase {
 
             System.out.println("Result:");
             PlacementResult placementResult = placementService.getOr404(1L).getResultById(1L);
+            System.out.println(placementResult.getPlacementScore());
             System.out.println(placementResult);
             placementResult.getClasses().forEach(classInfo -> {
                 System.out.print("[Pupils: " + classInfo.getNumOfPupils() + " (Males: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.MALE) + " ,Females: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.FEMALE) + " ,Delta: " + classInfo.getDeltaBetweenMalesAndFemales() + ") ");
@@ -106,6 +107,20 @@ public class LoadDatabase {
         logger.info("Preloading " + pupilService.add(
                 new Pupil("307944710", "Shir", "Halfon", Pupil.Gender.FEMALE, LocalDate.of(1993, 4, 6))
         ));
+
+        // add more pupils
+        for(int i=0; i< 9; i++){
+            logger.info("Preloading " + pupilService.add(
+                    new Pupil(String.valueOf(i), "name" + i, "sdfsdfas", Pupil.Gender.FEMALE, LocalDate.of(1990, 1, 1))
+            ));
+        }
+
+        for(int i=20; i< 34; i++){
+            logger.info("Preloading " + pupilService.add(
+                    new Pupil(String.valueOf(i), "name" + i, "sdfsdfas", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
+            ));
+        }
+
     }
 
     private void createGroups(){
@@ -119,7 +134,7 @@ public class LoadDatabase {
         logger.info("Preloading " + group2);
     }
 
-    private void createAttributeValues() throws Group.PupilNotBelongException {
+    private void createAttributeValues() {
         Group group = groupService.getOr404(1L);
         Template template = group.getTemplate();
 
@@ -132,13 +147,11 @@ public class LoadDatabase {
                 throw new RuntimeException(e);
             }
         });
-
-        //pupilService.removeAttributeValues(pupilService.all().get(0), group, Set.of(1L));
     }
 
     private void createPlacements(){
         Group group = groupService.getOr404(1L);
-        logger.info("Preloading " + placementService.add(new Placement("placement 1", 3, group)));
+        logger.info("Preloading " + placementService.add(new Placement("placement 1", 4, group)));
     }
 
     private void addPreferences() throws Preference.SamePupilException, Group.PupilNotBelongException {

@@ -35,25 +35,34 @@ public class PlacementClassroom extends BaseEntity {
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
 
-    public PlacementClassroom(List<Pupil> pupilsForAlgorithm, PupilsConnectionsDto connectionsToInclude, PupilsConnectionsDto connectionsToExclude){
+    int totalNumberOfMales;
+    int totalNumberOfFemales;
+
+    public PlacementClassroom(List<Pupil> pupilsForAlgorithm, PupilsConnectionsDto connectionsToInclude,
+                              PupilsConnectionsDto connectionsToExclude, int totalNumberOfMales, int totalNumberOfFemales){
         this.pupilsForAlgorithm = pupilsForAlgorithm;
         this.pupils = new HashSet<>(this.pupilsForAlgorithm);
 
         this.connectionsToInclude = connectionsToInclude;
         this.connectionsToExclude = connectionsToExclude;
+
+        this.totalNumberOfMales = totalNumberOfMales;
+        this.totalNumberOfFemales = totalNumberOfFemales;
     }
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getClassScore(){
         double percentageOfWrongConnectionsToInclude = percentageRelativeToPupilsNumber(getNumberOfWrongConnectionsToInclude());
         double percentageOfWrongConnectionsToExclude = percentageRelativeToPupilsNumber(getNumberOfWrongConnectionsToExclude());
+        double percentageOfMales = percentageRelativeToPupilsNumber(getDeltaBetweenMales());
+        double percentageOfFemales = percentageRelativeToPupilsNumber(getDeltaBetweenFemales());
         double percentageOfMalesAndFemales = percentageRelativeToPupilsNumber(getDeltaBetweenMalesAndFemales());
 
-        //System.out.println(percentageOfWrongConnectionsToInclude + " ~ " + percentageOfWrongConnectionsToExclude + " ~ " + percentageOfMalesAndFemales);
-
-        return percentageOfWrongConnectionsToInclude * 0.25
-                + percentageOfWrongConnectionsToExclude * 0.2
-                + percentageOfMalesAndFemales * 0.55;
+        return percentageOfWrongConnectionsToInclude * 0.15
+                + percentageOfWrongConnectionsToExclude * 0.15
+                + percentageOfMales * 0.24
+                + percentageOfFemales * 0.24
+                + percentageOfMalesAndFemales * 0.22;
     }
 
     private double percentageRelativeToPupilsNumber(double value){
@@ -65,6 +74,18 @@ public class PlacementClassroom extends BaseEntity {
         long numOfFemales = getNumOfPupilsByGender(Pupil.Gender.FEMALE);
 
         return Math.abs(numOfMales - numOfFemales);
+    }
+
+    public long getDeltaBetweenMales(){
+        long numOfMalesInClass = getNumOfPupilsByGender(Pupil.Gender.MALE);
+
+        return Math.abs(numOfMalesInClass - totalNumberOfMales);
+    }
+
+    public long getDeltaBetweenFemales(){
+        long numOfFemalesInClass = getNumOfPupilsByGender(Pupil.Gender.FEMALE);
+
+        return Math.abs(numOfFemalesInClass - totalNumberOfFemales);
     }
 
     public double getSumScoreOfPupils(){
@@ -113,6 +134,10 @@ public class PlacementClassroom extends BaseEntity {
             }
         }
         return wrongConnections;
+    }
+
+    public double getSumMaxScoreOfPupils(){
+        return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
     }
 
     public void removePupilFromClass(Pupil pupil){

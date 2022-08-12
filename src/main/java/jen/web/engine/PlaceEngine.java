@@ -18,12 +18,17 @@ public class PlaceEngine {
     private final List<Pupil> pupils;
     private final PupilsConnectionsDto connectionsToInclude;
     private final PupilsConnectionsDto connectionsToExclude;
+    private int numOfMales;
+    private int numOfFemales;
 
     public PlaceEngine(Placement placement){
         this.placement = placement;
         this.pupils = placement.getGroup().getPupils().stream().toList();
         this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, true));
         this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, false));
+
+        numOfMales = (int) pupils.stream().filter(p -> p.getGender()== Pupil.Gender.MALE).count();
+        numOfFemales = (int) pupils.stream().filter(p -> p.getGender()== Pupil.Gender.FEMALE).count();
     }
 
     private Set<SelectorSelectedId> getSelectorSelectedIds(Placement placement, boolean isWantToBeWithSelected){
@@ -50,6 +55,7 @@ public class PlaceEngine {
         return Engine
                 .builder(PlaceEngine::score, codec)
                 .populationSize(100)
+                //.offspringSelector(new RouletteWheelSelector<>()) //new RouletteWheelSelector<>(),
                 .offspringSelector(new TournamentSelector<>()) //new RouletteWheelSelector<>(),
                 .minimizing()
                 .alterers(
@@ -167,7 +173,7 @@ public class PlaceEngine {
         gt.forEach(chromosome -> {
             List<Pupil> pupilsInClass = new ArrayList<>(getNumOfPupils());
             chromosome.as(BitChromosome.class).ones().forEach(index -> pupilsInClass.add(pupils.get(index)));
-            allClasses.add(new PlacementClassroom(pupilsInClass, connectionsToInclude, connectionsToExclude));
+            allClasses.add(new PlacementClassroom(pupilsInClass, connectionsToInclude, connectionsToExclude, numOfMales, numOfFemales));
         });
 
         return new PlacementResult(allClasses);

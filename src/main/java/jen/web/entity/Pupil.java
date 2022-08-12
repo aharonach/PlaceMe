@@ -193,4 +193,12 @@ public class Pupil extends BaseEntity {
             super("Given id is not valid.");
         }
     }
+
+    public double getPupilMaxScore() {
+        double totalScore = 0;
+        for(AttributeValue attributeValue : attributeValues){
+            totalScore += attributeValue.getMaxScore();
+        }
+        return totalScore;
+    }
 }
