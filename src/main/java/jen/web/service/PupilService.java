@@ -112,7 +112,8 @@ public class PupilService implements EntityService<Pupil>{
         }
     }
 
-    public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues) throws Group.PupilNotBelongException, Template.AttributeNotBelongException {
+    public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues)
+            throws Group.PupilNotBelongException, Template.AttributeNotBelongException, AttributeValue.ValueOutOfRangeException {
 
         for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
             pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());

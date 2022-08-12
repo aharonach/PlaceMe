@@ -75,18 +75,29 @@ public class Pupil extends BaseEntity {
         this.givenId = givenId;
     }
 
-    public void addAttributeValue(Group group, Long attributeId, Double value) throws Group.PupilNotBelongException, Template.AttributeNotBelongException {
+    public void addAttributeValue(Group group, Long attributeId, Double value)
+            throws Group.PupilNotBelongException, Template.AttributeNotBelongException, AttributeValue.ValueOutOfRangeException {
 
         verifyPupilInGroup(group);
         Attribute attribute = group.getTemplate().getAttribute(attributeId);
 
-        // Then find if the attribute is already has a value for pupil,
+        // Find if the attribute is already has a value for pupil
+        AttributeValue attributeValue = getAttributeValueOfUserByAttribute(attribute);
+
         // If it does, update the value, otherwise create a new AttributeValue.
-        attributeValues.stream()
+        if(attributeValue != null){
+            attributeValue.setValue(value);
+        } else {
+            attributeValues.add(new AttributeValue(this, attribute, value));
+        }
+
+    }
+
+    private AttributeValue getAttributeValueOfUserByAttribute(Attribute attribute) {
+        Optional<AttributeValue> optionalAttributeValue = attributeValues.stream()
                 .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
-                .findFirst()
-                .ifPresentOrElse(attributeValue -> attributeValue.setValue(value),
-                        () -> attributeValues.add(new AttributeValue(this, attribute, value)));
+                .findFirst();
+        return optionalAttributeValue.orElse(null);
     }
 
     public Set<AttributeValue> getAttributeValues(Group group, Set<Long> attributeIds) throws Group.PupilNotBelongException {

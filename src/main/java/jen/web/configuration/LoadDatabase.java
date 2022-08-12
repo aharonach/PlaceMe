@@ -143,7 +143,8 @@ public class LoadDatabase {
             template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
             try {
                 pupilService.addAttributeValues(pupil, group, attributeValues);
-            } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException e) {
+            } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException |
+                     AttributeValue.ValueOutOfRangeException e) {
                 throw new RuntimeException(e);
             }
         });

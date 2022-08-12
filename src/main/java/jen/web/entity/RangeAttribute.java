@@ -18,6 +18,11 @@ public class RangeAttribute extends Attribute {
     }
 
     @Override
+    double minValue() {
+        return 0;
+    }
+
+    @Override
     double maxValue() {
         return 5;
     }

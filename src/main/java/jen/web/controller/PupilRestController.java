@@ -141,7 +141,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
             pupilService.addAttributeValues(pupil, group, attributeValues);
             return ResponseEntity.ok().build();
 
-        } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException e) {
+        } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException
+                 | AttributeValue.ValueOutOfRangeException e) {
             throw new BadRequest(e.getMessage());
         }
     }

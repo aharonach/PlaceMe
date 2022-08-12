@@ -1,6 +1,7 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mysql.cj.exceptions.NumberOutOfRange;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -32,16 +33,24 @@ public class AttributeValue {
     @Column(name = "attribute_value")
     private double value;
 
-    public AttributeValue(Pupil pupil, Attribute attribute, double value){
+    public AttributeValue(Pupil pupil, Attribute attribute, double value) throws ValueOutOfRangeException {
         this.pupilAttributeId.setPupilId(pupil.getId());
         this.pupilAttributeId.setAttributeId(attribute.getId());
         this.pupil = pupil;
         this.attribute = attribute;
-        this.value = value;
+        setValue(value);
     }
 
     public double getScore(){
         return attribute.calculate(value);
+    }
+
+    public void setValue(double value) throws ValueOutOfRangeException {
+        if(value > this.attribute.maxValue() || value < this.attribute.minValue()){
+            throw new ValueOutOfRangeException(this.attribute);
+        }
+
+        this.value = value;
     }
 
     public double getMaxScore(){
@@ -59,5 +68,11 @@ public class AttributeValue {
     @Override
     public int hashCode() {
         return Objects.hash(pupilAttributeId);
+    }
+
+    public static class ValueOutOfRangeException extends Exception {
+        public ValueOutOfRangeException(Attribute attribute){
+            super("Value out of range. Valid range is from '" + attribute.minValue() + "' to '" + attribute.maxValue() + "'.");
+        }
     }
 }

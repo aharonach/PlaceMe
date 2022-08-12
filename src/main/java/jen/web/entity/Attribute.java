@@ -30,7 +30,7 @@ public abstract class Attribute extends BaseEntity {
     }
 
     abstract double calculate(double score);
-
+    abstract double minValue();
     abstract double maxValue();
 
     @Override
