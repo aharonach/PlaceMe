@@ -15,7 +15,7 @@ function PupilsList() {
         lastName: "Last Name",
         gender: "Gender",
         birthDate: "Birth Date",
-        createdTime: "Created Time"
+        age: "Age",
     };
 
     const getData = () => {

@@ -11,6 +11,7 @@ import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -121,6 +122,10 @@ public class Pupil extends BaseEntity {
         return getAttributeValues().stream()
                 .filter(attributeValue ->  template.getAttributes().contains(attributeValue.getAttribute()))
                 .collect(Collectors.toSet());
+    }
+
+    public Integer getAge(){
+        return Math.abs(Period.between(LocalDate.now(), this.birthDate).getYears());
     }
 
     @JsonProperty
