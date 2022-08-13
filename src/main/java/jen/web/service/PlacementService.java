@@ -143,8 +143,12 @@ public class PlacementService implements EntityService<Placement> {
 
         placement.removeResult(placementResult);
         placementResult.setPlacement(null);
+
         placementResult.getClasses().forEach(placementClassroom -> {
             placementClassroom.setPlacementResult(null);
+            placementClassroom.getPupils().forEach(pupil -> {
+                pupil.removeFromClassrooms(placementClassroom);
+            });
             placementClassroom.setPupils(new HashSet<>());
         });
 

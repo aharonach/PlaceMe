@@ -162,7 +162,7 @@ public class GroupService implements EntityService<Group> {
     @Transactional
     public void RemoveAllPupilsFromGroup(Group group){
         group.getPupils().forEach(pupil -> pupil.removeFromGroup(group));
-        pupilRepository.saveAll(group.getPupils());
+        group.clearPupils();
     }
 
     private void verifyGroupNotAssociated(Group group) throws GroupIsAssociatedException {

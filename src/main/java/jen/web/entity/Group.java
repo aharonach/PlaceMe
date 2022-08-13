@@ -96,6 +96,10 @@ public class Group extends BaseEntity {
         pupil.removeFromGroup(this);
     }
 
+    public void clearPupils(){
+        pupils.clear();
+    }
+
     public Set<Pupil> getPupils(){
         return Collections.unmodifiableSet(pupils);
     }
