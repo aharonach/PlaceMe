@@ -45,7 +45,7 @@ public class PupilInClassesEntities {
 
         Placement placement = new Placement("placement 1", NUM_OF_CLASSES, GROUP);
 
-        PlaceEngine placeEngine = new PlaceEngine(placement);
+        PlaceEngine placeEngine = new PlaceEngine(placement, new PlaceEngineConfig());
         Engine<BitGene, Double> engine = placeEngine.getEngine();
 
         final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();

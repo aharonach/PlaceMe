@@ -7,14 +7,12 @@ import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.Limits;
 import jen.web.engine.PlaceEngine;
 import jen.web.entity.Group;
+import jen.web.entity.PlaceEngineConfig;
 import jen.web.entity.Placement;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
-import jen.web.repository.PlacementClassroomRepository;
-import jen.web.repository.PlacementRepository;
-import jen.web.repository.PlacementResultRepository;
-import jen.web.repository.PupilRepository;
+import jen.web.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +37,8 @@ public class PlacementService implements EntityService<Placement> {
 
     private final PupilRepository pupilRepository;
     private final GroupService groupService;
+
+    private final PlaceEngineConfigRepository engineConfigRepository;
 
     @Override
     @Transactional
@@ -159,13 +159,14 @@ public class PlacementService implements EntityService<Placement> {
     public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException {
         verifyPlacementContainsDataForGeneration(placement);
 
-        PlaceEngine placeEngine = new PlaceEngine(placement);
+        PlaceEngineConfig config = this.getGlobalConfig();
+        PlaceEngine placeEngine = new PlaceEngine(placement, config);
         Engine<BitGene, Double> engine = placeEngine.getEngine();
 
         final Phenotype<BitGene, Double> best = engine
                 .stream()
-                .limit(Limits.bySteadyFitness(7))
-                .limit(100)
+                .limit(Limits.bySteadyFitness(config.getLimitBySteadyFitness()))
+                .limit(config.getGenerationsLimit())
                 .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
                 .collect(EvolutionResult.toBestPhenotype());
 
@@ -189,6 +190,15 @@ public class PlacementService implements EntityService<Placement> {
 
     public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
         return placement.getResultById(resultID);
+    }
+
+    public PlaceEngineConfig getGlobalConfig() {
+        return engineConfigRepository.findById(1L).get();
+    }
+
+    public PlaceEngineConfig updateGlobalConfig(PlaceEngineConfig placeEngineConfig) {
+        placeEngineConfig.setId(1L);
+        return engineConfigRepository.save(placeEngineConfig);
     }
 
     public static class PlacementWithoutGroupException extends Exception {

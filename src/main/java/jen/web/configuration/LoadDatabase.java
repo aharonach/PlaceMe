@@ -34,6 +34,7 @@ public class LoadDatabase {
     CommandLineRunner initDatabase() {
         return args -> {
             // add
+            createEngineConfig();
             createTemplates();
             createPupils();
             createGroups();
@@ -79,6 +80,11 @@ public class LoadDatabase {
                 System.out.println(classInfo.getPupils());
             });
         };
+    }
+
+    private void createEngineConfig() {
+        PlaceEngineConfig placeEngineConfig = new PlaceEngineConfig();
+        placementService.updateGlobalConfig(placeEngineConfig);
     }
 
     private void createTemplates(){
