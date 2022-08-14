@@ -9,6 +9,8 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.lang.reflect.Constructor;
 
+import static io.jenetics.Alterer.DEFAULT_ALTER_PROBABILITY;
+
 @Getter
 @Setter
 @Entity
@@ -24,7 +26,7 @@ public class PlaceEngineConfig {
     SELECTOR offspringSelector = SELECTOR.TournamentSelector;
 
     ALTERER altererFirst = ALTERER.SwapMutator;
-    double altererFirstProbability = 0.33;
+    double altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
 
     ALTERER altererSecond = ALTERER.SinglePointCrossover;
     double altererSecondProbability = 0.36;
