@@ -1,7 +1,6 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mysql.cj.exceptions.NumberOutOfRange;
 import lombok.*;
 import org.hibernate.Hibernate;
 
