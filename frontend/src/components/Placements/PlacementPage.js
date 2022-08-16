@@ -1,24 +1,19 @@
 import React, {useEffect, useState} from 'react';
-import {useParams, useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
 import Loading from "../Loading";
 import {Alert, Button} from "react-bootstrap";
 import EditPlacement from './EditPlacement';
+import PlacementData from "./PlacementData";
+import {LinkContainer} from "react-router-bootstrap";
 
-export default function PlacementPage(){
+export default function PlacementPage({edit=false}){
     let { placementId } = useParams();
     const [placement, error, loading, axiosFetch] = useAxios();
+    const [count, setCount] = useState(1);
+
     let navigate = useNavigate();
-
-
-    const handleDelete = () => {
-        axiosFetch({
-            axiosInstance: Api,
-            method: 'delete',
-            url: `/placements/${placementId}`,
-        }).then(() => navigate('/placements', {replace: true}));
-    }
 
     const getPlacement = () => {
         axiosFetch({
@@ -28,19 +23,39 @@ export default function PlacementPage(){
         });
     }
 
+    const handleDelete = () => {
+        axiosFetch({
+            axiosInstance: Api,
+            method: 'delete',
+            url: `/placements/${placement.id}`,
+        }).then(() => navigate('/placements', {replace: true}));
+    }
+
     useEffect(() => {
         getPlacement();
-    }, []);
+    }, [count]);
 
     return (
         <>
             {loading && <Loading />}
             {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && placement &&
+            {!loading && placement &&
                 <article>
                     <h2>{placement.name}</h2>
-                    <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
-                    <EditPlacement placement={placement} />
+
+                    { !edit &&
+                        <div>
+                            <p>
+                                <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
+                                <LinkContainer to="edit"><Button>Edit Placement</Button></LinkContainer>
+                            </p>
+                            <PlacementData placement={placement} />
+                        </div>
+                    }
+
+                    { edit &&
+                        <EditPlacement placement={placement} count={count} setCount={setCount} />
+                    }
                 </article>
             }
         </>
