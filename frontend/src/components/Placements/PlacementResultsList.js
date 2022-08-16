@@ -15,6 +15,7 @@ export default function PlacementResultsList({placement}){
         name: "Name",
         description: "Description",
         createdTime: "Created Time",
+        status: "Status",
     };
 
     const getData = () => {

@@ -1,10 +1,5 @@
 package jen.web.service;
 
-import io.jenetics.BitGene;
-import io.jenetics.Phenotype;
-import io.jenetics.engine.Engine;
-import io.jenetics.engine.EvolutionResult;
-import io.jenetics.engine.Limits;
 import jen.web.engine.PlaceEngine;
 import jen.web.entity.Group;
 import jen.web.entity.PlaceEngineConfig;
@@ -24,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 @Service
 @RequiredArgsConstructor
@@ -79,8 +73,10 @@ public class PlacementService implements EntityService<Placement> {
 
     @Override
     @Transactional
-    public Placement updateById(Long id, Placement newPlacement) {
+    public Placement updateById(Long id, Placement newPlacement) throws PlacementResultsInProgressException {
         Placement placement = getOr404(id);
+        verifyPlacementDontHaveInProgressTasks(placement);
+
         boolean isUpdateGroupNeeded = newPlacement.getGroup() != null && !newPlacement.getGroup().equals(placement.getGroup());
 
         placement.setName(newPlacement.getName());
@@ -104,8 +100,10 @@ public class PlacementService implements EntityService<Placement> {
 
     @Override
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(Long id) throws PlacementResultsInProgressException {
         Placement placement = getOr404(id);
+        verifyPlacementDontHaveInProgressTasks(placement);
+
         Group group = placement.getGroup();
 
         if(group != null){
@@ -116,24 +114,35 @@ public class PlacementService implements EntityService<Placement> {
         placementRepository.delete(placement);
     }
 
+    private void verifyPlacementDontHaveInProgressTasks(Placement placement) throws PlacementResultsInProgressException {
+        Long numOfInProgressTasks = placement.getResults().stream()
+                .filter(placementResult -> PlacementResult.Status.IN_PROGRESS.equals(placementResult.getStatus()))
+                .count();
+        if(numOfInProgressTasks > 0){
+            throw new PlacementResultsInProgressException();
+        }
+    }
+
     @Transactional
-    public void savePlacementResult(Placement placement, PlacementResult placementResult) {
+    public PlacementResult savePlacementResult(Placement placement, PlacementResult placementResult) {
         placementResult.setPlacement(placement);
-        PlacementResult savedResult = placementResultRepository.save(placementResult);
 
-        savedResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(savedResult));
-        placementClassroomRepository.saveAll(savedResult.getClasses());
+        placementResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(placementResult));
+        placementClassroomRepository.saveAll(placementResult.getClasses());
 
-        savedResult.getClasses().forEach(placementClassroom -> {
+        placementResult.getClasses().forEach(placementClassroom -> {
             placementClassroom.getPupils().forEach(pupil -> pupil.addToClassrooms(placementClassroom));
             pupilRepository.saveAll(placementClassroom.getPupils());
         });
 
+        PlacementResult savedResult = placementResultRepository.save(placementResult);
         placement.addResult(savedResult);
         placementRepository.save(placement);
+
+        return savedResult;
     }
 
-    public void deleteAllPlacementResults(Placement placement) {
+    public void deleteAllPlacementResults(Placement placement) throws PlacementResultsInProgressException {
         for(PlacementResult placementResult : placement.getResults()){
             try {
                 deletePlacementResultById(placement, placementResult.getId());
@@ -143,8 +152,13 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     @Transactional
-    public void deletePlacementResultById(Placement placement, Long resultId) throws Placement.ResultNotExistsException {
+    public void deletePlacementResultById(Placement placement, Long resultId)
+            throws Placement.ResultNotExistsException, PlacementResultsInProgressException {
+
         PlacementResult placementResult = placement.getResultById(resultId);
+        if(PlacementResult.Status.IN_PROGRESS.equals(placementResult.getStatus())){
+            throw new PlacementResultsInProgressException();
+        }
 
         placement.removeResult(placementResult);
         placementResult.setPlacement(null);
@@ -167,10 +181,30 @@ public class PlacementService implements EntityService<Placement> {
         PlaceEngineConfig config = this.getGlobalConfig();
         PlaceEngine placeEngine = new PlaceEngine(placement, config);
 
-        PlacementResult placementResult = placeEngine.generatePlacementResult();
+        PlacementResult placementResult = new PlacementResult();
+        placementResult = savePlacementResult(placement, placementResult);
+        Long resultId = placementResult.getId();
+
+        // update result will be called after the generation will finish
+        executor.submit(() -> updateResultStatus(placeEngine, resultId, placement.getId()));
+
+        return placementResult;
+    }
+
+    private void updateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId){
+        PlacementResult placementResult = getPlacementResultOr404(resultId);
+        Placement placement = getOr404(placementId);
+
+        try{
+            PlacementResult algResult = placeEngine.generatePlacementResult();
+            placementResult.setClasses(algResult.getClasses());
+            placementResult.setStatus(PlacementResult.Status.COMPLETED);
+
+        } catch (Exception e){
+            placementResult.setStatus(PlacementResult.Status.FAILED);
+        }
 
         savePlacementResult(placement, placementResult);
-        return placementResult;
     }
 
     private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException {
@@ -200,6 +234,12 @@ public class PlacementService implements EntityService<Placement> {
     public static class PlacementWithoutGroupException extends Exception {
         public PlacementWithoutGroupException(){
             super("Placement must be assigned to a Group");
+        }
+    }
+
+    public static class PlacementResultsInProgressException extends Exception {
+        public PlacementResultsInProgressException(){
+            super("Cant perform the action. Placement have results that are in progress.");
         }
     }
 }

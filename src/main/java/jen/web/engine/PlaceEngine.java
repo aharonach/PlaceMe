@@ -6,6 +6,7 @@ import io.jenetics.util.IntRange;
 import jen.web.dto.PupilsConnectionsDto;
 import jen.web.entity.*;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -74,6 +75,7 @@ public class PlaceEngine {
                 .stream()
                 .limit(Limits.bySteadyFitness(config.getLimitBySteadyFitness()))
                 .limit(config.getGenerationsLimit())
+                //.limit(Limits.byExecutionTime(Duration.ofSeconds(10)))
                 .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
                 .peek(statistics)
                 .collect(EvolutionResult.toBestPhenotype());

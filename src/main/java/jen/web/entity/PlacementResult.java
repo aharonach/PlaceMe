@@ -1,18 +1,15 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jen.example.placePupils.ClassInfo;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Entity
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 @Table(name = "placement_results")
 public class PlacementResult extends BaseEntity {
     private String name;
@@ -37,6 +34,18 @@ public class PlacementResult extends BaseEntity {
     public PlacementResult(List<PlacementClassroom> classesForAlgorithm){
         this.classesForAlgorithm = classesForAlgorithm;
         this.classes = new HashSet<>(this.classesForAlgorithm);
+        this.status = Status.IN_PROGRESS;
+    }
+
+    public PlacementResult(String name, String description){
+        this.name = name;
+        this.description = description;
+        this.status = Status.IN_PROGRESS;
+    }
+
+    public PlacementResult(){
+        this.name = "Name";
+        this.description = "Description";
         this.status = Status.IN_PROGRESS;
     }
 

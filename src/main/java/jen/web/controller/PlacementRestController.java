@@ -53,13 +53,25 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @Override
     @PostMapping("/{placementId}")
     public ResponseEntity<?> update(@PathVariable Long placementId, @RequestBody Placement updatedRecord) {
-        return ResponseEntity.ok(placementModelAssembler.toModel(service.updateById(placementId, updatedRecord)));
+
+        try {
+            return ResponseEntity.ok(placementModelAssembler.toModel(service.updateById(placementId, updatedRecord)));
+
+        } catch (PlacementService.PlacementResultsInProgressException e) {
+            throw new PreconditionFailed(e.getMessage());
+        }
     }
 
     @Override
     @DeleteMapping("/{placementId}")
     public ResponseEntity<?> delete(@PathVariable Long placementId) {
-        service.deleteById(placementId);
+
+        try {
+            service.deleteById(placementId);
+        } catch (PlacementService.PlacementResultsInProgressException e) {
+            throw new PreconditionFailed(e.getMessage());
+        }
+
         return ResponseEntity.ok().build();
     }
 
@@ -105,7 +117,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
         try {
             service.deletePlacementResultById(placement, resultId);
-        } catch (Placement.ResultNotExistsException e) {
+        } catch (Placement.ResultNotExistsException | PlacementService.PlacementResultsInProgressException e) {
             throw new BadRequest(e.getMessage());
         }
 
