@@ -22,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +42,8 @@ public class PlacementService implements EntityService<Placement> {
     private final GroupService groupService;
 
     private final PlaceEngineConfigRepository engineConfigRepository;
+
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
     @Transactional
@@ -161,17 +166,8 @@ public class PlacementService implements EntityService<Placement> {
 
         PlaceEngineConfig config = this.getGlobalConfig();
         PlaceEngine placeEngine = new PlaceEngine(placement, config);
-        Engine<BitGene, Double> engine = placeEngine.getEngine();
 
-        final Phenotype<BitGene, Double> best = engine
-                .stream()
-                .limit(Limits.bySteadyFitness(config.getLimitBySteadyFitness()))
-                .limit(config.getGenerationsLimit())
-                .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
-                .collect(EvolutionResult.toBestPhenotype());
-
-        PlacementResult placementResult = placeEngine.decode(best.genotype());
-        System.out.println("Placement result is valid: " + PlaceEngine.isValid(best.genotype()));
+        PlacementResult placementResult = placeEngine.generatePlacementResult();
 
         savePlacementResult(placement, placementResult);
         return placementResult;

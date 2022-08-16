@@ -1,9 +1,7 @@
 package jen.web.engine;
 
 import io.jenetics.*;
-import io.jenetics.engine.Codec;
-import io.jenetics.engine.Constraint;
-import io.jenetics.engine.Engine;
+import io.jenetics.engine.*;
 import io.jenetics.util.IntRange;
 import jen.web.dto.PupilsConnectionsDto;
 import jen.web.entity.*;
@@ -31,6 +29,8 @@ public class PlaceEngine {
 
         numOfMales = (int) pupils.stream().filter(p -> p.getGender()== Pupil.Gender.MALE).count();
         numOfFemales = (int) pupils.stream().filter(p -> p.getGender()== Pupil.Gender.FEMALE).count();
+
+        pupils.forEach(System.out::println);
     }
 
     private Set<SelectorSelectedId> getSelectorSelectedIds(Placement placement, boolean isWantToBeWithSelected){
@@ -40,8 +40,7 @@ public class PlaceEngine {
                 .collect(Collectors.toSet());
     }
 
-    public Engine<BitGene, Double> getEngine(){
-        pupils.forEach(System.out::println);
+    private Engine<BitGene, Double> getEngine(){
 
         Codec<PlacementResult, BitGene> codec = Codec.of(
                 Genotype.of(BitChromosome.of(getNumOfPupils(), 0.5), placement.getNumberOfClasses()),
@@ -65,6 +64,25 @@ public class PlaceEngine {
                 )
                 .constraint(constraint)
                 .build();
+    }
+
+    public PlacementResult generatePlacementResult(){
+        final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
+        Engine<BitGene, Double> engine = getEngine();
+
+        final Phenotype<BitGene, Double> best = engine
+                .stream()
+                .limit(Limits.bySteadyFitness(config.getLimitBySteadyFitness()))
+                .limit(config.getGenerationsLimit())
+                .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
+                .peek(statistics)
+                .collect(EvolutionResult.toBestPhenotype());
+
+        PlacementResult placementResult = decode(best.genotype());
+        System.out.println("Placement result is valid: " + PlaceEngine.isValid(best.genotype()));
+        System.out.println(statistics);
+
+        return placementResult;
     }
 
     private static double score(final PlacementResult placementResult){
@@ -168,7 +186,7 @@ public class PlaceEngine {
         return placement.chromosome().length();
     }
 
-    public PlacementResult decode(Genotype<BitGene> gt){
+    private PlacementResult decode(Genotype<BitGene> gt){
         List<PlacementClassroom> allClasses = new ArrayList<>(placement.getNumberOfClasses());
 
         gt.forEach(chromosome -> {

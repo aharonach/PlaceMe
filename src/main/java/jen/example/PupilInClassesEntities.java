@@ -46,24 +46,8 @@ public class PupilInClassesEntities {
         Placement placement = new Placement("placement 1", NUM_OF_CLASSES, GROUP);
 
         PlaceEngine placeEngine = new PlaceEngine(placement, new PlaceEngineConfig());
-        Engine<BitGene, Double> engine = placeEngine.getEngine();
+        PlacementResult placementResult = placeEngine.generatePlacementResult();
 
-        final EvolutionStatistics<Double, ?> statistics = EvolutionStatistics.ofNumber();
-
-        final Phenotype<BitGene, Double> best = engine
-                .stream()
-                .limit(Limits.bySteadyFitness(7))
-                .limit(100)
-                .peek(r -> System.out.println(r.totalGenerations() + " : " + r.bestPhenotype() + ", worst:" + r.worstFitness()))
-                .peek(statistics)
-                .collect(EvolutionResult.toBestPhenotype());
-
-
-        System.out.println("Result:");
-        System.out.println(best.genotype());
-
-        System.out.println("is valid: " + PlaceEngine.isValid(best.genotype()));
-        PlacementResult placementResult = placeEngine.decode(best.genotype());
 
         placementResult.getClasses().forEach(classInfo -> {
             System.out.print("[Pupils: " + classInfo.getNumOfPupils() + " (Males: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.MALE) + " ,Females: " + classInfo.getNumOfPupilsByGender(Pupil.Gender.FEMALE) + " ,Delta: " + classInfo.getDeltaBetweenMalesAndFemales() + ") ");

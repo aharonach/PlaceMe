@@ -22,6 +22,9 @@ public class PlacementResult extends BaseEntity {
     @JoinColumn(name = "placement_id")
     private Placement placement;
 
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     @ToString.Exclude
     @JsonIgnore
     @Getter(value = AccessLevel.NONE)
@@ -34,6 +37,7 @@ public class PlacementResult extends BaseEntity {
     public PlacementResult(List<PlacementClassroom> classesForAlgorithm){
         this.classesForAlgorithm = classesForAlgorithm;
         this.classes = new HashSet<>(this.classesForAlgorithm);
+        this.status = Status.IN_PROGRESS;
     }
 
     public Set<PlacementClassroom> getClasses() {
@@ -79,5 +83,9 @@ public class PlacementResult extends BaseEntity {
 
     private int getNumOfPupils(){
         return (int) classesForAlgorithm.stream().mapToLong(PlacementClassroom::getNumOfPupils).sum();
+    }
+
+    public enum Status {
+        IN_PROGRESS, COMPLETED, FAILED
     }
 }
