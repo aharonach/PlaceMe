@@ -35,6 +35,7 @@ function App() {
                         <Route index element={<Placement.PlacementsList />}></Route>
                         <Route path="add" element={<Placement.AddPlacement />}></Route>
                         <Route path=":placementId" element={<Placement.PlacementPage />}></Route>
+                        <Route path=":placementId/edit" element={<Placement.PlacementPage edit={true} />}></Route>
                     </Route>
                     <Route path="*" element={<Pages.ErrorPage />}></Route>
                 </Routes>

@@ -6,10 +6,14 @@ import Api from '../../api';
 import { Alert } from 'react-bootstrap';
 import FormFields from './FormFields';
 import {getDefaultValuesByFields} from "../../utils";
+import { useNavigate } from "react-router-dom";
 
-export default function EditPlacement({ placement }){
+//export default function EditPlacement({placement, error, loading, axiosFetch}){
+export default function EditPlacement({placement, count, setCount}){
 
     const [response, error, loading, axiosFetch] = useAxios();
+
+    let navigate = useNavigate();
 
     let methods = useForm({
         defaultValues: { ...getDefaultValuesByFields(FormFields(), placement) }
@@ -23,6 +27,9 @@ export default function EditPlacement({ placement }){
             method: 'post',
             url: `/placements/${placement.id}`,
             data: {...data}
+        }).then((placement) => {
+            setCount(count + 1);
+            placement && navigate(`/placements/${placement.id}`);
         });
     };
 
