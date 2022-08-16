@@ -20,9 +20,11 @@ public class PlaceEngine {
     private final PupilsConnectionsDto connectionsToExclude;
     private int numOfMales;
     private int numOfFemales;
+    private final PlaceEngineConfig config;
 
-    public PlaceEngine(Placement placement){
+    public PlaceEngine(Placement placement, PlaceEngineConfig config){
         this.placement = placement;
+        this.config = config;
         this.pupils = placement.getGroup().getPupils().stream().toList();
         this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, true));
         this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, false));
@@ -54,13 +56,12 @@ public class PlaceEngine {
 
         return Engine
                 .builder(PlaceEngine::score, codec)
-                .populationSize(100)
-                //.offspringSelector(new RouletteWheelSelector<>()) //new RouletteWheelSelector<>(),
-                .offspringSelector(new TournamentSelector<>()) //new RouletteWheelSelector<>(),
+                .populationSize(config.getPopulationSize())
+                .offspringSelector((Selector<BitGene, Double>) config.createInstanceForSelector()) //new RouletteWheelSelector<>(),
                 .minimizing()
                 .alterers(
-                        new SwapMutator<>(),
-                        new SinglePointCrossover<>(0.36)
+                        (Alterer<BitGene, Double>) config.createInstanceForAltererFirst(),
+                        (Alterer<BitGene, Double>) config.createInstanceForAltererSecond()
                 )
                 .constraint(constraint)
                 .build();

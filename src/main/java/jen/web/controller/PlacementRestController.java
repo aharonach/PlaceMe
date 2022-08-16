@@ -2,6 +2,7 @@ package jen.web.controller;
 
 import jen.web.assembler.PlacementModelAssembler;
 import jen.web.assembler.PlacementResultModelAssembler;
+import jen.web.entity.PlaceEngineConfig;
 import jen.web.entity.Placement;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.BadRequest;
@@ -100,7 +101,6 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @DeleteMapping("/{placementId}/results/{resultId}")
     public ResponseEntity<?> deleteResult(@PathVariable Long placementId, @PathVariable Long resultId) {
-
         Placement placement = service.getOr404(placementId);
 
         try {
@@ -110,5 +110,15 @@ public class PlacementRestController extends BaseRestController<Placement> {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/configs")
+    public ResponseEntity<?> getConfig() {
+        return ResponseEntity.ok(EntityModel.of(service.getGlobalConfig()));
+    }
+
+    @PostMapping("/configs")
+    public ResponseEntity<?> updateConfig(@RequestBody PlaceEngineConfig config) {
+        return ResponseEntity.ok(service.updateGlobalConfig(config));
     }
 }
