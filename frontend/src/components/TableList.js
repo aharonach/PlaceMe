@@ -26,17 +26,17 @@ function TableList({
 
                     {columns && Object.keys(columns).map( key => {
                         if ( 'actions' === key ) {
-                            return <th key={key}>{columns[key].label}</th>;
+                            return <th scope="col" key={key}>{columns[key].label}</th>;
                         }
 
-                        return <th key={key}>{columns[key]}</th>
+                        return <th scope="col" key={key}>{columns[key]}</th>
                     })}
                 </tr>
             </thead>
             <tbody>
             {items && items.map( item => (
                 <tr key={item['id']}>
-                    {numbering.enabled && <td>{currentNumber++}</td>}
+                    {numbering.enabled && <th scope="row">{currentNumber++}</th>}
 
                     {Object.keys(columns).map( key => {
                         // return empty cell for the moment.

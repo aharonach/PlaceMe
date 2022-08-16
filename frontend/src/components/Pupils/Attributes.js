@@ -22,8 +22,7 @@ const prepareFields = (template) => {
     return fields;
 }
 
-export default function Attributes({ group }) {
-    const { pupilId } = useParams();
+export default function Attributes({ pupilId, group }) {
     const [template, errorTemplate, loadingTemplate, axiosFetchTemplate] = useAxios();
     const [attributeValues, error, loading, axiosFetch] = useAxios();
 
