@@ -50,7 +50,9 @@ public class PupilService implements EntityService<Pupil>{
         return pupilRepository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
 
-    // @todo: add method for getting pupil by given id
+    public Pupil getByGivenIdOr404(String givenId) {
+        return pupilRepository.getPupilByGivenId(givenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
+    }
 
     @Override
     public List<Pupil> all() {
@@ -89,7 +91,7 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     @Override
-    //@Transactional
+    @Transactional
     public void deleteById(Long id) {
         Pupil pupil = getOr404(id);
 
@@ -105,13 +107,6 @@ public class PupilService implements EntityService<Pupil>{
         pupilRepository.delete(pupil);
     }
 
-    private void verifyGroupNotAssociated(Group group) throws GroupService.GroupIsAssociatedException {
-        if(group.getPlacements().size() > 0){
-            Placement placement = group.getPlacements().stream().findFirst().get();
-            throw new GroupService.GroupIsAssociatedException(placement);
-        }
-    }
-
     public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues)
             throws Group.PupilNotBelongException, Template.AttributeNotBelongException, AttributeValue.ValueOutOfRangeException {
 
@@ -125,13 +120,14 @@ public class PupilService implements EntityService<Pupil>{
     public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) throws Group.PupilNotBelongException {
 
         Set<AttributeValue> attributeValues = pupil.getAttributeValues(group, attributeIds);
+        attributeValues.forEach(attributeValue -> pupil.removeAttributeValue(attributeValue));
         attributeValueRepository.deleteAll(attributeValues);
 
     }
 
     public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) throws Group.PupilNotBelongException {
 
-        Set<AttributeValue> attributeValues = pupil.getAttributeValues(group);
+        Set<AttributeValue> attributeValues = getOr404(pupil.getId()).getAttributeValues(group);
         return attributeValues;
 
     }

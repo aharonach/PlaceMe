@@ -26,7 +26,7 @@ public class Group extends BaseEntity {
     private Template template;
     @ToString.Exclude
     @JsonIgnore
-    @ManyToMany(mappedBy = "groups", cascade = {CascadeType.ALL})
+    @ManyToMany(mappedBy = "groups")
     @Fetch(FetchMode.JOIN)
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
@@ -87,8 +87,10 @@ public class Group extends BaseEntity {
     }
 
     public void addPupil(Pupil pupil){
-        pupils.add(pupil);
-        pupil.addToGroup(this);
+        if(!pupils.contains(pupil)){
+            pupils.add(pupil);
+            pupil.addToGroup(this);
+        }
     }
 
     public void removePupil(Pupil pupil){

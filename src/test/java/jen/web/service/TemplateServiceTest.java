@@ -25,33 +25,33 @@ class TemplateServiceTest {
 
 
     @Autowired
-    TemplateService service;
+    TemplateService templateService;
 
     @Test
     @Transactional
-    void shouldCreateAndRemoveTemplateWhenAddTemplateAndDeleteIt() {
-        assertEquals(0, service.all().size());
+    void shouldCreateAndRemoveTemplateWhenAddingTemplateAndDeletingIt() {
+        assertEquals(0, templateService.all().size());
 
         Template template1 = new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1);
-        service.add(template1);
+        templateService.add(template1);
 
         Template template2 = new Template(TEMPLATE_2, TEMPLATE_DESCRIPTION_2);
-        service.add(template2);
+        templateService.add(template2);
 
-        assertEquals(2, service.all().size());
-        Template receivedTemplate1 = service.all().get(0);
-        Template receivedTemplate2 = service.all().get(1);
+        assertEquals(2, templateService.all().size());
+        Template receivedTemplate1 = templateService.all().get(0);
+        Template receivedTemplate2 = templateService.all().get(1);
 
-        assertEquals(receivedTemplate1, service.getOr404(receivedTemplate1.getId()));
-        assertNotEquals(receivedTemplate1, service.getOr404(receivedTemplate2.getId()));
+        assertEquals(receivedTemplate1, templateService.getOr404(receivedTemplate1.getId()));
+        assertNotEquals(receivedTemplate1, templateService.getOr404(receivedTemplate2.getId()));
 
         assertEquals(TEMPLATE_1, receivedTemplate1.getName());
         assertEquals(TEMPLATE_DESCRIPTION_1, receivedTemplate1.getDescription());
         assertEquals(0, receivedTemplate1.getAttributes().size());
 
-        service.deleteById(receivedTemplate1.getId());
-        service.deleteById(receivedTemplate2.getId());
-        assertEquals(0, service.all().size());
+        templateService.deleteById(receivedTemplate1.getId());
+        templateService.deleteById(receivedTemplate2.getId());
+        assertEquals(0, templateService.all().size());
     }
 
     @Test
@@ -59,9 +59,9 @@ class TemplateServiceTest {
     void shouldCreateTemplateWithAttributesWhenAddTemplate() {
         Set<Attribute> attributes = Set.of(new RangeAttribute("name", "attr desc", 10));
         Template template = new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1, attributes);
-        service.add(template);
+        templateService.add(template);
 
-        Template receivedTemplate = service.all().get(0);
+        Template receivedTemplate = templateService.all().get(0);
         Set<Attribute> receivedAttributes = receivedTemplate.getAttributes();
         Attribute receivedAttribute = receivedAttributes.stream().findFirst().get();
 
@@ -69,11 +69,11 @@ class TemplateServiceTest {
         assertEquals("name", receivedAttribute.getName());
         assertEquals("attr desc", receivedAttribute.getDescription());
         assertEquals(10, receivedAttribute.getPriority());
-        service.deleteById(receivedTemplate.getId());
+        templateService.deleteById(receivedTemplate.getId());
     }
 
     @Test
     void shouldThrowNotFoundExceptionOnGetTemplateWhenTemplateNotExist() {
-        assertThrows(NotFound.class, () -> service.getOr404(100L));
+        assertThrows(NotFound.class, () -> templateService.getOr404(100L));
     }
 }

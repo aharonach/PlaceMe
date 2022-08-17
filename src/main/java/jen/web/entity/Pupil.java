@@ -64,6 +64,10 @@ public class Pupil extends BaseEntity {
         return Collections.unmodifiableSet(attributeValues);
     }
 
+    public void removeAttributeValue(AttributeValue attributeValue){
+        attributeValues.remove(attributeValue);
+    }
+
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
 
         if(!givenId.matches(DIGITS_REGEX)){
@@ -147,7 +151,10 @@ public class Pupil extends BaseEntity {
     }
 
     public void addToGroup(Group group){
-        groups.add(group);
+        if(!groups.contains(group)){
+            groups.add(group);
+            group.addPupil(this);
+        }
     }
 
     public void removeFromGroup(Group group) {
