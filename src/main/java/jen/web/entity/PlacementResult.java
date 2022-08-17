@@ -1,18 +1,15 @@
 package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jen.example.placePupils.ClassInfo;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Entity
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 @Table(name = "placement_results")
 public class PlacementResult extends BaseEntity {
     private String name;
@@ -21,6 +18,9 @@ public class PlacementResult extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "placement_id")
     private Placement placement;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @ToString.Exclude
     @JsonIgnore
@@ -34,6 +34,19 @@ public class PlacementResult extends BaseEntity {
     public PlacementResult(List<PlacementClassroom> classesForAlgorithm){
         this.classesForAlgorithm = classesForAlgorithm;
         this.classes = new HashSet<>(this.classesForAlgorithm);
+        this.status = Status.IN_PROGRESS;
+    }
+
+    public PlacementResult(String name, String description){
+        this.name = name;
+        this.description = description;
+        this.status = Status.IN_PROGRESS;
+    }
+
+    public PlacementResult(){
+        this.name = "Name";
+        this.description = "Description";
+        this.status = Status.IN_PROGRESS;
     }
 
     public Set<PlacementClassroom> getClasses() {
@@ -79,5 +92,9 @@ public class PlacementResult extends BaseEntity {
 
     private int getNumOfPupils(){
         return (int) classesForAlgorithm.stream().mapToLong(PlacementClassroom::getNumOfPupils).sum();
+    }
+
+    public enum Status {
+        IN_PROGRESS, COMPLETED, FAILED
     }
 }

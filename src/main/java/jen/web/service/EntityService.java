@@ -10,7 +10,7 @@ public interface EntityService<T> {
 
     List<T> all();
 
-    T updateById(Long id, T newItem);
+    T updateById(Long id, T newItem) throws PlacementService.PlacementResultsInProgressException;
 
-    void deleteById(Long id);
+    void deleteById(Long id) throws PlacementService.PlacementResultsInProgressException;
 }
