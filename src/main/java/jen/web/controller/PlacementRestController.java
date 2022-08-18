@@ -6,6 +6,7 @@ import jen.web.entity.PlaceEngineConfig;
 import jen.web.entity.Placement;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.BadRequest;
+import jen.web.exception.NotFound;
 import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,6 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @Override
     @PostMapping("/{placementId}")
     public ResponseEntity<?> update(@PathVariable Long placementId, @RequestBody Placement updatedRecord) {
-
         try {
             return ResponseEntity.ok(placementModelAssembler.toModel(service.updateById(placementId, updatedRecord)));
 
@@ -65,7 +65,6 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @Override
     @DeleteMapping("/{placementId}")
     public ResponseEntity<?> delete(@PathVariable Long placementId) {
-
         try {
             service.deleteById(placementId);
         } catch (PlacementService.PlacementResultsInProgressException e) {
@@ -95,6 +94,31 @@ public class PlacementRestController extends BaseRestController<Placement> {
     public ResponseEntity<?> getResults(@PathVariable Long placementId) {
         CollectionModel<EntityModel<PlacementResult>> allEntities = placementResultModelAssembler.toCollectionModel(service.getOr404(placementId).getResults());
         return ResponseEntity.ok().body(allEntities);
+    }
+
+    @GetMapping("/{placementId}/results/selected")
+    public ResponseEntity<?> getSelectedResult(@PathVariable Long placementId) {
+        try {
+            Placement placement = service.getOr404(placementId);
+            PlacementResult placementResult = service.getSelectedResult(placement);
+            EntityModel<PlacementResult> entityModel = placementResultModelAssembler.toModel(placementResult);
+            return ResponseEntity.ok().body(entityModel);
+        } catch(Placement.NoSelectedResultException e) {
+            throw new NotFound(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{placementId}/results/selected")
+    public ResponseEntity<?> setSelectedResult(@PathVariable Long placementId, @RequestBody Long resultId) {
+        try {
+            Placement placement = service.getOr404(placementId);
+            service.setSelectedResult(placement, resultId);
+            return ResponseEntity.ok().build();
+        } catch (Placement.ResultNotExistsException e) {
+            throw new NotFound(e.getMessage());
+        } catch (PlacementResult.NotCompletedException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @GetMapping("/{placementId}/results/{resultId}")

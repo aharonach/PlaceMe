@@ -15,8 +15,12 @@ public class PlacementResult extends BaseEntity {
     private String name;
     private String description;
 
+    private boolean selected;
+
     @ManyToOne
     @JoinColumn(name = "placement_id")
+    @JsonIgnore
+    @ToString.Exclude
     private Placement placement;
 
     @Enumerated(EnumType.STRING)
@@ -94,7 +98,17 @@ public class PlacementResult extends BaseEntity {
         return (int) classesForAlgorithm.stream().mapToLong(PlacementClassroom::getNumOfPupils).sum();
     }
 
+    public boolean isCompleted() {
+        return Status.COMPLETED.equals(getStatus());
+    }
+
     public enum Status {
         IN_PROGRESS, COMPLETED, FAILED
+    }
+
+    public static class NotCompletedException extends Exception {
+        public NotCompletedException() {
+            super("Placement result is not completed.");
+        }
     }
 }

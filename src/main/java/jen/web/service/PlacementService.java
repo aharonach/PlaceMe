@@ -62,8 +62,9 @@ public class PlacementService implements EntityService<Placement> {
         return placementRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
     }
 
-    public PlacementResult getPlacementResultOr404(Long id) {
-        return placementResultRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement result " + id));
+    public PlacementResult getPlacementResultOr404(Long placementId, Long resultId) {
+        getOr404(placementId);
+        return placementResultRepository.findById(resultId).orElseThrow(() -> new NotFound("Could not find placement result " + resultId));
     }
 
     @Override
@@ -192,7 +193,7 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     private void updateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId){
-        PlacementResult placementResult = getPlacementResultOr404(resultId);
+        PlacementResult placementResult = getPlacementResultOr404(placementId, resultId);
         Placement placement = getOr404(placementId);
 
         try{
@@ -220,6 +221,16 @@ public class PlacementService implements EntityService<Placement> {
 
     public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
         return placement.getResultById(resultID);
+    }
+
+    public PlacementResult getSelectedResult(Placement placement) throws Placement.NoSelectedResultException {
+        return placement.getSelectedResult();
+    }
+
+    public void setSelectedResult(Placement placement, Long resultId) throws Placement.ResultNotExistsException, PlacementResult.NotCompletedException {
+        PlacementResult placementResult = placement.getResultById(resultId);
+        placement.setSelectedResult(placementResult);
+        placementRepository.save(placement);
     }
 
     public PlaceEngineConfig getGlobalConfig() {

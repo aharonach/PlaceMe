@@ -73,15 +73,10 @@ public class Placement extends BaseEntity {
     }
 
     public PlacementResult getResultById(Long resultId) throws ResultNotExistsException {
-        Optional<PlacementResult> result = results.stream()
+        return results.stream()
                 .filter(r -> r.getId().equals(resultId))
-                .findFirst();
-
-        if(result.isEmpty()){
-            throw new ResultNotExistsException(resultId);
-        }
-
-        return result.get();
+                .findFirst()
+                .orElseThrow(() -> new ResultNotExistsException(resultId));
     }
 
     public void removePupilFromAllResults(Pupil pupil){
@@ -92,9 +87,33 @@ public class Placement extends BaseEntity {
         });
     }
 
+    public PlacementResult getSelectedResult() throws NoSelectedResultException {
+        return getResults().stream()
+                .filter(PlacementResult::isSelected)
+                .findFirst()
+                .orElseThrow(NoSelectedResultException::new);
+    }
+
+    public void setSelectedResult(PlacementResult result) throws PlacementResult.NotCompletedException {
+        if (getResults().contains(result)) {
+            if(!result.isCompleted()) {
+                throw new PlacementResult.NotCompletedException();
+            }
+
+            getResults().forEach(existsResult -> existsResult.setSelected(false));
+            result.setSelected(true);
+        }
+    }
+
     public static class ResultNotExistsException extends Exception {
-        public ResultNotExistsException(Long resutlId){
-            super("Placement does not have result with Id '" + resutlId + "'.");
+        public ResultNotExistsException(Long resultId){
+            super("Placement does not have result with Id '" + resultId + "'.");
+        }
+    }
+
+    public static class NoSelectedResultException extends Exception {
+        public NoSelectedResultException(){
+            super("Placement does not have a selected result.");
         }
     }
 }
