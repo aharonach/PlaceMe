@@ -147,22 +147,6 @@ public class PupilRestController extends BaseRestController<Pupil> {
         }
     }
 
-    @DeleteMapping("/{pupilId}/groups/{groupId}/attributes")
-    public ResponseEntity<?> deleteAttributeValues(@PathVariable Long pupilId,
-                                                   @PathVariable Long groupId,
-                                                   @RequestBody Set<Long> attributeIds) {
-        Pupil pupil = pupilService.getOr404(pupilId);
-        Group group = groupService.getOr404(groupId);
-
-        try {
-            pupilService.removeAttributeValues(pupil, group, attributeIds);
-            return ResponseEntity.ok().build();
-
-        } catch (Group.PupilNotBelongException e) {
-            throw new BadRequest(e.getMessage());
-        }
-    }
-
     @GetMapping("/{pupilId}/groups/{groupId}/attributes")
     public ResponseEntity<?> getAttributeValues(@PathVariable Long pupilId,
                                                    @PathVariable Long groupId) {

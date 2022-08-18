@@ -64,10 +64,6 @@ public class Pupil extends BaseEntity {
         return Collections.unmodifiableSet(attributeValues);
     }
 
-    public void removeAttributeValue(AttributeValue attributeValue){
-        attributeValues.remove(attributeValue);
-    }
-
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
 
         if(!givenId.matches(DIGITS_REGEX)){

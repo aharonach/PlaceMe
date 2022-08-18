@@ -117,14 +117,6 @@ public class PupilService implements EntityService<Pupil>{
         attributeValueRepository.saveAllAndFlush(pupil.getAttributeValues());
     }
 
-    public void removeAttributeValues(Pupil pupil, Group group, Set<Long> attributeIds) throws Group.PupilNotBelongException {
-
-        Set<AttributeValue> attributeValues = pupil.getAttributeValues(group, attributeIds);
-        attributeValues.forEach(attributeValue -> pupil.removeAttributeValue(attributeValue));
-        attributeValueRepository.deleteAll(attributeValues);
-
-    }
-
     public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) throws Group.PupilNotBelongException {
 
         Set<AttributeValue> attributeValues = getOr404(pupil.getId()).getAttributeValues(group);

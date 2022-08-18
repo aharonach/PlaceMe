@@ -12,10 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -128,44 +124,6 @@ class PupilServiceTest {
         assertEquals(0, receivedGroup1.getPupils().size());
         assertEquals(0, receivedGroup2.getPupils().size());
     }
-
-//    @Test
-//    @Transactional
-//    void shouldAddAttributeValuesToPupilWhenAddingValuesForHim()
-//            throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException,
-//            Group.PupilNotBelongException, AttributeValue.ValueOutOfRangeException, Template.AttributeNotBelongException {
-//
-//        Template receivedTemplate = templateService.add(new Template("template 2", "template 2 desc", Set.of(
-//                new RangeAttribute("attr 1", "attr 1 for template 2", 10),
-//                new RangeAttribute("attr 2", "attr 2 for template 2", 20)
-//        )));
-//
-//        Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
-//
-//        Pupil pupil = new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1));
-//        pupil.addToGroup(receivedGroup);
-//        pupil.addAttributeValue(receivedGroup, 1L, 1D);
-//        Pupil receivedPupil = pupilService.add(pupil);
-//
-//        Map<Long, Double> attributeValuesMap = new HashMap<>();
-//        attributeValuesMap.put(2L, 2D);
-//        pupilService.addAttributeValues(receivedPupil, receivedGroup, attributeValuesMap);
-//
-//        assertEquals(1, pupilService.all().size());
-//        assertEquals(2, receivedPupil.getAttributeValues().size());
-//        assertEquals(2, pupilService.getAttributeValues(receivedPupil, receivedGroup).size());
-//
-//        pupilService.removeAttributeValues(receivedPupil, receivedGroup, Set.of(1L));
-//        assertEquals(1, pupilService.getAttributeValues(receivedPupil, receivedGroup).size());
-//
-//        pupilService.removeAttributeValues(receivedPupil, receivedGroup, Set.of(2L));
-//        assertEquals(0, pupilService.getAttributeValues(receivedPupil, receivedGroup).size());
-//        assertEquals(0, receivedPupil.getAttributeValues().size());
-//
-//        templateService.deleteById(receivedTemplate.getId());
-//        groupService.deleteById(receivedGroup.getId());
-//        pupilService.deleteById(receivedPupil.getId());
-//    }
 
     // test update
 
