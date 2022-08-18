@@ -1,10 +1,7 @@
 package jen.web.service;
 
 import jen.web.engine.PlaceEngine;
-import jen.web.entity.Group;
-import jen.web.entity.PlaceEngineConfig;
-import jen.web.entity.Placement;
-import jen.web.entity.PlacementResult;
+import jen.web.entity.*;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.*;
@@ -132,7 +129,11 @@ public class PlacementService implements EntityService<Placement> {
         placementClassroomRepository.saveAll(placementResult.getClasses());
 
         placementResult.getClasses().forEach(placementClassroom -> {
-            placementClassroom.getPupils().forEach(pupil -> pupil.addToClassrooms(placementClassroom));
+            placementClassroom.getPupils().forEach(pupil -> {
+                Set<Long> classIds = pupil.getClassroomIds();
+                classIds.add(placementClassroom.getId());
+                pupil.setClassrooms(placementClassroomRepository.getAllByIdIn(classIds));
+            });
             pupilRepository.saveAll(placementClassroom.getPupils());
         });
 
@@ -184,6 +185,7 @@ public class PlacementService implements EntityService<Placement> {
 
         PlacementResult placementResult = new PlacementResult();
         placementResult = savePlacementResult(placement, placementResult);
+
         Long resultId = placementResult.getId();
 
         // update result will be called after the generation will finish
@@ -192,7 +194,7 @@ public class PlacementService implements EntityService<Placement> {
         return placementResult;
     }
 
-    private void updateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId){
+    private synchronized void updateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId){
         PlacementResult placementResult = getPlacementResultOr404(placementId, resultId);
         Placement placement = getOr404(placementId);
 

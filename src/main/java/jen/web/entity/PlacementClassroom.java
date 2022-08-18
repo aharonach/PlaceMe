@@ -140,6 +140,13 @@ public class PlacementClassroom extends BaseEntity {
         return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
     }
 
+    public void addPupilToClass(Pupil pupil){
+        if(!pupils.contains(pupil)){
+            pupils.add(pupil);
+            pupil.addToClassrooms(this);
+        }
+    }
+
     public void removePupilFromClass(Pupil pupil){
         pupils.remove(pupil);
     }

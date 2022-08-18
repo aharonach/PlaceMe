@@ -12,11 +12,16 @@ import jen.web.service.PlacementService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @RestController
@@ -28,6 +33,9 @@ public class PlacementRestController extends BaseRestController<Placement> {
     private final PlacementModelAssembler placementModelAssembler;
     
     private final PlacementResultModelAssembler placementResultModelAssembler;
+
+    @Value("${placement.max.allowed.results.on.generate}")
+    private Integer maxAllowedResultsOnGenerate;
 
     @Override
     @GetMapping()
@@ -75,19 +83,34 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @PostMapping("/{placementId}/results/generate")
-    public ResponseEntity<?> startPlacement(@PathVariable Long placementId) {
+    public ResponseEntity<?> startPlacement(@PathVariable Long placementId, @RequestBody Optional<Integer> amountOfResults) {
         Placement placement = service.getOr404(placementId);
 
-        PlacementResult placementResult = null;
-        try {
-            placementResult = service.generatePlacementResult(placement);
-        } catch (PlacementService.PlacementWithoutGroupException e) {
-            throw new PreconditionFailed(e.getMessage());
+        int numOfResults = getHowManyResultsToGenerate(amountOfResults);
+        Set<PlacementResult> results = new HashSet<>(numOfResults);
+
+        for(int i=0; i< numOfResults; i++) {
+            try {
+                results.add(service.generatePlacementResult(placement));
+            } catch (PlacementService.PlacementWithoutGroupException e) {
+                throw new PreconditionFailed(e.getMessage());
+            }
         }
 
-        return ResponseEntity
-                .ok()
-                .body(EntityModel.of(placementResult));
+        return ResponseEntity.ok(placementResultModelAssembler.toCollectionModel(results));
+    }
+
+    private int getHowManyResultsToGenerate(Optional<Integer> amountOfResults){
+        int numOfResults = 1;
+
+        if(amountOfResults.isPresent()){
+            if(amountOfResults.get() > maxAllowedResultsOnGenerate){
+                throw new IllegalNumberOfResultsException();
+            }
+            numOfResults = amountOfResults.get();
+        }
+
+        return numOfResults;
     }
 
     @GetMapping("/{placementId}/results")
@@ -156,5 +179,11 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @PostMapping("/configs")
     public ResponseEntity<?> updateConfig(@RequestBody PlaceEngineConfig config) {
         return ResponseEntity.ok(service.updateGlobalConfig(config));
+    }
+
+    public class IllegalNumberOfResultsException extends BadRequest {
+        public IllegalNumberOfResultsException(){
+            super("Number of result must be from 1 to " + maxAllowedResultsOnGenerate + ".");
+        }
     }
 }

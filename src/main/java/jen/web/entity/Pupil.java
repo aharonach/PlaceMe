@@ -162,7 +162,10 @@ public class Pupil extends BaseEntity {
     }
 
     public void addToClassrooms(PlacementClassroom placementClassroom){
-        classrooms.add(placementClassroom);
+        if(!classrooms.contains(placementClassroom)){
+            classrooms.add(placementClassroom);
+            placementClassroom.addPupilToClass(this);
+        }
     }
 
     public void removeFromClassrooms(PlacementClassroom placementClassroom) {
