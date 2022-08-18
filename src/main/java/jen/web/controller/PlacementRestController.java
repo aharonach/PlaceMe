@@ -1,9 +1,11 @@
 package jen.web.controller;
 
+import jen.web.assembler.PlacementClassroomModelAssembler;
 import jen.web.assembler.PlacementModelAssembler;
 import jen.web.assembler.PlacementResultModelAssembler;
 import jen.web.entity.PlaceEngineConfig;
 import jen.web.entity.Placement;
+import jen.web.entity.PlacementClassroom;
 import jen.web.entity.PlacementResult;
 import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
@@ -31,8 +33,9 @@ public class PlacementRestController extends BaseRestController<Placement> {
     private static final Logger logger = LoggerFactory.getLogger(PlacementRestController.class);
     private final PlacementService service;
     private final PlacementModelAssembler placementModelAssembler;
-    
     private final PlacementResultModelAssembler placementResultModelAssembler;
+
+    private final PlacementClassroomModelAssembler placementClassroomModelAssembler;
 
     @Value("${placement.max.allowed.results.on.generate}")
     private Integer maxAllowedResultsOnGenerate;
@@ -119,18 +122,6 @@ public class PlacementRestController extends BaseRestController<Placement> {
         return ResponseEntity.ok().body(allEntities);
     }
 
-    @GetMapping("/{placementId}/results/selected")
-    public ResponseEntity<?> getSelectedResult(@PathVariable Long placementId) {
-        try {
-            Placement placement = service.getOr404(placementId);
-            PlacementResult placementResult = service.getSelectedResult(placement);
-            EntityModel<PlacementResult> entityModel = placementResultModelAssembler.toModel(placementResult);
-            return ResponseEntity.ok().body(entityModel);
-        } catch(Placement.NoSelectedResultException e) {
-            throw new NotFound(e.getMessage());
-        }
-    }
-
     @PostMapping("/{placementId}/results/selected")
     public ResponseEntity<?> setSelectedResult(@PathVariable Long placementId, @RequestBody Long resultId) {
         try {
@@ -153,6 +144,20 @@ public class PlacementRestController extends BaseRestController<Placement> {
             PlacementResult placementResult = service.getResultById(placement, resultId);
             EntityModel<PlacementResult> entityModel = placementResultModelAssembler.toModel(placementResult);
             return ResponseEntity.ok().body(entityModel);
+        } catch (Placement.ResultNotExistsException e) {
+            throw new BadRequest(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{placementId}/results/{resultId}/classes")
+    public ResponseEntity<?> getResultClasses(@PathVariable Long placementId, @PathVariable Long resultId) {
+
+        Placement placement = service.getOr404(placementId);
+
+        try {
+            PlacementResult placementResult = service.getResultById(placement, resultId);
+            CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toCollectionModel(placementResult.getClasses());
+            return ResponseEntity.ok().body(entities);
         } catch (Placement.ResultNotExistsException e) {
             throw new BadRequest(e.getMessage());
         }

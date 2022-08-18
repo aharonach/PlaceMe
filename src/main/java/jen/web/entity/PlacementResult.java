@@ -32,6 +32,7 @@ public class PlacementResult extends BaseEntity {
     @Setter(value = AccessLevel.NONE)
     private transient List<PlacementClassroom> classesForAlgorithm = new ArrayList<>(); // list is needed for the algorithm
 
+    @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "placementResult")
     private Set<PlacementClassroom> classes = new LinkedHashSet<>(); // Set is better for hibernate
 
@@ -100,6 +101,10 @@ public class PlacementResult extends BaseEntity {
 
     public boolean isCompleted() {
         return Status.COMPLETED.equals(getStatus());
+    }
+
+    public int getNumberOfClasses(){
+        return classes.size();
     }
 
     public enum Status {
