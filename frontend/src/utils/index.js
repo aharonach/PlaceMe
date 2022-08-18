@@ -29,3 +29,7 @@ export function getDefaultValuesByFields(fields, values) {
     const fieldIds = getFieldIds(fields);
     return Object.fromEntries( Object.entries(values).filter( entry => fieldIds.includes(entry[0]) ));
 }
+
+export function setFormValues(form, values) {
+    Object.keys(values).forEach(key => form.setValue(key, values[key]));
+}

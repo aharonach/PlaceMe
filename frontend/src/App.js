@@ -20,6 +20,7 @@ function App() {
                         <Route index element={<Pupil.PupilsList />}></Route>
                         <Route path="add" element={<Pupil.AddPupil />}></Route>
                         <Route path=":pupilId" element={<Pupil.Profile />}></Route>
+                        <Route path=":pupilId/edit" element={<Pupil.EditPupil />}></Route>
                     </Route>
                     <Route path="/groups" element={<Pages.Groups />}>
                         <Route index element={<Group.GroupsList />} />
