@@ -87,11 +87,11 @@ public class Placement extends BaseEntity {
         });
     }
 
-    public PlacementResult getSelectedResult() throws NoSelectedResultException {
+    public PlacementResult getSelectedResult() {
         return getResults().stream()
                 .filter(PlacementResult::isSelected)
                 .findFirst()
-                .orElseThrow(NoSelectedResultException::new);
+                .orElse(null);
     }
 
     public void setSelectedResult(PlacementResult result) throws PlacementResult.NotCompletedException {

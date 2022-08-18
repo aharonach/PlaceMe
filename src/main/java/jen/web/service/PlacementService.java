@@ -224,7 +224,11 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     public PlacementResult getSelectedResult(Placement placement) throws Placement.NoSelectedResultException {
-        return placement.getSelectedResult();
+        PlacementResult placementResult = placement.getSelectedResult();
+        if(placementResult == null){
+            throw new Placement.NoSelectedResultException();
+        }
+        return placementResult;
     }
 
     public void setSelectedResult(Placement placement, Long resultId) throws Placement.ResultNotExistsException, PlacementResult.NotCompletedException {
