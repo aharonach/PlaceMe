@@ -40,6 +40,7 @@ public class AttributeValue {
         setValue(value);
     }
 
+    @JsonIgnore
     public double getScore(){
         return attribute.calculate(value);
     }
@@ -52,6 +53,7 @@ public class AttributeValue {
         this.value = value;
     }
 
+    @JsonIgnore
     public double getMaxScore(){
         return attribute.calculate(attribute.maxValue());
     }
