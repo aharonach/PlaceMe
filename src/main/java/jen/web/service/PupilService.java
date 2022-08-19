@@ -64,7 +64,7 @@ public class PupilService implements EntityService<Pupil>{
     public Pupil updateById(Long id, Pupil newPupil) {
         Pupil pupil = getOr404(id);
 
-        if (!(newPupil.getGivenId() == null || pupil.getGivenId().equals(newPupil.getGivenId()))) {
+        if (newPupil.getGivenId() != null && !pupil.getGivenId().equals(newPupil.getGivenId())) {
             validateGivenIdNotExists(newPupil.getGivenId());
             try {
                 pupil.setGivenId(newPupil.getGivenId());

@@ -4,6 +4,8 @@ import jen.web.entity.Attribute;
 import jen.web.entity.RangeAttribute;
 import jen.web.entity.Template;
 import jen.web.exception.NotFound;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +28,15 @@ class TemplateServiceTest {
 
     @Autowired
     TemplateService templateService;
+
+    @Autowired
+    RepositoryTestUtils repositoryTestUtils;
+
+    @BeforeEach
+    @AfterEach
+    void verifyDbIsEmpty() {
+        repositoryTestUtils.verifyAllTablesAreEmpty();
+    }
 
     @Test
     @Transactional

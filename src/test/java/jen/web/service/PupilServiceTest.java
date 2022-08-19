@@ -27,14 +27,13 @@ class PupilServiceTest {
     @Autowired
     TemplateService templateService;
 
-    @BeforeEach
-    void setUp() {
-        assertEquals(0, pupilService.all().size());
-    }
+    @Autowired
+    RepositoryTestUtils repositoryTestUtils;
 
+    @BeforeEach
     @AfterEach
-    void tearDown() {
-        assertEquals(0, pupilService.all().size());
+    void verifyDbIsEmpty() {
+        repositoryTestUtils.verifyAllTablesAreEmpty();
     }
 
     @Test
@@ -123,6 +122,37 @@ class PupilServiceTest {
         pupilService.deleteById(receivedPupil.getId());
         assertEquals(0, receivedGroup1.getPupils().size());
         assertEquals(0, receivedGroup2.getPupils().size());
+
+        groupService.deleteById(receivedGroup1.getId());
+        groupService.deleteById(receivedGroup2.getId());
+    }
+
+    @Test
+    void shouldUpdatePupilGeneralInfoWhenUpdatingGeneralInfo() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+        Pupil pupil = new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1));
+        Pupil receivedPupil = pupilService.add(pupil);
+
+        assertEquals("Pupil1", receivedPupil.getFirstName());
+        assertEquals("Last1", receivedPupil.getLastName());
+        assertEquals("123456789", receivedPupil.getGivenId());
+        assertEquals(Pupil.Gender.MALE, receivedPupil.getGender());
+        assertEquals(1990, receivedPupil.getBirthDate().getYear());
+
+        receivedPupil.setFirstName("new_Pupil1");
+        receivedPupil.setLastName("new_Last1");
+        receivedPupil.setGivenId("987654321");
+        receivedPupil.setGender(Pupil.Gender.FEMALE);
+        receivedPupil.setBirthDate(LocalDate.of(2000, 2, 2));
+
+        Pupil updatedPupil = pupilService.updateById(receivedPupil.getId(), receivedPupil);
+
+        assertEquals("new_Pupil1", updatedPupil.getFirstName());
+        assertEquals("new_Last1", updatedPupil.getLastName());
+        assertEquals("987654321", updatedPupil.getGivenId());
+        assertEquals(Pupil.Gender.FEMALE, updatedPupil.getGender());
+        assertEquals(2000, updatedPupil.getBirthDate().getYear());
+
+        pupilService.deleteById(receivedPupil.getId());
     }
 
     // test update
