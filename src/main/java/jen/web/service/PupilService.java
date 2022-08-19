@@ -37,10 +37,9 @@ public class PupilService implements EntityService<Pupil>{
         }
 
         validateGivenIdNotExists(pupil.getGivenId());
-        pupil.getGroups().stream().map(BaseEntity::getId).forEach(groupId -> {
-            Group group = groupService.getOr404(groupId);
-            pupil.addToGroup(group);
-        });
+        if(!pupil.getGroups().isEmpty()){
+            setPupilGroups(pupil, pupil.getGroups());
+        }
 
         return pupilRepository.save(pupil);
     }
@@ -61,30 +60,22 @@ public class PupilService implements EntityService<Pupil>{
 
     @Override
     @Transactional
-    public Pupil updateById(Long id, Pupil newPupil) {
+    public Pupil updateById(Long id, Pupil newPupil) throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
         Pupil pupil = getOr404(id);
 
+        // edit general information
         if (newPupil.getGivenId() != null && !pupil.getGivenId().equals(newPupil.getGivenId())) {
             validateGivenIdNotExists(newPupil.getGivenId());
-            try {
-                pupil.setGivenId(newPupil.getGivenId());
-            } catch (Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
-                throw new RuntimeException(e);
-            }
+            pupil.setGivenId(newPupil.getGivenId());
         }
-
-        Set<Long> newGroupIds = newPupil.getGroups().stream().map(BaseEntity::getId).collect(Collectors.toSet());
-        if(!newGroupIds.isEmpty()){
-            pupil.setGroups(groupService.getByIds(newGroupIds));
-        }
-
         pupil.setFirstName(newPupil.getFirstName());
         pupil.setLastName(newPupil.getLastName());
         pupil.setGender(newPupil.getGender());
         pupil.setBirthDate(newPupil.getBirthDate());
 
-        if ( !newPupil.getAttributeValues().isEmpty() ) {
-            pupil.setAttributeValues(new HashSet<>(newPupil.getAttributeValues()));
+        // edit groups if new pupil contain groups
+        if(!newPupil.getGroups().isEmpty()){
+            setPupilGroups(pupil, newPupil.getGroups());
         }
 
         return pupilRepository.save(pupil);
@@ -107,10 +98,10 @@ public class PupilService implements EntityService<Pupil>{
         pupilRepository.delete(pupil);
     }
 
-    public void addAttributeValues(Pupil pupil, Group group, Map<Long, Double> attributeValues)
+    public void addOrUpdateAttributeValuesFromIdValueMap(Pupil pupil, Group group, Map<Long, Double> attributeIdValueMap)
             throws Group.PupilNotBelongException, Template.AttributeNotBelongException, AttributeValue.ValueOutOfRangeException {
 
-        for (Map.Entry<Long, Double> attributeValue : attributeValues.entrySet()) {
+        for (Map.Entry<Long, Double> attributeValue : attributeIdValueMap.entrySet()) {
             pupil.addAttributeValue(group, attributeValue.getKey(), attributeValue.getValue());
         }
 
@@ -122,6 +113,28 @@ public class PupilService implements EntityService<Pupil>{
         Set<AttributeValue> attributeValues = getOr404(pupil.getId()).getAttributeValues(group);
         return attributeValues;
 
+    }
+
+    public Set<Group> setPupilGroups(Pupil pupil, Set<Group> newGroups){
+        Set<Long> newGroupIds = newGroups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        pupil.setGroups(groupService.getByIds(newGroupIds));
+        pupilRepository.save(pupil);
+
+        return pupil.getGroups();
+    }
+
+    public Set<Group> linkPupilToGroup(Pupil pupil, Group newGroup){
+        Set<Group> pupilGroups = new HashSet<>(pupil.getGroups());
+        pupilGroups.add(newGroup);
+
+        return setPupilGroups(pupil, pupilGroups);
+    }
+
+    public Set<Group> unlinkPupilFromGroup(Pupil pupil, Group groupToRemove){
+        Set<Group> pupilGroups = new HashSet<>(pupil.getGroups());
+        pupilGroups.remove(groupToRemove);
+
+        return setPupilGroups(pupil, pupilGroups);
     }
 
     public boolean isPupilExists(String givenId) {

@@ -124,6 +124,14 @@ public class Pupil extends BaseEntity {
                 .collect(Collectors.toSet());
     }
 
+    public Map<Long, Double> getAttributeValueMap(){
+        Map<Long, Double> result = new HashMap<>(attributeValues.size());
+        for(AttributeValue attributeValue: attributeValues){
+            result.put(attributeValue.getAttribute().getId(), attributeValue.getValue());
+        }
+        return result;
+    }
+
     public Integer getAge(){
         return Math.abs(Period.between(LocalDate.now(), this.birthDate).getYears());
     }
