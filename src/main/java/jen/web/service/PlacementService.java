@@ -177,7 +177,7 @@ public class PlacementService implements EntityService<Placement> {
         placementResultRepository.deleteById(resultId);
     }
 
-    public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException {
+    public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
         verifyPlacementContainsDataForGeneration(placement);
 
         PlaceEngineConfig config = this.getGlobalConfig();
@@ -205,14 +205,19 @@ public class PlacementService implements EntityService<Placement> {
 
         } catch (Exception e){
             placementResult.setStatus(PlacementResult.Status.FAILED);
+            logger.error("error during generation: " + e.getMessage());
         }
 
         savePlacementResult(placement, placementResult);
     }
 
-    private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException {
+    private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
         if(placement.getGroup() == null){
             throw new PlacementWithoutGroupException();
+        }
+
+        if(placement.getGroup().getPupils().size() == 0){
+            throw new PlacementWithoutPupilsInGroupException();
         }
 
         // @todo: attr values will be empty. should we avoid starting a placement in this case?
@@ -257,6 +262,12 @@ public class PlacementService implements EntityService<Placement> {
     public static class PlacementResultsInProgressException extends Exception {
         public PlacementResultsInProgressException(){
             super("Cant perform the action. Placement have results that are in progress.");
+        }
+    }
+
+    public static class PlacementWithoutPupilsInGroupException extends Exception {
+        public PlacementWithoutPupilsInGroupException(){
+            super("Group have no pupils.");
         }
     }
 }

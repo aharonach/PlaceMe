@@ -95,7 +95,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
         for(int i=0; i< numOfResults; i++) {
             try {
                 results.add(service.generatePlacementResult(placement));
-            } catch (PlacementService.PlacementWithoutGroupException e) {
+            } catch (PlacementService.PlacementWithoutGroupException | PlacementService.PlacementWithoutPupilsInGroupException e) {
                 throw new PreconditionFailed(e.getMessage());
             }
         }
