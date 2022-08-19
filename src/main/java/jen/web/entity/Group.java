@@ -94,8 +94,10 @@ public class Group extends BaseEntity {
     }
 
     public void removePupil(Pupil pupil){
-        pupils.remove(pupil);
-        pupil.removeFromGroup(this);
+        if(pupils.contains(pupil)){
+            pupils.remove(pupil);
+            pupil.removeFromGroup(this);
+        }
     }
 
     public void clearPupils(){

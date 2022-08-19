@@ -139,6 +139,9 @@ public class Pupil extends BaseEntity {
     @JsonProperty
     public void setGroups(Set<Group> newGroups){
         groups = newGroups;
+        for (Group group: newGroups){
+            group.addPupil(this);
+        }
     }
 
     @JsonIgnore
@@ -162,7 +165,10 @@ public class Pupil extends BaseEntity {
     }
 
     public void removeFromGroup(Group group) {
-        groups.remove(group);
+        if(groups.contains(group)){
+            groups.remove(group);
+            group.removePupil(this);
+        }
     }
 
     public Set<Long> getClassroomIds(){

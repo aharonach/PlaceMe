@@ -115,6 +115,7 @@ public class PupilService implements EntityService<Pupil>{
 
     }
 
+    @Transactional
     public Set<Group> setPupilGroups(Pupil pupil, Set<Group> newGroups){
         Set<Long> newGroupIds = newGroups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
         pupil.setGroups(groupService.getByIds(newGroupIds));
@@ -123,6 +124,7 @@ public class PupilService implements EntityService<Pupil>{
         return pupil.getGroups();
     }
 
+    @Transactional
     public Set<Group> linkPupilToGroup(Pupil pupil, Group newGroup){
         Set<Group> pupilGroups = new HashSet<>(pupil.getGroups());
         pupilGroups.add(newGroup);
@@ -130,11 +132,10 @@ public class PupilService implements EntityService<Pupil>{
         return setPupilGroups(pupil, pupilGroups);
     }
 
-    public Set<Group> unlinkPupilFromGroup(Pupil pupil, Group groupToRemove){
-        Set<Group> pupilGroups = new HashSet<>(pupil.getGroups());
-        pupilGroups.remove(groupToRemove);
-
-        return setPupilGroups(pupil, pupilGroups);
+    @Transactional
+    public void unlinkPupilFromGroup(Pupil pupil, Group groupToRemove){
+        pupil.removeFromGroup(groupToRemove);
+        pupilRepository.save(pupil);
     }
 
     public boolean isPupilExists(String givenId) {
