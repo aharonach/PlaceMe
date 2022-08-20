@@ -7,7 +7,6 @@ import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
 import jen.web.repository.PupilRepository;
-import jen.web.repository.TemplateRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,9 +30,7 @@ public class GroupService implements EntityService<Group> {
     private final GroupRepository groupRepository;
     @Getter
     private final PreferenceRepository preferenceRepository;
-
     private final PupilRepository pupilRepository;
-    private final TemplateRepository templateRepository;
     private final TemplateService templateService;
 
     @Override
@@ -95,7 +93,7 @@ public class GroupService implements EntityService<Group> {
         }
         group.setTemplate(null);
         deleteAllPreferencesFromGroup(group);
-        RemoveAllPupilsFromGroup(group);
+        unlinkAllPupilsFromGroup(group);
 
         group.getPlacements().forEach(placement -> {
             placement.setGroup(null);
@@ -114,10 +112,20 @@ public class GroupService implements EntityService<Group> {
         //return groupRepository.getAllByIdIn(ids);
     }
 
-
-    public void addPupilToGroup(Group group, Pupil pupil){
+    public void linkPupilToGroup(Group group, Pupil pupil){
         group.addPupil(pupil);
         pupilRepository.save(pupil);
+    }
+
+    public void unlinkPupilToGroup(Group group, Pupil pupil){
+        group.removePupil(pupil);
+        pupilRepository.save(pupil);
+    }
+
+    @Transactional
+    public void unlinkAllPupilsFromGroup(Group group){
+        new ArrayList<>(group.getPupils()).forEach(pupil -> pupil.removeFromGroup(group));
+        group.clearPupils();
     }
 
     @Transactional
@@ -157,19 +165,6 @@ public class GroupService implements EntityService<Group> {
 
     public Set<Preference> getAllPreferencesForPupil(Pupil pupil, Group group){
         return group.getAllPreferencesForPupil(pupil.getId());
-    }
-
-    @Transactional
-    public void RemoveAllPupilsFromGroup(Group group){
-        group.getPupils().forEach(pupil -> pupil.removeFromGroup(group));
-        group.clearPupils();
-    }
-
-    private void verifyGroupNotAssociated(Group group) throws GroupIsAssociatedException {
-        if(group.getPlacements().size() > 0){
-            Placement placement = group.getPlacements().stream().findFirst().get();
-            throw new GroupIsAssociatedException(placement);
-        }
     }
 
     public static class GroupIsAssociatedException extends NotAcceptable {
