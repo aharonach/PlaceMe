@@ -172,10 +172,4 @@ public class GroupService implements EntityService<Group> {
     public Set<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
         return group.getAllPreferencesForPupil(pupil.getId());
     }
-
-    public static class GroupIsAssociatedException extends NotAcceptable {
-        public GroupIsAssociatedException(Placement placement){
-            super("Group is associated with Placement " + placement.getId() + " (" + placement.getName() + ")");
-        }
-    }
 }
