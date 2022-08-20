@@ -108,6 +108,10 @@ public class Group extends BaseEntity {
         return Collections.unmodifiableSet(pupils);
     }
 
+    public void clearPreferences(){
+        preferences.clear();
+    }
+
     public Set<Preference> getPreferences() {
         return Collections.unmodifiableSet(preferences);
     }
@@ -129,7 +133,7 @@ public class Group extends BaseEntity {
     }
 
     public void addOrUpdatePreference(Pupil selector, Pupil selected, boolean wantToBeTogether) throws Preference.SamePupilException {
-        Optional<Preference> optionalPreference = getPreferencesForPupils(selector.getId(), selected.getId());
+        Optional<Preference> optionalPreference = getPreferenceForPupils(selector.getId(), selected.getId());
         Preference preference;
         if(optionalPreference.isPresent()){
             preference = optionalPreference.get();
@@ -141,7 +145,7 @@ public class Group extends BaseEntity {
         }
     }
 
-    public Optional<Preference> getPreferencesForPupils(Long selectorId, Long selectedId){
+    public Optional<Preference> getPreferenceForPupils(Long selectorId, Long selectedId){
         return preferences.stream()
                 .filter(preference -> preference.getSelectorSelectedId().getSelectorId().equals(selectorId))
                 .filter(preference -> preference.getSelectorSelectedId().getSelectedId().equals(selectedId))
@@ -153,6 +157,10 @@ public class Group extends BaseEntity {
                 .filter(preference -> preference.getSelectorSelectedId().getSelectorId().equals(pupilId)
                         || preference.getSelectorSelectedId().getSelectedId().equals(pupilId))
                 .collect(Collectors.toSet());
+    }
+
+    public void deletePreference(Preference preference){
+        preferences.remove(preference);
     }
 
     @Override

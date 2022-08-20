@@ -107,7 +107,7 @@ public class GroupRestController extends BaseRestController<Group> {
     public ResponseEntity<?> getPreferencesForPupil(@PathVariable Long groupId, @PathVariable Long pupilId){
         Group group = groupService.getOr404(groupId);
         Pupil pupil = pupilService.getOr404(pupilId);
-        Set<Preference> preferences = groupService.getAllPreferencesForPupil(pupil, group);
+        Set<Preference> preferences = groupService.getAllPreferencesForPupil(group, pupil);
         CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
 
         return ResponseEntity
@@ -135,7 +135,10 @@ public class GroupRestController extends BaseRestController<Group> {
                                               @RequestBody Preference preference) {
 
         Group group = groupService.getOr404(groupId);
-        groupService.deletePupilPreferences(group, preference);
+        Long selectorId = preference.getSelectorSelectedId().getSelectorId();
+        Long selectedId = preference.getSelectorSelectedId().getSelectedId();
+
+        groupService.deletePupilPreferences(group, selectorId, selectedId);
 
         return ResponseEntity.ok().build();
     }

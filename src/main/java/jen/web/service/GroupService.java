@@ -140,30 +140,36 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Transactional
-    public void deletePupilPreferences(Group group, Preference preference) {
-        Long selectorId = preference.getSelectorSelectedId().getSelectorId();
-        Long selectedId = preference.getSelectorSelectedId().getSelectedId();
+    public void deletePupilPreferences(Group group, Long selectorId, Long selectedId) {
 
-        Set<SelectorSelectedId> selectorSelectedIds = group.getPreferencesForPupils(selectorId, selectedId)
-                .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
+        Set<SelectorSelectedId> selectorSelectedIds = group.getPreferenceForPupils(selectorId, selectedId)
+                .stream()
+                .map(Preference::getSelectorSelectedId)
+                .collect(Collectors.toSet());
+        group.getPreferenceForPupils(selectorId, selectedId).ifPresent(group::deletePreference);
         preferenceRepository.deleteAllById(selectorSelectedIds);
     }
 
     @Transactional
     public void deletePupilPreferences(Group group, Pupil pupil){
         Set<SelectorSelectedId> selectorSelectedIds = group.getAllPreferencesForPupil(pupil.getId())
-                .stream().map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
-        preferenceRepository.deleteAllById(selectorSelectedIds);
+                .stream()
+                .map(Preference::getSelectorSelectedId)
+                .collect(Collectors.toSet());
+        new HashSet<>(group.getAllPreferencesForPupil(pupil.getId())).forEach(group::deletePreference);
+        preferenceRepository.deleteAllBySelectorSelectedIdInAndGroupId(selectorSelectedIds, group.getId());
     }
 
     @Transactional
     public void deleteAllPreferencesFromGroup(Group group){
         Set<SelectorSelectedId> selectorSelectedIds = group.getPreferences().stream()
-                .map(Preference::getSelectorSelectedId).collect(Collectors.toSet());
-        preferenceRepository.deleteAllById(selectorSelectedIds);
+                .map(Preference::getSelectorSelectedId)
+                .collect(Collectors.toSet());
+        group.clearPreferences();
+        preferenceRepository.deleteAllBySelectorSelectedIdInAndGroupId(selectorSelectedIds, group.getId());
     }
 
-    public Set<Preference> getAllPreferencesForPupil(Pupil pupil, Group group){
+    public Set<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
         return group.getAllPreferencesForPupil(pupil.getId());
     }
 
