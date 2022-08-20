@@ -133,7 +133,7 @@ public class LoadDatabase {
         Template template = templateService.getOr404(2L);
 
         Group group1 = groupService.add(new Group("group 1", "group 1 desc", template));
-        pupilService.all().forEach(pupil -> groupService.addPupilToGroup(group1, pupil));
+        pupilService.all().forEach(pupil -> groupService.linkPupilToGroup(group1, pupil));
         logger.info("Preloading " + group1);
 
         Group group2 = groupService.add(new Group("group 2", "group 2 desc", template));
@@ -148,7 +148,7 @@ public class LoadDatabase {
             Map<Long, Double> attributeValues = new HashMap<>(template.getAttributes().size());
             template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
             try {
-                pupilService.addAttributeValues(pupil, group, attributeValues);
+                pupilService.addOrUpdateAttributeValuesFromIdValueMap(pupil, group, attributeValues);
             } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException |
                      AttributeValue.ValueOutOfRangeException e) {
                 throw new RuntimeException(e);
@@ -172,7 +172,7 @@ public class LoadDatabase {
         groupService.addPupilPreference(group, new Preference(pupil3, pupil1, false));
     }
 
-    private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException {
+    private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException {
         Placement placement = placementService.all().get(0);
         placementService.generatePlacementResult(placement);
     }
