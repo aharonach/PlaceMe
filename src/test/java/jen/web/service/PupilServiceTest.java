@@ -40,27 +40,27 @@ class PupilServiceTest {
 
     @Test
     void shouldCreateAndRemovePupilWhenAddingPupilAndDeletingIt() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
-        Pupil pupil1 = new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1));
-        Pupil receivedPupil1 = pupilService.add(pupil1);
-
-        Pupil pupil2 = new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2));
-        Pupil receivedPupil2 = pupilService.add(pupil2);
-
+        Pupil receivedPupil1 = pupilService.add(
+                new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
+        );
+        Pupil receivedPupil2 = pupilService.add(
+                new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2))
+        );
         assertEquals(2, pupilService.all().size());
+        assertNotEquals(pupilService.getOr404(pupilService.all().get(0).getId()), pupilService.getOr404(pupilService.all().get(1).getId()));
 
         assertEquals("Pupil1", receivedPupil1.getFirstName());
         assertEquals("Last1", receivedPupil1.getLastName());
         assertEquals("123456789", receivedPupil1.getGivenId());
         assertEquals(Pupil.Gender.MALE, receivedPupil1.getGender());
         assertEquals(1990, receivedPupil1.getBirthDate().getYear());
+        pupilService.deleteById(receivedPupil1.getId());
 
         assertEquals("Pupil2", receivedPupil2.getFirstName());
         assertEquals("Last2", receivedPupil2.getLastName());
         assertEquals("987654321", receivedPupil2.getGivenId());
         assertEquals(Pupil.Gender.FEMALE, receivedPupil2.getGender());
         assertEquals(1992, receivedPupil2.getBirthDate().getYear());
-
-        pupilService.deleteById(receivedPupil1.getId());
         pupilService.deleteById(receivedPupil2.getId());
     }
 
