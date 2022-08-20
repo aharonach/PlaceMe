@@ -12,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -201,7 +203,40 @@ class PupilServiceTest {
         groupService.deleteById(receivedGroup3.getId());
     }
 
-    // test update
+    @Test
+    void shouldAddOrUpdateAttributeValues() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Group.PupilNotBelongException, AttributeValue.ValueOutOfRangeException, Template.AttributeNotBelongException {
+        Template receivedTemplate = templateService.add(new Template("template 2", "template 2 desc", Set.of(
+                new RangeAttribute("attr 1", "attr 1 for template 2", 10),
+                new RangeAttribute("attr 2", "attr 2 for template 2", 20)
+        )));
+        Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
+        Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));
+
+        Pupil pupil1 = new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1));
+        pupil1.addToGroup(receivedGroup1);
+        Pupil receivedPupil = pupilService.add(pupil1);
+
+        assertEquals(0, receivedPupil.getAttributeValues(receivedGroup1).size());
+        assertEquals(0, pupilService.getAttributeValues(receivedPupil, receivedGroup1).size());
+        assertThrows(Group.PupilNotBelongException.class, () -> receivedPupil.getAttributeValues(receivedGroup2));
+        assertEquals(0, receivedPupil.getAttributeValues().size());
+
+        Map<Long, Double> valuesMap = new HashMap<>(2);
+        valuesMap.put(1L, 2D);
+        valuesMap.put(2L, 3D);
+        pupilService.addOrUpdateAttributeValuesFromIdValueMap(receivedPupil, receivedGroup1, valuesMap);
+        assertEquals(2, pupilService.getAttributeValues(receivedPupil, receivedGroup1).size());
+
+        AttributeValue attributeValue1 = receivedPupil.getAttributeValues(receivedGroup1, Set.of(1L)).stream().findFirst().get();
+        assertEquals(2D, attributeValue1.getValue());
+        AttributeValue attributeValue2 = receivedPupil.getAttributeValues(receivedGroup1, Set.of(2L)).stream().findFirst().get();
+        assertEquals(3D, attributeValue2.getValue());
+
+        pupilService.deleteById(receivedPupil.getId());
+        groupService.deleteById(receivedGroup1.getId());
+        groupService.deleteById(receivedGroup2.getId());
+        templateService.deleteById(receivedTemplate.getId());
+    }
 
     @Test
     void shouldThrowNotFoundExceptionOnGetPupilWhenPupilNotExist() {
