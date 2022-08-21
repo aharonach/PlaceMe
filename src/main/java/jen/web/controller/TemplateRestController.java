@@ -13,7 +13,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.Attr;
 
 
 @RestController
@@ -23,14 +22,14 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     private static final Logger logger = LoggerFactory.getLogger(TemplateRestController.class);
 
-    private final TemplateService service;
+    private final TemplateService templateService;
     private final TemplateModelAssembler assembler;
 
 
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll() {
-        CollectionModel<EntityModel<Template>> allEntities = assembler.toCollectionModel(service.all());
+        CollectionModel<EntityModel<Template>> allEntities = assembler.toCollectionModel(templateService.all());
 
         return ResponseEntity
                 .ok()
@@ -40,7 +39,7 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @GetMapping("/{templateId}")
     public ResponseEntity<?> get(@PathVariable Long templateId) {
-        EntityModel<Template> entity = assembler.toModel(service.getOr404(templateId));
+        EntityModel<Template> entity = assembler.toModel(templateService.getOr404(templateId));
 
         return ResponseEntity
                 .ok()
@@ -50,7 +49,7 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Template newRecord) {
-        EntityModel<Template> entity = assembler.toModel(service.add(newRecord));
+        EntityModel<Template> entity = assembler.toModel(templateService.add(newRecord));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -60,7 +59,7 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PostMapping("/{templateId}")
     public ResponseEntity<?> update(@PathVariable Long templateId, @RequestBody Template updatedRecord) {
-        Template updatedTemplate = service.updateById(templateId, updatedRecord);
+        Template updatedTemplate = templateService.updateById(templateId, updatedRecord);
         EntityModel<Template> entity = assembler.toModel(updatedTemplate);
 
         return ResponseEntity
@@ -71,7 +70,7 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @DeleteMapping("/{templateId}")
     public ResponseEntity<?> delete(@PathVariable Long templateId) {
-        service.deleteById(templateId);
+        templateService.deleteById(templateId);
         return ResponseEntity.ok().build();
     }
 
@@ -79,10 +78,10 @@ public class TemplateRestController extends BaseRestController<Template> {
     @DeleteMapping("/{templateId}/attributes/{attributeId}")
     public ResponseEntity<?> deleteAttributeForTemplate(@PathVariable Long templateId, @PathVariable Long attributeId) {
 
-        Template template = service.getOr404(templateId);
-        Attribute attribute = service.getAttributeOr404(attributeId);
+        Template template = templateService.getOr404(templateId);
+        Attribute attribute = templateService.getAttributeOr404(attributeId);
         try {
-            service.deleteAttributeForTemplateById(template, attribute);
+            templateService.deleteAttributeForTemplateById(template, attribute);
         } catch (Template.AttributeNotBelongException e) {
             throw new BadRequest(e.getMessage());
         }
@@ -95,10 +94,10 @@ public class TemplateRestController extends BaseRestController<Template> {
                                         @PathVariable Long attributeId,
                                         @RequestBody Attribute newAttribute) {
 
-        Template template = service.getOr404(templateId);
-        Attribute attribute = service.getAttributeOr404(attributeId);
+        Template template = templateService.getOr404(templateId);
+        Attribute attribute = templateService.getAttributeOr404(attributeId);
         try {
-            Template updatedTemplate = service.updateAttributeForTemplateById(template, attribute, newAttribute);
+            Template updatedTemplate = templateService.updateAttributeForTemplateById(template, attribute, newAttribute);
             EntityModel<Template> entity = assembler.toModel(updatedTemplate);
             return ResponseEntity.ok().body(entity);
 
@@ -111,8 +110,8 @@ public class TemplateRestController extends BaseRestController<Template> {
     public ResponseEntity<?> addAttributeForTemplate(@PathVariable Long templateId,
                                      @RequestBody Attribute newAttribute) {
 
-        Template template = service.getOr404(templateId);
-        EntityModel<Template> entity = assembler.toModel(service.addAttributeForTemplateById(template, newAttribute));
+        Template template = templateService.getOr404(templateId);
+        EntityModel<Template> entity = assembler.toModel(templateService.addAttributeForTemplateById(template, newAttribute));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())

@@ -2,7 +2,6 @@ package jen.web.service;
 
 import jen.web.entity.*;
 import jen.web.exception.EntityAlreadyExists;
-import jen.web.exception.NotAcceptable;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
@@ -68,16 +67,18 @@ public class GroupService implements EntityService<Group> {
         group.setName(newGroup.getName());
         group.setDescription(newGroup.getDescription());
 
-        if(newGroup.getTemplate() != null){
+        if(newGroup.getTemplate() != null && !group.getTemplate().equals(newGroup.getTemplate())){
             Template newTemplate = templateService.getOr404(newGroup.getTemplate().getId());
 
-            Set<Long> newGroupIds = newTemplate.getGroupIds();
-            if(group.getTemplate() != null){
-                newGroupIds.remove(group.getTemplate().getId());
-            }
-
+//            Set<Long> newGroupIds = newTemplate.getGroupIds();
+//            if(group.getTemplate() != null){
+//                group.getTemplate().removeGroup(group);
+//                //newGroupIds.remove(group.getTemplate().getId());
+//            }
+//            newGroupIds.add(newGroup.getId());
+//            group.getTemplate().removeGroup(group);
             group.setTemplate(newTemplate);
-            newTemplate.setGroups(groupRepository.getAllByIdIn(newGroupIds));
+            //newTemplate.setGroups(groupRepository.getAllByIdIn(newGroupIds));
         }
 
         return groupRepository.save(group);
@@ -117,14 +118,16 @@ public class GroupService implements EntityService<Group> {
         pupilRepository.save(pupil);
     }
 
-    public void unlinkPupilToGroup(Group group, Pupil pupil){
+    public void unlinkPupilFromGroup(Group group, Pupil pupil){
         group.removePupil(pupil);
+        deletePupilPreferences(group, pupil);
         pupilRepository.save(pupil);
     }
 
     @Transactional
     public void unlinkAllPupilsFromGroup(Group group){
         new ArrayList<>(group.getPupils()).forEach(pupil -> pupil.removeFromGroup(group));
+        deleteAllPreferencesFromGroup(group);
         group.clearPupils();
     }
 

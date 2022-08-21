@@ -21,7 +21,7 @@ public class Template extends BaseEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Attribute> attributes = new HashSet<>();
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "template", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "template")
     private Set<Group> groups = new LinkedHashSet<>();
 
     public Template(String name, String description){
