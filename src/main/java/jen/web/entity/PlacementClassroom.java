@@ -69,21 +69,29 @@ public class PlacementClassroom extends BaseEntity {
         return (value / pupils.size()) * 100;
     }
 
+    public long getNumberOfMales(){
+        return getNumOfPupilsByGender(Pupil.Gender.MALE);
+    }
+
+    public long getNumberOfFemales(){
+        return getNumOfPupilsByGender(Pupil.Gender.FEMALE);
+    }
+
     public long getDeltaBetweenMalesAndFemales(){
-        long numOfMales = getNumOfPupilsByGender(Pupil.Gender.MALE);
-        long numOfFemales = getNumOfPupilsByGender(Pupil.Gender.FEMALE);
+        long numOfMales = getNumberOfMales();
+        long numOfFemales = getNumberOfFemales();
 
         return Math.abs(numOfMales - numOfFemales);
     }
 
     public long getDeltaBetweenMales(){
-        long numOfMalesInClass = getNumOfPupilsByGender(Pupil.Gender.MALE);
+        long numOfMalesInClass = getNumberOfMales();
 
         return Math.abs(numOfMalesInClass - totalNumberOfMales);
     }
 
     public long getDeltaBetweenFemales(){
-        long numOfFemalesInClass = getNumOfPupilsByGender(Pupil.Gender.FEMALE);
+        long numOfFemalesInClass = getNumberOfFemales();
 
         return Math.abs(numOfFemalesInClass - totalNumberOfFemales);
     }

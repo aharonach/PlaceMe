@@ -46,8 +46,9 @@ export default function PlacementPage({edit=false}){
                     { !edit &&
                         <div>
                             <p>
-                                <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
                                 <LinkContainer to="edit"><Button>Edit Placement</Button></LinkContainer>
+                                <LinkContainer to="results"><Button>Show All Optional Results</Button></LinkContainer>
+                                <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
                             </p>
                             <PlacementData placement={placement} />
                         </div>

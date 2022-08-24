@@ -37,6 +37,8 @@ function App() {
                         <Route path="add" element={<Placement.AddPlacement />}></Route>
                         <Route path=":placementId" element={<Placement.PlacementPage />}></Route>
                         <Route path=":placementId/edit" element={<Placement.PlacementPage edit={true} />}></Route>
+                        <Route path=":placementId/results" element={<Placement.PlacementResultsList />}></Route>
+                        <Route path=":placementId/results/:resultId" element={<Placement.PlacementResultPage />}></Route>
                     </Route>
                     <Route path="*" element={<Pages.ErrorPage />}></Route>
                 </Routes>
