@@ -1,6 +1,7 @@
 package jen.web.service;
 
 import jen.web.entity.Attribute;
+import jen.web.entity.BaseEntity;
 import jen.web.entity.Template;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
@@ -13,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +51,9 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     public List<Template> all() {
-        return templateRepository.findAll();
+        return templateRepository.findAll().stream()
+                .sorted(Comparator.comparing(BaseEntity::getId))
+                .collect(Collectors.toList());
     }
 
     @Override

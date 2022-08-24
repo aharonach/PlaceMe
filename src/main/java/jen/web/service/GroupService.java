@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +53,9 @@ public class GroupService implements EntityService<Group> {
 
     @Override
     public List<Group> all() {
-        return groupRepository.findAll();
+        return groupRepository.findAll().stream()
+                .sorted(Comparator.comparing(BaseEntity::getId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -69,16 +68,7 @@ public class GroupService implements EntityService<Group> {
 
         if(newGroup.getTemplate() != null && !group.getTemplate().equals(newGroup.getTemplate())){
             Template newTemplate = templateService.getOr404(newGroup.getTemplate().getId());
-
-//            Set<Long> newGroupIds = newTemplate.getGroupIds();
-//            if(group.getTemplate() != null){
-//                group.getTemplate().removeGroup(group);
-//                //newGroupIds.remove(group.getTemplate().getId());
-//            }
-//            newGroupIds.add(newGroup.getId());
-//            group.getTemplate().removeGroup(group);
             group.setTemplate(newTemplate);
-            //newTemplate.setGroups(groupRepository.getAllByIdIn(newGroupIds));
         }
 
         return groupRepository.save(group);

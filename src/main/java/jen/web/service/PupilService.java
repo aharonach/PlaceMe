@@ -52,7 +52,9 @@ public class PupilService implements EntityService<Pupil>{
 
     @Override
     public List<Pupil> all() {
-        return pupilRepository.findAll();
+        return pupilRepository.findAll().stream()
+                .sorted(Comparator.comparing(BaseEntity::getId))
+                .collect(Collectors.toList());
     }
 
     @Override
