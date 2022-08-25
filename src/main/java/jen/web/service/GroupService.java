@@ -93,14 +93,10 @@ public class GroupService implements EntityService<Group> {
         groupRepository.delete(group);
     }
 
-    public Set<Group> getByIds(Set<Long> ids) {
-        Set<Group> groups = new HashSet<>(ids.size());
-        for(Long id : ids){
-            groups.add(getOr404(id));
-        }
-        return groups;
-        // @todo: decide what to do, this line gets the same result but its not throwing exception for non existing ids
-        //return groupRepository.getAllByIdIn(ids);
+    public List<Group> getByIds(Set<Long> ids) {
+        return groupRepository.getAllByIdIn(ids).stream()
+                .sorted(Comparator.comparing(BaseEntity::getId))
+                .collect(Collectors.toList());
     }
 
     public void linkPupilToGroup(Group group, Pupil pupil){
@@ -162,7 +158,9 @@ public class GroupService implements EntityService<Group> {
         preferenceRepository.deleteAllBySelectorSelectedIdInAndGroupId(selectorSelectedIds, group.getId());
     }
 
-    public Set<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
-        return group.getAllPreferencesForPupil(pupil.getId());
+    public List<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
+        return group.getAllPreferencesForPupil(pupil.getId()).stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 }

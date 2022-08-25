@@ -86,7 +86,7 @@ public class PupilService implements EntityService<Pupil>{
         Pupil pupil = getOr404(id);
 
         attributeValueRepository.deleteAll(pupil.getAttributeValues());
-        Set<Group> groups = groupService.getByIds(new HashSet<>(pupil.getGroupIds()));
+        List<Group> groups = groupService.getByIds(new HashSet<>(pupil.getGroupIds()));
         for(Group group : groups){
             group.getPlacements().forEach(placement -> placement.removePupilFromAllResults(pupil));
             group.removePupil(pupil);
@@ -115,9 +115,9 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     @Transactional
-    public Set<Group> setPupilGroups(Pupil pupil, Set<Group> newGroups){
+    public Set<Group> setPupilGroups(Pupil pupil, Collection<Group> newGroups){
         Set<Long> newGroupIds = newGroups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
-        pupil.setGroups(groupService.getByIds(newGroupIds));
+        pupil.setGroups(new HashSet<>(groupService.getByIds(newGroupIds)));
         pupilRepository.save(pupil);
 
         return pupil.getGroups();

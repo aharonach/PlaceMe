@@ -13,7 +13,7 @@ import java.util.Objects;
 @ToString
 @Table(name = "preferences")
 @NoArgsConstructor
-public class Preference {
+public class Preference implements Comparable{
     @EmbeddedId
     private SelectorSelectedId selectorSelectedId = new SelectorSelectedId();
 
@@ -46,6 +46,19 @@ public class Preference {
     @Override
     public int hashCode() {
         return Objects.hash(selectorSelectedId);
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Preference other = (Preference)o;
+        int compareBySelector = (int) (this.getSelectorSelectedId().getSelectorId() - other.getSelectorSelectedId().getSelectorId());
+        int compareBySelected= (int) (this.getSelectorSelectedId().getSelectedId() - other.getSelectorSelectedId().getSelectedId());
+
+        if(compareBySelector != 0){
+            return compareBySelector;
+        } else {
+            return compareBySelected;
+        }
     }
 
     public static class SamePupilException extends Exception {

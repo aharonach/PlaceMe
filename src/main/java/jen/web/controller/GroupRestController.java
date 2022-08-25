@@ -19,6 +19,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -107,7 +108,7 @@ public class GroupRestController extends BaseRestController<Group> {
     public ResponseEntity<?> getPreferencesForPupil(@PathVariable Long groupId, @PathVariable Long pupilId){
         Group group = groupService.getOr404(groupId);
         Pupil pupil = pupilService.getOr404(pupilId);
-        Set<Preference> preferences = groupService.getAllPreferencesForPupil(group, pupil);
+        List<Preference> preferences = groupService.getAllPreferencesForPupil(group, pupil);
         CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
 
         return ResponseEntity
@@ -143,7 +144,7 @@ public class GroupRestController extends BaseRestController<Group> {
         return ResponseEntity.ok().build();
     }
 
-    private CollectionModel<Preference> preferencesToModelCollection(Long groupId, Set<Preference> preferences){
+    private CollectionModel<Preference> preferencesToModelCollection(Long groupId, Iterable<Preference> preferences){
         return  CollectionModel.of(preferences,
                 linkTo(methodOn(this.getClass()).get(groupId)).withRel("group"),
                 linkTo(methodOn(this.getClass()).getPreferences(groupId)).withSelfRel()

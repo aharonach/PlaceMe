@@ -18,6 +18,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -105,7 +106,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     @PostMapping(path = "/{pupilId}/groups")
     public ResponseEntity<?> updatePupilGroup(@PathVariable Long pupilId, @RequestBody Set<Long> groupIds) {
         Pupil pupil = pupilService.getOr404(pupilId);
-        Set<Group> newGroups = groupService.getByIds(groupIds);
+        List<Group> newGroups = groupService.getByIds(groupIds);
 
         Set<Group> updatedGroups = pupilService.setPupilGroups(pupil, newGroups);
 
@@ -156,7 +157,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
         }
     }
 
-    private CollectionModel<AttributeValue> preferencesToModelCollection(Long pupilId, Long groupId, Set<AttributeValue> attributeValues){
+    private CollectionModel<AttributeValue> preferencesToModelCollection(Long pupilId, Long groupId, Iterable<AttributeValue> attributeValues){
         return  CollectionModel.of(attributeValues,
                 linkTo(methodOn(this.getClass()).get(pupilId)).withRel("pupil"),
                 linkTo(methodOn(this.getClass()).getPupilGroups(groupId)).withRel("group"),
