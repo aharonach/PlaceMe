@@ -94,9 +94,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     public List<Group> getByIdsWithoutPages(Set<Long> ids) {
-        return groupRepository.getAllByIdIn(ids).stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+        return groupRepository.getAllByIdInOrderById(ids);
     }
 
     public Page<Group> getByIds(Set<Long> ids, PageRequest pageRequest) {

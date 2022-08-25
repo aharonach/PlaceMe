@@ -118,7 +118,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
         Pupil pupil = pupilService.getOr404(pupilId);
         Group groupToAdd = groupService.getOr404(groupId);
 
-        Set<Group> updatedGroups = pupilService.linkPupilToGroup(pupil, groupToAdd);
+        List<Group> updatedGroups = pupilService.linkPupilToGroup(pupil, groupToAdd);
 
         CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(updatedGroups);
         return ResponseEntity.ok().body(allEntities);
@@ -129,7 +129,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
         Pupil pupil = pupilService.getOr404(pupilId);
         List<Group> newGroups = groupService.getByIdsWithoutPages(groupIds);
 
-        Set<Group> updatedGroups = pupilService.setPupilGroups(pupil, newGroups);
+        List<Group> updatedGroups = pupilService.setPupilGroups(pupil, newGroups);
 
         CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(updatedGroups);
         return ResponseEntity.ok().body(allEntities);
@@ -169,7 +169,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
         Group group = groupService.getOr404(groupId);
 
         try {
-            Set<AttributeValue> attributeValues = pupilService.getAttributeValues(pupil, group);
+            List<AttributeValue> attributeValues = pupilService.getAttributeValues(pupil, group);
             CollectionModel<AttributeValue> allEntities = preferencesToModelCollection(pupil.getId(), group.getId(), attributeValues);
             return ResponseEntity.ok().body(allEntities);
 

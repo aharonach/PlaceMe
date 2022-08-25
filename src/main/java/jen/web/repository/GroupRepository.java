@@ -11,6 +11,6 @@ import java.util.List;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
-    List<Group> getAllByIdIn(Collection<Long> id);
+    List<Group> getAllByIdInOrderById(Collection<Long> id);
     Page<Group> getAllByIdIn(Collection<Long> id, Pageable pageable);
 }

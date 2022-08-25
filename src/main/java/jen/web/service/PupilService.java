@@ -112,24 +112,25 @@ public class PupilService implements EntityService<Pupil>{
         attributeValueRepository.saveAllAndFlush(pupil.getAttributeValues());
     }
 
-    public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) throws Group.PupilNotBelongException {
+    public List<AttributeValue> getAttributeValues(Pupil pupil, Group group) throws Group.PupilNotBelongException {
+        Set<AttributeValue> attributeValues = pupil.getAttributeValues(group);
 
-        Set<AttributeValue> attributeValues = getOr404(pupil.getId()).getAttributeValues(group);
-        return attributeValues;
-
+        return attributeValueRepository.getAllByPupilAttributeIdInOrderByPupilAttributeId(attributeValues.stream()
+                .map(attributeValue -> attributeValue.getPupilAttributeId())
+                .collect(Collectors.toSet()));
     }
 
     @Transactional
-    public Set<Group> setPupilGroups(Pupil pupil, Collection<Group> newGroups){
+    public List<Group> setPupilGroups(Pupil pupil, Collection<Group> newGroups){
         Set<Long> newGroupIds = newGroups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
         pupil.setGroups(new HashSet<>(groupService.getByIdsWithoutPages(newGroupIds)));
         pupilRepository.save(pupil);
 
-        return pupil.getGroups();
+        return groupService.getByIdsWithoutPages(new HashSet<>(pupil.getGroupIds()));
     }
 
     @Transactional
-    public Set<Group> linkPupilToGroup(Pupil pupil, Group newGroup){
+    public List<Group> linkPupilToGroup(Pupil pupil, Group newGroup){
         Set<Group> pupilGroups = new HashSet<>(pupil.getGroups());
         pupilGroups.add(newGroup);
 
