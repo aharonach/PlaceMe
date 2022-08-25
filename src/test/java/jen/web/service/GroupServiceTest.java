@@ -12,8 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,15 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 class GroupServiceTest {
 
-    @Autowired
-    PupilService pupilService;
-    @Autowired
-    GroupService groupService;
-    @Autowired
-    TemplateService templateService;
-
-    @Autowired
-    RepositoryTestUtils repositoryTestUtils;
+    @Autowired PupilService pupilService;
+    @Autowired GroupService groupService;
+    @Autowired TemplateService templateService;
+    @Autowired RepositoryTestUtils repositoryTestUtils;
 
     @BeforeEach
     @AfterEach
@@ -38,18 +32,18 @@ class GroupServiceTest {
         repositoryTestUtils.verifyAllTablesAreEmpty();
     }
 
-
     @Test
     void shouldCreateAndRemoveGroupWhenAddingGroupAndDeletingIt() throws PagesAndSortHandler.FieldNotSortableException {
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));
-        assertEquals(2, groupService.all().getContent().size());
-        assertNotEquals(groupService.getOr404(groupService.all().getContent().get(0).getId()), groupService.getOr404(groupService.all().getContent().get(1).getId()));
+        assertEquals(2, getGroupsFromService().size());
+        assertNotEquals(receivedGroup1.getId(), receivedGroup2.getId());
+        assertNotEquals(groupService.getOr404(receivedGroup1.getId()), groupService.getOr404(receivedGroup2.getId()));
 
 
         assertEquals("group 1", receivedGroup1.getName());
         assertEquals("group 1 desc", receivedGroup1.getDescription());
-        assertEquals(null, receivedGroup1.getTemplate());
+        assertNull(receivedGroup1.getTemplate());
         assertEquals(0, receivedGroup1.getPupils().size());
         assertEquals(0, receivedGroup1.getPreferences().size());
         assertEquals(0, receivedGroup1.getPlacements().size());
@@ -57,7 +51,7 @@ class GroupServiceTest {
 
         assertEquals("group 2", receivedGroup2.getName());
         assertEquals("group 2 desc", receivedGroup2.getDescription());
-        assertEquals(null, receivedGroup2.getTemplate());
+        assertNull(receivedGroup2.getTemplate());
         assertEquals(0, receivedGroup2.getPupils().size());
         assertEquals(0, receivedGroup2.getPreferences().size());
         assertEquals(0, receivedGroup2.getPlacements().size());
@@ -67,10 +61,7 @@ class GroupServiceTest {
     @Test
     @Transactional
     void shouldCreateAndRemoveGroupWithTemplateWhenAddingGroupAndDeletingIt() {
-        Template receivedTemplate = templateService.add(new Template("template 2", "template 2 desc", Set.of(
-                new RangeAttribute("attr 1", "attr 1 for template 2", 10),
-                new RangeAttribute("attr 2", "attr 2 for template 2", 20)
-        )));
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
         receivedTemplate = templateService.getOr404(receivedTemplate.getId());
 
@@ -85,15 +76,11 @@ class GroupServiceTest {
     @Test
     @Transactional
     void shouldAddPupilToGroupWhenAddingFromService() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, PagesAndSortHandler.FieldNotSortableException {
-        Pupil receivedPupil1 = pupilService.add(
-                new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
-        );
-        Pupil receivedPupil2 = pupilService.add(
-                new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2))
-        );
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));
-        assertEquals(2, groupService.all().getContent().size());
+        assertEquals(2, getGroupsFromService().size());
 
         groupService.linkPupilToGroup(receivedGroup1, receivedPupil1);
         groupService.linkPupilToGroup(receivedGroup2, receivedPupil1);
@@ -129,13 +116,10 @@ class GroupServiceTest {
     @Test
     @Transactional
     void shouldClearPupilListWhenRemovingAllPupilsFromGroup() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
-        Pupil receivedPupil1 = pupilService.add(
-                new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
-        );
-        Pupil receivedPupil2 = pupilService.add(
-                new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2))
-        );
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", null));
+
         groupService.linkPupilToGroup(receivedGroup, receivedPupil1);
         groupService.linkPupilToGroup(receivedGroup, receivedPupil2);
 
@@ -160,15 +144,9 @@ class GroupServiceTest {
     @Test
     @Transactional
     void testCreatingPupilPreferences() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Preference.SamePupilException, Group.PupilNotBelongException {
-        Pupil receivedPupil1 = pupilService.add(
-                new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
-        );
-        Pupil receivedPupil2 = pupilService.add(
-                new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2))
-        );
-        Pupil receivedPupil3 = pupilService.add(
-                new Pupil("543216789", "Pupil3", "Last3", Pupil.Gender.MALE, LocalDate.of(1994, 4, 4))
-        );
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
+        Pupil receivedPupil3 = pupilService.add(repositoryTestUtils.createPupil3());
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));
         Group receivedGroup3 = groupService.add(new Group("group 3", "group 3 desc", null));
@@ -206,15 +184,10 @@ class GroupServiceTest {
     @Test
     @Transactional
     void testDeletingPupilPreferences() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Preference.SamePupilException, Group.PupilNotBelongException {
-        Pupil receivedPupil1 = pupilService.add(
-                new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
-        );
-        Pupil receivedPupil2 = pupilService.add(
-                new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2))
-        );
-        Pupil receivedPupil3 = pupilService.add(
-                new Pupil("543216789", "Pupil3", "Last3", Pupil.Gender.MALE, LocalDate.of(1994, 4, 4))
-        );
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
+        Pupil receivedPupil3 = pupilService.add(repositoryTestUtils.createPupil3());
+
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         groupService.linkPupilToGroup(receivedGroup1, receivedPupil1);
         groupService.linkPupilToGroup(receivedGroup1, receivedPupil2);
@@ -265,15 +238,10 @@ class GroupServiceTest {
     @Test
     @Transactional
     void shouldSetNewTemplateWhenUpdatingGroup() {
-        Template receivedTemplate1 = templateService.add(new Template("template 1", "template 1 desc", Set.of(
-                new RangeAttribute("attr 1", "attr 1 for template 1", 10),
-                new RangeAttribute("attr 2", "attr 2 for template 1", 20)
-        )));
-        Template receivedTemplate2 = templateService.add(new Template("template 2", "template 2 desc", Set.of(
-                new RangeAttribute("attr 1", "attr 1 for template 2", 10),
-                new RangeAttribute("attr 2", "attr 2 for template 2", 20)
-        )));
+        Template receivedTemplate1 = templateService.add(repositoryTestUtils.createTemplate1());
+        Template receivedTemplate2 = templateService.add(repositoryTestUtils.createTemplate2());
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate1));
+
         assertEquals("template 1", receivedGroup.getTemplate().getName());
         assertEquals(1, receivedGroup.getTemplate().getGroups().size());
         assertEquals(receivedGroup.getTemplate().getId(), receivedTemplate1.getId());
@@ -297,15 +265,10 @@ class GroupServiceTest {
     @Test
     @Transactional
     void shouldDeletePupilPreferencesWhenUnlinkPupilFromGroup() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Preference.SamePupilException, Group.PupilNotBelongException {
-        Pupil receivedPupil1 = pupilService.add(
-                new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
-        );
-        Pupil receivedPupil2 = pupilService.add(
-                new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2))
-        );
-        Pupil receivedPupil3 = pupilService.add(
-                new Pupil("543216789", "Pupil3", "Last3", Pupil.Gender.MALE, LocalDate.of(1994, 4, 4))
-        );
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
+        Pupil receivedPupil3 = pupilService.add(repositoryTestUtils.createPupil3());
+
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         groupService.linkPupilToGroup(receivedGroup1, receivedPupil1);
         groupService.linkPupilToGroup(receivedGroup1, receivedPupil2);
@@ -334,5 +297,9 @@ class GroupServiceTest {
     @Test
     void shouldThrowNotFoundExceptionOnGetGroupWhenGroupNotExist() {
         assertThrows(NotFound.class, () -> groupService.getOr404(100L));
+    }
+
+    private List<Group> getGroupsFromService() throws PagesAndSortHandler.FieldNotSortableException {
+        return groupService.all(repositoryTestUtils.getFirstPageRequest()).getContent();
     }
 }

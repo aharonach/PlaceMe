@@ -8,11 +8,13 @@ import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
+import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -32,8 +34,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
     private final PlacementService placementService;
     private final PlacementModelAssembler placementModelAssembler;
     private final PlacementResultModelAssembler placementResultModelAssembler;
-
     private final PlacementClassroomModelAssembler placementClassroomModelAssembler;
+    private final PagesAndSortHandler pagesAndSortHandler;
 
     @Value("${placement.max.allowed.results.on.generate}")
     private Integer maxAllowedResultsOnGenerate;
@@ -42,9 +44,12 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+
         try {
-            CollectionModel<EntityModel<Placement>> pagesModel = placementModelAssembler.toPageCollection(placementService.all(page, sortBy));
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.placementMap);
+            CollectionModel<EntityModel<Placement>> pagesModel = placementModelAssembler.toPageCollection(placementService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
+
         } catch (PagesAndSortHandler.FieldNotSortableException e) {
             throw new BadRequest(e.getMessage());
         }

@@ -6,8 +6,6 @@ import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.PupilRepository;
-import jen.web.util.FieldSortingMaps;
-import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +26,6 @@ public class PupilService implements EntityService<Pupil>{
     private final PupilRepository pupilRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final GroupService groupService;
-    private final PagesAndSortHandler pagesHandler;
 
     @Override
     @Transactional
@@ -55,13 +52,8 @@ public class PupilService implements EntityService<Pupil>{
         return pupilRepository.getPupilByGivenId(givenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
     }
 
-    public Page<Pupil> all() throws PagesAndSortHandler.FieldNotSortableException {
-        return all(Optional.empty(),Optional.empty());
-    }
-
     @Override
-    public Page<Pupil> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.groupMap);
+    public Page<Pupil> all(PageRequest pageRequest) {
         return pupilRepository.findAll(pageRequest);
     }
 
@@ -106,8 +98,8 @@ public class PupilService implements EntityService<Pupil>{
         pupilRepository.delete(pupil);
     }
 
-    public Page<Group> getPupilGroups(Pupil pupil, Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        return groupService.getByIds(new HashSet<>(pupil.getGroupIds()), pageNumber, sortBy);
+    public Page<Group> getPupilGroups(Pupil pupil, PageRequest pageRequest) {
+        return groupService.getByIds(new HashSet<>(pupil.getGroupIds()), pageRequest);
     }
 
     public void addOrUpdateAttributeValuesFromIdValueMap(Pupil pupil, Group group, Map<Long, Double> attributeIdValueMap)

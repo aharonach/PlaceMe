@@ -2,14 +2,15 @@ package jen.web.controller;
 
 import jen.web.assembler.TemplateModelAssembler;
 import jen.web.entity.Attribute;
-import jen.web.entity.Group;
 import jen.web.entity.Template;
 import jen.web.exception.BadRequest;
 import jen.web.service.TemplateService;
+import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -29,13 +30,17 @@ public class TemplateRestController extends BaseRestController<Template> {
     private final TemplateService templateService;
     private final TemplateModelAssembler assembler;
 
+    private final PagesAndSortHandler pagesAndSortHandler;
 
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+
         try {
-            CollectionModel<EntityModel<Template>> pagesModel = assembler.toPageCollection(templateService.all(page, sortBy));
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.templateMap);
+            CollectionModel<EntityModel<Template>> pagesModel = assembler.toPageCollection(templateService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
+
         } catch (PagesAndSortHandler.FieldNotSortableException e) {
             throw new BadRequest(e.getMessage());
         }

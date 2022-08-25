@@ -1,27 +1,21 @@
 package jen.web.service;
 
 import jen.web.entity.Attribute;
-import jen.web.entity.BaseEntity;
-import jen.web.entity.Placement;
 import jen.web.entity.Template;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeRepository;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.TemplateRepository;
-import jen.web.util.FieldSortingMaps;
-import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +26,6 @@ public class TemplateService implements EntityService<Template> {
     private final TemplateRepository templateRepository;
     private final AttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
-    private final PagesAndSortHandler pagesHandler;
 
 
     @Override
@@ -55,13 +48,8 @@ public class TemplateService implements EntityService<Template> {
         return attributeRepository.findById(id).orElseThrow(() -> new NotFound("Could not find attribute " + id));
     }
 
-    public Page<Template> all() throws PagesAndSortHandler.FieldNotSortableException {
-        return all(Optional.empty(),Optional.empty());
-    }
-
     @Override
-    public Page<Template> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.templateMap);
+    public Page<Template> all(PageRequest pageRequest) {
         return templateRepository.findAll(pageRequest);
     }
 

@@ -6,15 +6,12 @@ import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
 import jen.web.repository.PupilRepository;
-import jen.web.util.FieldSortingMaps;
-import jen.web.util.PagesAndSortHandler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +30,6 @@ public class GroupService implements EntityService<Group> {
     private final PreferenceRepository preferenceRepository;
     private final PupilRepository pupilRepository;
     private final TemplateService templateService;
-    private final PagesAndSortHandler pagesHandler;
 
     @Override
     @Transactional
@@ -58,13 +54,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Override
-    public Page<Group> all() throws PagesAndSortHandler.FieldNotSortableException {
-        return all(Optional.empty(),Optional.empty());
-    }
-
-    @Override
-    public Page<Group> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.groupMap);
+    public Page<Group> all(PageRequest pageRequest) {
         return groupRepository.findAll(pageRequest);
     }
 
@@ -109,8 +99,7 @@ public class GroupService implements EntityService<Group> {
                 .collect(Collectors.toList());
     }
 
-    public Page<Group> getByIds(Set<Long> ids, Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.groupMap);
+    public Page<Group> getByIds(Set<Long> ids, PageRequest pageRequest) {
         return groupRepository.getAllByIdIn(ids, pageRequest);
     }
 

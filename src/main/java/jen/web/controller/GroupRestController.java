@@ -2,17 +2,18 @@ package jen.web.controller;
 
 import jen.web.assembler.GroupModelAssembler;
 import jen.web.assembler.PupilModelAssembler;
-import jen.web.assembler.TemplateModelAssembler;
 import jen.web.entity.Group;
 import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
 import jen.web.exception.BadRequest;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
+import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -36,14 +37,18 @@ public class GroupRestController extends BaseRestController<Group> {
     private final PupilService pupilService;
     private final GroupModelAssembler groupAssembler;
     private final PupilModelAssembler pupilAssembler;
+    private final PagesAndSortHandler pagesAndSortHandler;
 
 
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+
         try {
-            CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(groupService.all(page, sortBy));
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap);
+            CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(groupService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
+
         } catch (PagesAndSortHandler.FieldNotSortableException e) {
             throw new BadRequest(e.getMessage());
         }

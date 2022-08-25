@@ -26,6 +26,10 @@ public class PagesAndSortHandler {
     @Value("${default.items.per.page}")
     public Integer DefaultItemsPerPage;
 
+    public PageRequest getFirstPageRequest() throws PagesAndSortHandler.FieldNotSortableException {
+        return getPageRequest(Optional.of(0), Optional.of("id"), FieldSortingMaps.defaultMap);
+    }
+
     public PageRequest getPageRequest(Optional<Integer> pageNumber, Optional<String> sortBy, Map<String, Sort> fieldSortingMap) throws FieldNotSortableException {
         return getPageRequest(pageNumber, sortBy, fieldSortingMap, DefaultItemsPerPage);
     }
