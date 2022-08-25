@@ -6,9 +6,13 @@ import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.PupilRepository;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +28,10 @@ public class PupilService implements EntityService<Pupil>{
     private final PupilRepository pupilRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final GroupService groupService;
+    private final PagesAndSortHandler pagesHandler;
+    private final Map<String, Sort> fieldSortingMap = Map.of(
+            "id", Sort.by("id")
+    );
 
     @Override
     @Transactional
@@ -50,11 +58,14 @@ public class PupilService implements EntityService<Pupil>{
         return pupilRepository.getPupilByGivenId(givenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
     }
 
+    public Page<Pupil> all() throws PagesAndSortHandler.FieldNotSortableException {
+        return all(Optional.empty(),Optional.empty());
+    }
+
     @Override
-    public List<Pupil> all() {
-        return pupilRepository.findAll().stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+    public Page<Pupil> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
+        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, fieldSortingMap);
+        return pupilRepository.findAll(pageRequest);
     }
 
     @Override

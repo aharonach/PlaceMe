@@ -5,16 +5,17 @@ import jen.web.entity.*;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.*;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -35,6 +36,10 @@ public class PlacementService implements EntityService<Placement> {
     private final GroupService groupService;
 
     private final PlaceEngineConfigRepository engineConfigRepository;
+    private final PagesAndSortHandler pagesHandler;
+    private final Map<String, Sort> fieldSortingMap = Map.of(
+            "id", Sort.by("id")
+    );
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -66,11 +71,14 @@ public class PlacementService implements EntityService<Placement> {
         return placementResultRepository.findById(resultId).orElseThrow(() -> new NotFound("Could not find placement result " + resultId));
     }
 
+    public Page<Placement> all() throws PagesAndSortHandler.FieldNotSortableException {
+        return all(Optional.empty(),Optional.empty());
+    }
+
     @Override
-    public List<Placement> all() {
-        return placementRepository.findAll().stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+    public Page<Placement> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
+        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, fieldSortingMap);
+        return placementRepository.findAll(pageRequest);
     }
 
     @Override

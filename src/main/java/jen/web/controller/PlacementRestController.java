@@ -3,14 +3,12 @@ package jen.web.controller;
 import jen.web.assembler.PlacementClassroomModelAssembler;
 import jen.web.assembler.PlacementModelAssembler;
 import jen.web.assembler.PlacementResultModelAssembler;
-import jen.web.entity.PlaceEngineConfig;
-import jen.web.entity.Placement;
-import jen.web.entity.PlacementClassroom;
-import jen.web.entity.PlacementResult;
+import jen.web.entity.*;
 import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +38,16 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @Value("${placement.max.allowed.results.on.generate}")
     private Integer maxAllowedResultsOnGenerate;
 
+
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(placementModelAssembler.toCollectionModel(placementService.all()));
+    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+        try {
+            CollectionModel<EntityModel<Placement>> pagesModel = placementModelAssembler.toPageCollection(placementService.all(page, sortBy));
+            return ResponseEntity.ok().body(pagesModel);
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override

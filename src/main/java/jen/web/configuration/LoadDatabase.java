@@ -5,6 +5,7 @@ import jen.web.service.GroupService;
 import jen.web.service.PlacementService;
 import jen.web.service.PupilService;
 import jen.web.service.TemplateService;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class LoadDatabase {
             });
 
             System.out.println("Prefs:");
-            System.out.println(groupService.all().get(0).getPreferences());
+            System.out.println(groupService.all().getContent().get(0).getPreferences());
 
             System.out.println("Result:");
             PlacementResult placementResult = placementService.getOr404(1L).getResultById(1L);
@@ -129,7 +130,7 @@ public class LoadDatabase {
 
     }
 
-    private void createGroups(){
+    private void createGroups() throws PagesAndSortHandler.FieldNotSortableException {
         Template template = templateService.getOr404(2L);
 
         Group group1 = groupService.add(new Group("group 1", "group 1 desc", template));
@@ -140,7 +141,7 @@ public class LoadDatabase {
         logger.info("Preloading " + group2);
     }
 
-    private void createAttributeValues() {
+    private void createAttributeValues() throws PagesAndSortHandler.FieldNotSortableException {
         Group group = groupService.getOr404(1L);
         Template template = group.getTemplate();
 
@@ -161,8 +162,8 @@ public class LoadDatabase {
         logger.info("Preloading " + placementService.add(new Placement("placement 1", 4, group)));
     }
 
-    private void addPreferences() throws Preference.SamePupilException, Group.PupilNotBelongException {
-        Group group = groupService.all().get(0);
+    private void addPreferences() throws Preference.SamePupilException, Group.PupilNotBelongException, PagesAndSortHandler.FieldNotSortableException {
+        Group group = groupService.all().getContent().get(0);
         Pupil pupil1 = pupilService.getOr404(1L);
         Pupil pupil2 = pupilService.getOr404(2L);
         Pupil pupil3 = pupilService.getOr404(3L);
@@ -172,8 +173,8 @@ public class LoadDatabase {
         groupService.addPupilPreference(group, new Preference(pupil3, pupil1, false));
     }
 
-    private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException {
-        Placement placement = placementService.all().get(0);
+    private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, PagesAndSortHandler.FieldNotSortableException {
+        Placement placement = placementService.all().getContent().get(0);
         placementService.generatePlacementResult(placement);
     }
 }

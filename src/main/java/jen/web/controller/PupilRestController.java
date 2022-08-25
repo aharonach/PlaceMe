@@ -7,19 +7,27 @@ import jen.web.entity.Group;
 import jen.web.entity.Pupil;
 import jen.web.entity.Template;
 import jen.web.exception.BadRequest;
+import jen.web.repository.PupilRepository;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -37,11 +45,18 @@ public class PupilRestController extends BaseRestController<Pupil> {
     private final PupilModelAssembler pupilAssembler;
     private final GroupModelAssembler groupAssembler;
 
+    private final PupilRepository pupilRepository;
+
+
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll() {
-        CollectionModel<EntityModel<Pupil>> allEntities = pupilAssembler.toCollectionModel(pupilService.all());
-        return ResponseEntity.ok().body(allEntities);
+    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+        try {
+            CollectionModel<EntityModel<Pupil>> pagesModel = pupilAssembler.toPageCollection(pupilService.all(page, sortBy));
+            return ResponseEntity.ok().body(pagesModel);
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override

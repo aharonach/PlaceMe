@@ -10,6 +10,7 @@ import jen.web.entity.Template;
 import jen.web.exception.BadRequest;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -37,14 +39,16 @@ public class GroupRestController extends BaseRestController<Group> {
     private final TemplateModelAssembler templateAssembler;
     private final PupilModelAssembler pupilAssembler;
 
+
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll() {
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(groupService.all());
-
-        return ResponseEntity
-                .ok()
-                .body(allEntities);
+    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+        try {
+            CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(groupService.all(page, sortBy));
+            return ResponseEntity.ok().body(pagesModel);
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
