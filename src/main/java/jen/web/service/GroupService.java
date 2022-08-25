@@ -104,7 +104,9 @@ public class GroupService implements EntityService<Group> {
     }
 
     public List<Group> getByIdsWithoutPages(Set<Long> ids) {
-        return groupRepository.getAllByIdIn(ids);
+        return groupRepository.getAllByIdIn(ids).stream()
+                .sorted(Comparator.comparing(BaseEntity::getId))
+                .collect(Collectors.toList());
     }
 
     public Page<Group> getByIds(Set<Long> ids, Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
