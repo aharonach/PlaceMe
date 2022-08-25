@@ -101,6 +101,11 @@ public class GroupService implements EntityService<Group> {
         return groupRepository.getAllByIdIn(ids, pageRequest);
     }
 
+    public Page<Pupil> getPupilOfGroup(Group group, PageRequest pageRequest) {
+        Set<Long> pupilIds = group.getPupils().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        return pupilRepository.getAllByIdIn(pupilIds, pageRequest);
+    }
+
     public void linkPupilToGroup(Group group, Pupil pupil){
         group.addPupil(pupil);
         pupilRepository.save(pupil);

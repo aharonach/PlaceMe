@@ -13,6 +13,7 @@ import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -92,13 +93,19 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @GetMapping("/{groupId}/pupils")
-    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId){
-        CollectionModel<EntityModel<Pupil>> allEntities =
-                pupilAssembler.toCollectionModel(groupService.getOr404(groupId).getPupils());
+    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId, @RequestParam Optional<Integer> page,
+                                              @RequestParam Optional<String> sortBy){
+        Group group = groupService.getOr404(groupId);
 
-        return ResponseEntity
-                .ok()
-                .body(allEntities);
+        try {
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.pupilMap);
+            Page<Pupil> pages = groupService.getPupilOfGroup(group, pageRequest);
+            CollectionModel<EntityModel<Pupil>> allEntities = pupilAssembler.toPageCollection(pages);
+            return ResponseEntity.ok().body(allEntities);
+
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @GetMapping("/{groupId}/preferences")

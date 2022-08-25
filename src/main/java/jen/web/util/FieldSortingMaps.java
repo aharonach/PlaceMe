@@ -10,7 +10,12 @@ public class FieldSortingMaps {
             "id", Sort.by("id")
     );
 
-    public static final Map<String, Sort> pupilMap = defaultMap;
+    public static final Map<String, Sort> pupilMap = Map.of(
+            "id", Sort.by("id"),
+            "age", Sort.by("birthDate", "firstName", "LastName", "givenId"),
+            "full_name", Sort.by("firstName", "LastName", "givenId")
+    );
+
     public static final Map<String, Sort> placementMap = defaultMap;
     public static final Map<String, Sort> templateMap = defaultMap;
     public static final Map<String, Sort> groupMap = defaultMap;

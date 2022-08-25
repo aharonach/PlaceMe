@@ -1,7 +1,6 @@
 package jen.web.assembler;
 
 import jen.web.controller.TemplateRestController;
-import jen.web.entity.Pupil;
 import jen.web.entity.Template;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
@@ -30,6 +29,11 @@ public class TemplateModelAssembler implements RepresentationModelAssembler<Temp
     @Override
     public CollectionModel<EntityModel<Template>> toCollectionModel(Iterable<? extends Template> entities) {
         throw new RuntimeException("use Page instead");
+    }
+
+    public CollectionModel<EntityModel<Template>> toCollectionModelWithoutPages(Iterable<? extends Template> entities) {
+        return RepresentationModelAssembler.super.toCollectionModel(entities)
+                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withSelfRel());
     }
 
     public CollectionModel<EntityModel<Template>> toPageCollection(Page<? extends Template> page) {

@@ -2,7 +2,6 @@ package jen.web.assembler;
 
 import jen.web.controller.PlacementRestController;
 import jen.web.entity.Placement;
-import jen.web.entity.Template;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -31,6 +30,11 @@ public class PlacementModelAssembler implements RepresentationModelAssembler<Pla
     @Override
     public CollectionModel<EntityModel<Placement>> toCollectionModel(Iterable<? extends Placement> entities) {
         throw new RuntimeException("use Page instead");
+    }
+
+    public CollectionModel<EntityModel<Placement>> toCollectionModelWithoutPages(Iterable<? extends Placement> entities) {
+        return RepresentationModelAssembler.super.toCollectionModel(entities)
+                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withSelfRel());
     }
 
     public CollectionModel<EntityModel<Placement>> toPageCollection(Page<? extends Placement> page) {

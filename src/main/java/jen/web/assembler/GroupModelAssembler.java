@@ -3,7 +3,6 @@ package jen.web.assembler;
 import jen.web.controller.GroupRestController;
 import jen.web.controller.TemplateRestController;
 import jen.web.entity.Group;
-import jen.web.entity.Placement;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -25,7 +24,8 @@ public class GroupModelAssembler implements RepresentationModelAssembler<Group, 
     public EntityModel<Group> toModel(Group entity) {
         EntityModel<Group> entityModel = EntityModel.of(entity,
                 linkTo(methodOn(groupController).get(entity.getId())).withSelfRel(),
-                linkTo(methodOn(groupController).getPupilsOfGroup(entity.getId())).withRel("group_pupils"),
+                linkTo(methodOn(groupController).getPupilsOfGroup(entity.getId(), Optional.empty(),Optional.empty()))
+                        .withRel("group_pupils"),
                 linkTo(methodOn(groupController).getPreferences(entity.getId())).withRel("preferences")
         );
 
@@ -41,6 +41,11 @@ public class GroupModelAssembler implements RepresentationModelAssembler<Group, 
     @Override
     public CollectionModel<EntityModel<Group>> toCollectionModel(Iterable<? extends Group> entities) {
         throw new RuntimeException("use Page instead");
+    }
+
+    public CollectionModel<EntityModel<Group>> toCollectionModelWithoutPages(Iterable<? extends Group> entities) {
+        return RepresentationModelAssembler.super.toCollectionModel(entities)
+                .add(linkTo(methodOn(groupController).getAll(Optional.empty(),Optional.empty())).withSelfRel());
     }
 
     public CollectionModel<EntityModel<Group>> toPageCollection(Page<? extends Group> page) {

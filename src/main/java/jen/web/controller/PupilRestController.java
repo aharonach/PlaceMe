@@ -120,7 +120,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
         List<Group> updatedGroups = pupilService.linkPupilToGroup(pupil, groupToAdd);
 
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(updatedGroups);
+        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModelWithoutPages(updatedGroups);
         return ResponseEntity.ok().body(allEntities);
     }
     
@@ -131,7 +131,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
         List<Group> updatedGroups = pupilService.setPupilGroups(pupil, newGroups);
 
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(updatedGroups);
+        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModelWithoutPages(updatedGroups);
         return ResponseEntity.ok().body(allEntities);
     }
     
