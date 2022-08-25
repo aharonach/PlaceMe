@@ -24,16 +24,11 @@ public class PlacementService implements EntityService<Placement> {
     private static final Logger logger = LoggerFactory.getLogger(PlacementService.class);
 
     private final PlacementRepository placementRepository;
-
     private final PlacementResultRepository placementResultRepository;
-
     private final PlacementClassroomRepository placementClassroomRepository;
-
     private final PupilRepository pupilRepository;
     private final GroupService groupService;
-
     private final PlaceEngineConfigRepository engineConfigRepository;
-
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override

@@ -29,7 +29,12 @@ public class PupilModelAssembler implements RepresentationModelAssembler<Pupil, 
 
     @Override
     public CollectionModel<EntityModel<Pupil>> toCollectionModel(Iterable<? extends Pupil> entities) {
-        throw new RuntimeException("use Page instead");
+        throw new RuntimeException("use page instead");
+    }
+
+    public CollectionModel<EntityModel<Pupil>> toCollectionModelWithoutPages(Iterable<? extends Pupil> entities) {
+        return RepresentationModelAssembler.super.toCollectionModel(entities)
+                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withSelfRel());
     }
 
     public CollectionModel<EntityModel<Pupil>> toPageCollection(Page<? extends Pupil> page) {
