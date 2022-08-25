@@ -22,7 +22,7 @@ public class PupilModelAssembler implements RepresentationModelAssembler<Pupil, 
     public EntityModel<Pupil> toModel(Pupil entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
-                linkTo(methodOn(controller).getPupilGroups(entity.getId())).withRel("pupil_groups"),
+                linkTo(methodOn(controller).getPupilGroups(entity.getId(), Optional.empty(), Optional.empty())).withRel("pupil_groups"),
                 linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withRel("pupils")
         );
     }

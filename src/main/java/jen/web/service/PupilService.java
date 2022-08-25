@@ -6,13 +6,13 @@ import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.PupilRepository;
+import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +29,6 @@ public class PupilService implements EntityService<Pupil>{
     private final AttributeValueRepository attributeValueRepository;
     private final GroupService groupService;
     private final PagesAndSortHandler pagesHandler;
-    private final Map<String, Sort> fieldSortingMap = Map.of(
-            "id", Sort.by("id")
-    );
 
     @Override
     @Transactional
@@ -64,7 +61,7 @@ public class PupilService implements EntityService<Pupil>{
 
     @Override
     public Page<Pupil> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, fieldSortingMap);
+        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.groupMap);
         return pupilRepository.findAll(pageRequest);
     }
 
@@ -97,7 +94,8 @@ public class PupilService implements EntityService<Pupil>{
         Pupil pupil = getOr404(id);
 
         attributeValueRepository.deleteAll(pupil.getAttributeValues());
-        List<Group> groups = groupService.getByIds(new HashSet<>(pupil.getGroupIds()));
+        List<Group> groups = groupService.getByIdsWithoutPages(new HashSet<>(pupil.getGroupIds()));
+
         for(Group group : groups){
             group.getPlacements().forEach(placement -> placement.removePupilFromAllResults(pupil));
             group.removePupil(pupil);
@@ -106,6 +104,10 @@ public class PupilService implements EntityService<Pupil>{
         }
 
         pupilRepository.delete(pupil);
+    }
+
+    public Page<Group> getPupilGroups(Pupil pupil, Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
+        return groupService.getByIds(new HashSet<>(pupil.getGroupIds()), pageNumber, sortBy);
     }
 
     public void addOrUpdateAttributeValuesFromIdValueMap(Pupil pupil, Group group, Map<Long, Double> attributeIdValueMap)
@@ -128,7 +130,7 @@ public class PupilService implements EntityService<Pupil>{
     @Transactional
     public Set<Group> setPupilGroups(Pupil pupil, Collection<Group> newGroups){
         Set<Long> newGroupIds = newGroups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
-        pupil.setGroups(new HashSet<>(groupService.getByIds(newGroupIds)));
+        pupil.setGroups(new HashSet<>(groupService.getByIdsWithoutPages(newGroupIds)));
         pupilRepository.save(pupil);
 
         return pupil.getGroups();

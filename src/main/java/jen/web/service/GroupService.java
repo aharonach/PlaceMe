@@ -6,6 +6,7 @@ import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
 import jen.web.repository.PupilRepository;
+import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +34,6 @@ public class GroupService implements EntityService<Group> {
     private final PupilRepository pupilRepository;
     private final TemplateService templateService;
     private final PagesAndSortHandler pagesHandler;
-    private final Map<String, Sort> fieldSortingMap = Map.of(
-            "id", Sort.by("id")
-    );
 
     @Override
     @Transactional
@@ -66,7 +64,7 @@ public class GroupService implements EntityService<Group> {
 
     @Override
     public Page<Group> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, fieldSortingMap);
+        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.groupMap);
         return groupRepository.findAll(pageRequest);
     }
 
@@ -105,10 +103,13 @@ public class GroupService implements EntityService<Group> {
         groupRepository.delete(group);
     }
 
-    public List<Group> getByIds(Set<Long> ids) {
-        return groupRepository.getAllByIdIn(ids).stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+    public List<Group> getByIdsWithoutPages(Set<Long> ids) {
+        return groupRepository.getAllByIdIn(ids);
+    }
+
+    public Page<Group> getByIds(Set<Long> ids, Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
+        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.groupMap);
+        return groupRepository.getAllByIdIn(ids, pageRequest);
     }
 
     public void linkPupilToGroup(Group group, Pupil pupil){

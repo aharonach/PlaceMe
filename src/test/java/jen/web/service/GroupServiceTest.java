@@ -2,6 +2,7 @@ package jen.web.service;
 
 import jen.web.entity.*;
 import jen.web.exception.NotFound;
+import jen.web.util.PagesAndSortHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,11 +40,11 @@ class GroupServiceTest {
 
 
     @Test
-    void shouldCreateAndRemoveGroupWhenAddingGroupAndDeletingIt() {
+    void shouldCreateAndRemoveGroupWhenAddingGroupAndDeletingIt() throws PagesAndSortHandler.FieldNotSortableException {
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));
-        assertEquals(2, groupService.all().size());
-        assertNotEquals(groupService.getOr404(groupService.all().get(0).getId()), groupService.getOr404(groupService.all().get(1).getId()));
+        assertEquals(2, groupService.all().getContent().size());
+        assertNotEquals(groupService.getOr404(groupService.all().getContent().get(0).getId()), groupService.getOr404(groupService.all().getContent().get(1).getId()));
 
 
         assertEquals("group 1", receivedGroup1.getName());
@@ -83,7 +84,7 @@ class GroupServiceTest {
 
     @Test
     @Transactional
-    void shouldAddPupilToGroupWhenAddingFromService() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+    void shouldAddPupilToGroupWhenAddingFromService() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, PagesAndSortHandler.FieldNotSortableException {
         Pupil receivedPupil1 = pupilService.add(
                 new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
         );
@@ -92,7 +93,7 @@ class GroupServiceTest {
         );
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));
-        assertEquals(2, groupService.all().size());
+        assertEquals(2, groupService.all().getContent().size());
 
         groupService.linkPupilToGroup(receivedGroup1, receivedPupil1);
         groupService.linkPupilToGroup(receivedGroup2, receivedPupil1);

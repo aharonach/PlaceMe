@@ -3,6 +3,7 @@ package jen.web.service;
 import jen.web.entity.*;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
+import jen.web.util.PagesAndSortHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,15 +40,15 @@ class PupilServiceTest {
     }
 
     @Test
-    void shouldCreateAndRemovePupilWhenAddingPupilAndDeletingIt() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+    void shouldCreateAndRemovePupilWhenAddingPupilAndDeletingIt() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, PagesAndSortHandler.FieldNotSortableException {
         Pupil receivedPupil1 = pupilService.add(
                 new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
         );
         Pupil receivedPupil2 = pupilService.add(
                 new Pupil("987654321", "Pupil2", "Last2", Pupil.Gender.FEMALE, LocalDate.of(1992, 2, 2))
         );
-        assertEquals(2, pupilService.all().size());
-        assertNotEquals(pupilService.getOr404(pupilService.all().get(0).getId()), pupilService.getOr404(pupilService.all().get(1).getId()));
+        assertEquals(2, pupilService.all().getContent().size());
+        assertNotEquals(pupilService.getOr404(pupilService.all().getContent().get(0).getId()), pupilService.getOr404(pupilService.all().getContent().get(1).getId()));
 
         assertEquals("Pupil1", receivedPupil1.getFirstName());
         assertEquals("Last1", receivedPupil1.getLastName());
@@ -65,14 +66,14 @@ class PupilServiceTest {
     }
 
     @Test
-    void shouldGetSamePupilWhenGettingPupilByIdAndByGivenId() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+    void shouldGetSamePupilWhenGettingPupilByIdAndByGivenId() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, PagesAndSortHandler.FieldNotSortableException {
         Pupil pupil = new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1));
         assertFalse(pupilService.isPupilExists("123456789"));
 
         Pupil receivedPupil = pupilService.add(pupil);
 
         assertTrue(pupilService.isPupilExists("123456789"));
-        assertEquals(1, pupilService.all().size());
+        assertEquals(1, pupilService.all().getContent().size());
 
         Pupil pupilByGivenId = pupilService.getByGivenIdOr404("123456789");
         assertEquals(receivedPupil, pupilByGivenId);
@@ -81,11 +82,11 @@ class PupilServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenAddingPupilWithSameOrInvalidGivenId() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+    void shouldThrowExceptionWhenAddingPupilWithSameOrInvalidGivenId() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, PagesAndSortHandler.FieldNotSortableException {
         Pupil pupil = new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1));
         Pupil receivedPupil = pupilService.add(pupil);
 
-        assertEquals(1, pupilService.all().size());
+        assertEquals(1, pupilService.all().getContent().size());
 
         // adding again the same pupil
         assertThrows(EntityAlreadyExists.class, () -> pupilService.add(pupil));
@@ -101,10 +102,10 @@ class PupilServiceTest {
 
     @Test
     @Transactional
-    void shouldAddPupilToGroupWhenCreatingPupilAndAddHimToAGroup() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+    void shouldAddPupilToGroupWhenCreatingPupilAndAddHimToAGroup() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, PagesAndSortHandler.FieldNotSortableException {
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));
-        assertEquals(2, groupService.all().size());
+        assertEquals(2, groupService.all().getContent().size());
 
         Pupil pupil = new Pupil("123456789", "Pupil1", "Last1", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1));
         pupil.addToGroup(receivedGroup1);
@@ -113,7 +114,7 @@ class PupilServiceTest {
         // not require save or update
         receivedPupil.addToGroup(receivedGroup2);
 
-        assertEquals(1, pupilService.all().size());
+        assertEquals(1, pupilService.all().getContent().size());
         assertEquals(2, receivedPupil.getGroups().size());
         assertTrue(pupilService.getOr404(receivedPupil.getId()).getGroups().contains(receivedGroup1));
         assertTrue(pupilService.getOr404(receivedPupil.getId()).getGroups().contains(receivedGroup2));

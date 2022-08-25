@@ -100,11 +100,18 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
     
     @GetMapping("/{pupilId}/groups")
-    public ResponseEntity<?> getPupilGroups(@PathVariable Long pupilId) {
+    public ResponseEntity<?> getPupilGroups(@PathVariable Long pupilId, @RequestParam Optional<Integer> page,
+                                            @RequestParam Optional<String> sortBy) {
         Pupil pupil = pupilService.getOr404(pupilId);
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(pupil.getGroups());
 
-        return ResponseEntity.ok().body(allEntities);
+        try {
+            CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(pupilService.getPupilGroups(pupil, page, sortBy));
+            return ResponseEntity.ok().body(pagesModel);
+
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
     }
     
     @PutMapping("/{pupilId}/groups")
@@ -121,7 +128,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     @PostMapping(path = "/{pupilId}/groups")
     public ResponseEntity<?> updatePupilGroup(@PathVariable Long pupilId, @RequestBody Set<Long> groupIds) {
         Pupil pupil = pupilService.getOr404(pupilId);
-        List<Group> newGroups = groupService.getByIds(groupIds);
+        List<Group> newGroups = groupService.getByIdsWithoutPages(groupIds);
 
         Set<Group> updatedGroups = pupilService.setPupilGroups(pupil, newGroups);
 
@@ -175,7 +182,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     private CollectionModel<AttributeValue> preferencesToModelCollection(Long pupilId, Long groupId, Iterable<AttributeValue> attributeValues){
         return  CollectionModel.of(attributeValues,
                 linkTo(methodOn(this.getClass()).get(pupilId)).withRel("pupil"),
-                linkTo(methodOn(this.getClass()).getPupilGroups(groupId)).withRel("group"),
+                linkTo(methodOn(this.getClass()).getPupilGroups(groupId, Optional.empty(), Optional.empty())).withRel("group"),
                 linkTo(methodOn(this.getClass()).getAttributeValues(pupilId, groupId)).withSelfRel()
         );
     }

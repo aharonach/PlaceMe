@@ -5,6 +5,7 @@ import jen.web.entity.*;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.*;
+import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -37,9 +38,6 @@ public class PlacementService implements EntityService<Placement> {
 
     private final PlaceEngineConfigRepository engineConfigRepository;
     private final PagesAndSortHandler pagesHandler;
-    private final Map<String, Sort> fieldSortingMap = Map.of(
-            "id", Sort.by("id")
-    );
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -77,7 +75,7 @@ public class PlacementService implements EntityService<Placement> {
 
     @Override
     public Page<Placement> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, fieldSortingMap);
+        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.placementMap);
         return placementRepository.findAll(pageRequest);
     }
 

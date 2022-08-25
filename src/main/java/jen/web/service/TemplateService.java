@@ -9,6 +9,7 @@ import jen.web.exception.NotFound;
 import jen.web.repository.AttributeRepository;
 import jen.web.repository.AttributeValueRepository;
 import jen.web.repository.TemplateRepository;
+import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -32,9 +33,7 @@ public class TemplateService implements EntityService<Template> {
     private final AttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final PagesAndSortHandler pagesHandler;
-    private final Map<String, Sort> fieldSortingMap = Map.of(
-            "id", Sort.by("id")
-    );
+
 
     @Override
     public Template add(Template template) {
@@ -62,7 +61,7 @@ public class TemplateService implements EntityService<Template> {
 
     @Override
     public Page<Template> all(Optional<Integer> pageNumber, Optional<String> sortBy) throws PagesAndSortHandler.FieldNotSortableException {
-        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, fieldSortingMap);
+        PageRequest pageRequest = pagesHandler.getPageRequest(pageNumber, sortBy, FieldSortingMaps.templateMap);
         return templateRepository.findAll(pageRequest);
     }
 

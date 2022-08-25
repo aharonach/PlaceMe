@@ -6,7 +6,6 @@ import jen.web.assembler.TemplateModelAssembler;
 import jen.web.entity.Group;
 import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
-import jen.web.entity.Template;
 import jen.web.exception.BadRequest;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
@@ -36,7 +35,6 @@ public class GroupRestController extends BaseRestController<Group> {
     private final GroupService groupService;
     private final PupilService pupilService;
     private final GroupModelAssembler groupAssembler;
-    private final TemplateModelAssembler templateAssembler;
     private final PupilModelAssembler pupilAssembler;
 
 
