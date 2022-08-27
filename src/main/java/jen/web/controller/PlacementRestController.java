@@ -109,7 +109,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
             }
         }
 
-        return ResponseEntity.ok(placementResultModelAssembler.toCollectionModel(results));
+        return ResponseEntity.ok(placementResultModelAssembler.toCollectionModelWithoutPages(results));
     }
 
     private int getHowManyResultsToGenerate(Optional<Integer> amountOfResults){
@@ -126,9 +126,18 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @GetMapping("/{placementId}/results")
-    public ResponseEntity<?> getResults(@PathVariable Long placementId) {
-        CollectionModel<EntityModel<PlacementResult>> allEntities = placementResultModelAssembler.toCollectionModel(placementService.getOr404(placementId).getResults());
-        return ResponseEntity.ok().body(allEntities);
+    public ResponseEntity<?> getResults(@PathVariable Long placementId, @RequestParam Optional<Integer> page,
+                                        @RequestParam Optional<String> sortBy) {
+        Placement placement = placementService.getOr404(placementId);
+
+        try {
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap);
+            CollectionModel<EntityModel<PlacementResult>> pagesModel = placementResultModelAssembler.toPageCollection(placementService.getPlacementResults(placement, pageRequest));
+            return ResponseEntity.ok().body(pagesModel);
+
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @PostMapping("/{placementId}/results/selected")

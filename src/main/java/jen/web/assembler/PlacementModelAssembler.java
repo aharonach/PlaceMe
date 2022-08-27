@@ -23,7 +23,7 @@ public class PlacementModelAssembler implements RepresentationModelAssembler<Pla
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
                 linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withRel("placements"),
-                linkTo(methodOn(controller).getResults(entity.getId())).withRel("placement_results")
+                linkTo(methodOn(controller).getResults(entity.getId(), Optional.empty(), Optional.empty())).withRel("placement_results")
         );
     }
 

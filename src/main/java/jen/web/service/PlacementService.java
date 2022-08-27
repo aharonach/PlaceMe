@@ -221,6 +221,10 @@ public class PlacementService implements EntityService<Placement> {
         }
     }
 
+    public Page<PlacementResult> getPlacementResults(Placement placement, PageRequest pageRequest) {
+        return placementResultRepository.getAllByIdIn(placement.getResultIds(), pageRequest);
+    }
+
     public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
         return placement.getResultById(resultID);
     }

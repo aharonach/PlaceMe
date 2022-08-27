@@ -8,6 +8,7 @@ import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -49,6 +50,10 @@ public class Placement extends BaseEntity {
 
     public Set<PlacementResult> getResults() {
         return Collections.unmodifiableSet(results);
+    }
+
+    public Set<Long> getResultIds(){
+        return this.getResults().stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
 
     public void addResult(PlacementResult placementResult){
