@@ -33,8 +33,17 @@ public class Placement extends BaseEntity {
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;
         this.numberOfClasses = numberOfClasses;
+        this.setGroup(group);
+    }
+
+    public void setGroup(Group group){
+        if(this.group != null){
+            this.group.removePlacement(this);
+        }
         this.group = group;
-        group.addPlacement(this); //@todo: check
+        if(group != null){
+            group.addPlacement(this);
+        }
     }
 
     public Long getGroupId(){

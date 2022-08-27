@@ -39,10 +39,12 @@ public class PlacementService implements EntityService<Placement> {
             throw new EntityAlreadyExists("Placement with Id '" + id + "' already exists.");
         }
 
-        if(placement.getGroup() != null){
+        if(placement.getGroup() != null && placement.getGroup().getId() != null){
             Group group = groupService.getOr404(placement.getGroup().getId());
             group.addPlacement(placement);
             placement.setGroup(group);
+        } else {
+            placement.setGroup(null);
         }
 
         Placement res = placementRepository.save(placement);
@@ -76,15 +78,20 @@ public class PlacementService implements EntityService<Placement> {
         placement.setNumberOfClasses(newPlacement.getNumberOfClasses());
 
         if(isUpdateGroupNeeded){
-            Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
+            boolean newGroupIsNull = newPlacement.getGroup().getId() == null;
+            if(newGroupIsNull){
+                placement.setGroup(null);
+            } else {
+                Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
 
-            Set<Long> newPlacementIdsForGroup =placement.getGroup().getPlacementIds();
-            if(placement.getGroup() != null){
-                newPlacementIdsForGroup.remove(placement.getId());
+                Set<Long> newPlacementIdsForGroup = placement.getGroup() == null ? new HashSet<>() : placement.getGroup().getPlacementIds();
+                if(placement.getGroup() != null){
+                    newPlacementIdsForGroup.remove(placement.getId());
+                }
+
+                placement.setGroup(newGroup);
+                newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIdsForGroup));
             }
-
-            placement.setGroup(newGroup);
-            newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIdsForGroup));
         }
 
         Placement res = placementRepository.save(placement);
