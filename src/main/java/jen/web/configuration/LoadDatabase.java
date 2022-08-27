@@ -31,7 +31,6 @@ public class LoadDatabase {
     @NonNull PupilService pupilService;
     @NonNull GroupService groupService;
     @NonNull PlacementService placementService;
-    @NonNull PagesAndSortHandler pagesAndSortHandler;
     @Bean
     CommandLineRunner initDatabase() {
         return args -> {
@@ -48,26 +47,26 @@ public class LoadDatabase {
 
             // print
             System.out.println("Pupils:");
-            pupilService.all(pagesAndSortHandler.getFirstPageRequest()).forEach(pupil -> {
+            pupilService.allWithoutPages().forEach(pupil -> {
                 System.out.println(pupil);
                 System.out.println(pupil.getAttributeValues());
             });
 
             System.out.println("Templates:");
-            templateService.all(pagesAndSortHandler.getFirstPageRequest()).forEach(System.out::println);
+            templateService.allWithoutPages().forEach(System.out::println);
 
             System.out.println("Groups:");
-            groupService.all(pagesAndSortHandler.getFirstPageRequest()).forEach(System.out::println);
+            groupService.allWithoutPages().forEach(System.out::println);
 
             System.out.println("Placements:");
-            placementService.all(pagesAndSortHandler.getFirstPageRequest()).forEach(placement -> {
+            placementService.allWithoutPages().forEach(placement -> {
                 System.out.println(placement);
                 System.out.println(placement.getGroup());
                 System.out.println(placement.getGroup().getPupils());
             });
 
             System.out.println("Prefs:");
-            System.out.println(groupService.all(pagesAndSortHandler.getFirstPageRequest()).getContent().get(0).getPreferences());
+            System.out.println(groupService.allWithoutPages().get(0).getPreferences());
 
             System.out.println("Result:");
             PlacementResult placementResult = placementService.getOr404(1L).getResultById(1L);
@@ -135,7 +134,7 @@ public class LoadDatabase {
         Template template = templateService.getOr404(2L);
 
         Group group1 = groupService.add(new Group("group 1", "group 1 desc", template));
-        pupilService.all(pagesAndSortHandler.getFirstPageRequest()).forEach(pupil -> groupService.linkPupilToGroup(group1, pupil));
+        pupilService.allWithoutPages().forEach(pupil -> groupService.linkPupilToGroup(group1, pupil));
         logger.info("Preloading " + group1);
 
         Group group2 = groupService.add(new Group("group 2", "group 2 desc", template));
@@ -146,7 +145,7 @@ public class LoadDatabase {
         Group group = groupService.getOr404(1L);
         Template template = group.getTemplate();
 
-        pupilService.all(pagesAndSortHandler.getFirstPageRequest()).forEach(pupil -> {
+        pupilService.allWithoutPages().forEach(pupil -> {
             Map<Long, Double> attributeValues = new HashMap<>(template.getAttributes().size());
             template.getAttributes().forEach(attribute -> attributeValues.put(attribute.getId(), 4D));
             try {
@@ -164,7 +163,7 @@ public class LoadDatabase {
     }
 
     private void addPreferences() throws Preference.SamePupilException, Group.PupilNotBelongException, PagesAndSortHandler.FieldNotSortableException {
-        Group group = groupService.all(pagesAndSortHandler.getFirstPageRequest()).getContent().get(0);
+        Group group = groupService.allWithoutPages().get(0);
         Pupil pupil1 = pupilService.getOr404(1L);
         Pupil pupil2 = pupilService.getOr404(2L);
         Pupil pupil3 = pupilService.getOr404(3L);
@@ -175,7 +174,7 @@ public class LoadDatabase {
     }
 
     private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, PagesAndSortHandler.FieldNotSortableException {
-        Placement placement = placementService.all(pagesAndSortHandler.getFirstPageRequest()).getContent().get(0);
+        Placement placement = placementService.allWithoutPages().get(0);
         placementService.generatePlacementResult(placement);
     }
 }
