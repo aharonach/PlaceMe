@@ -6,6 +6,7 @@ import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,7 @@ public class PlacementService implements EntityService<Placement> {
     private final PupilRepository pupilRepository;
     private final GroupService groupService;
     private final PlaceEngineConfigRepository engineConfigRepository;
+    @Setter
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -119,7 +121,7 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     @Transactional
-    public PlacementResult savePlacementResult(Placement placement, PlacementResult placementResult) {
+    protected PlacementResult savePlacementResult(Placement placement, PlacementResult placementResult) {
         placementResult.setPlacement(placement);
 
         placementResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(placementResult));
@@ -177,12 +179,10 @@ public class PlacementService implements EntityService<Placement> {
     public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
         verifyPlacementContainsDataForGeneration(placement);
 
-        PlaceEngineConfig config = this.getGlobalConfig();
-        PlaceEngine placeEngine = new PlaceEngine(placement, config);
+        PlaceEngine placeEngine = new PlaceEngine(placement, getGlobalConfig());
 
         PlacementResult placementResult = new PlacementResult();
         placementResult = savePlacementResult(placement, placementResult);
-
         Long resultId = placementResult.getId();
 
         // update result will be called after the generation will finish
@@ -191,7 +191,7 @@ public class PlacementService implements EntityService<Placement> {
         return placementResult;
     }
 
-    private synchronized void generateAndUpdateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId) {
+    protected synchronized void generateAndUpdateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId) {
         Placement placement = getOr404(placementId);
         try{
             PlacementResult placementResult = getResultById(placement, resultId);

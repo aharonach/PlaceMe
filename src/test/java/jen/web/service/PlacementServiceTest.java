@@ -1,17 +1,19 @@
 package jen.web.service;
 
-import jen.web.entity.Group;
-import jen.web.entity.Placement;
+import jen.web.entity.*;
 import jen.web.exception.NotFound;
 import jen.web.util.PagesAndSortHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,11 +23,15 @@ class PlacementServiceTest {
 
     @Autowired PlacementService placementService;
     @Autowired GroupService groupService;
+    @Autowired TemplateService templateService;
+    @Autowired PupilService pupilService;
     @Autowired RepositoryTestUtils repositoryTestUtils;
 
     @BeforeEach
     void setUp() {
         repositoryTestUtils.clearAllData();
+        PlaceEngineConfig placeEngineConfig = new PlaceEngineConfig();
+        placementService.updateGlobalConfig(placeEngineConfig);
     }
 
     @AfterEach
@@ -68,8 +74,64 @@ class PlacementServiceTest {
         groupService.deleteById(receivedGroup1.getId());
     }
 
+    @Test
+    void shouldGenerateResultSuccessfullyWhenAllTheRequirementsAreExist() throws PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, InterruptedException, ExecutionException, Placement.ResultNotExistsException {
+        // replace Executor with Mock
+        ExecutorMock executorMock = new ExecutorMock();
+        placementService.setExecutor(executorMock);
+
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
+        Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
+        groupService.linkPupilToGroup(receivedGroup, receivedPupil1);
+        groupService.linkPupilToGroup(receivedGroup, receivedPupil2);
+        Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
+
+        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement);
+        assertEquals(PlacementResult.Status.IN_PROGRESS, placementResult.getStatus());
+        assertNotNull(placementResult.getId());
+
+        // verify that exceptions are throws when performing action on placement with in_progress result
+        assertThrows(PlacementService.PlacementResultsInProgressException.class, () -> placementService.deleteById(receivedPlacement.getId()));
+        assertThrows(PlacementService.PlacementResultsInProgressException.class, () -> placementService.updateById(receivedPlacement.getId(), receivedPlacement));
+        assertThrows(PlacementService.PlacementResultsInProgressException.class, () -> placementService.deleteAllPlacementResults(receivedPlacement));
+        assertThrows(PlacementService.PlacementResultsInProgressException.class, () -> placementService.deletePlacementResultById(receivedPlacement, placementResult.getId()));
+
+        // start the alg and update status
+        Future<?> future = executorMock.submitFirst();
+        future.get();
+        assertTrue(future.isDone());
+
+        PlacementResult receivedPlacementResult = placementService.getResultById(receivedPlacement, placementResult.getId());
+        assertEquals(PlacementResult.Status.COMPLETED, receivedPlacementResult.getStatus());
+
+        groupService.deleteById(receivedGroup.getId());
+        placementService.deleteById(receivedPlacement.getId());
+        templateService.deleteById(receivedTemplate.getId());
+        pupilService.deleteById(receivedPupil1.getId());
+        pupilService.deleteById(receivedPupil2.getId());
+    }
+
+    @Test
+    void shouldThrowExceptionsOnGenerateResultWhenThereIsNoGroup() throws PlacementService.PlacementResultsInProgressException {
+        Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, null));
+        assertThrows(PlacementService.PlacementWithoutGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement));
+        placementService.deleteById(receivedPlacement.getId());
+    }
+
+    @Test
+    void shouldThrowExceptionsOnGenerateResultWhenThereAreNoPupilsGroup() throws PlacementService.PlacementResultsInProgressException {
+        Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", null));
+        Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
+        assertThrows(PlacementService.PlacementWithoutPupilsInGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement));
+        placementService.deleteById(receivedPlacement.getId());
+        groupService.deleteById(receivedGroup.getId());
+    }
 
 
+
+    // @Todo: Test update method
 
     // Tests
 
@@ -88,4 +150,25 @@ class PlacementServiceTest {
     private List<Placement> getPlacementsFromService() throws PagesAndSortHandler.FieldNotSortableException {
         return placementService.all(repositoryTestUtils.getFirstPageRequest()).getContent();
     }
+
+    private class ExecutorMock extends ThreadPoolExecutor {
+        public Queue<Runnable> taskQueue = new LinkedBlockingQueue<>();
+        public ExecutorMock() {
+            super(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+        }
+        @Override
+        public Future<?> submit(Runnable task){
+            this.taskQueue.add(task);
+            return new FutureTask<>(() -> null);
+        }
+
+        public Future<?> submitFirst(){
+            Runnable task = this.taskQueue.poll();
+            if(task == null){
+                throw new RuntimeException("There are no task in Q");
+            }
+            return super.submit(task);
+        }
+    }
+
 }
