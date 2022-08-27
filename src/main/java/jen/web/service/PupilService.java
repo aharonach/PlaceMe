@@ -48,6 +48,11 @@ public class PupilService implements EntityService<Pupil>{
         return pupilRepository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
 
+    @Override
+    public List<Pupil> allWithoutPages() {
+        return pupilRepository.findAll();
+    }
+
     public Pupil getByGivenIdOr404(String givenId) {
         return pupilRepository.getPupilByGivenId(givenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
     }

@@ -54,6 +54,11 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Override
+    public List<Group> allWithoutPages() {
+        return groupRepository.findAll();
+    }
+
+    @Override
     public Page<Group> all(PageRequest pageRequest) {
         return groupRepository.findAll(pageRequest);
     }

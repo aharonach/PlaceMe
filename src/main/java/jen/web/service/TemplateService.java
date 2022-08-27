@@ -44,6 +44,11 @@ public class TemplateService implements EntityService<Template> {
         return templateRepository.findById(id).orElseThrow(() -> new NotFound("Could not find template " + id));
     }
 
+    @Override
+    public List<Template> allWithoutPages() {
+        return templateRepository.findAll();
+    }
+
     public Attribute getAttributeOr404(Long id) {
         return attributeRepository.findById(id).orElseThrow(() -> new NotFound("Could not find attribute " + id));
     }

@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +56,11 @@ public class PlacementService implements EntityService<Placement> {
     @Override
     public Placement getOr404(Long id) {
         return placementRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
+    }
+
+    @Override
+    public List<Placement> allWithoutPages() {
+        return placementRepository.findAll();
     }
 
     @Override
