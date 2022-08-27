@@ -43,6 +43,18 @@ public class RepositoryTestUtils {
         assertEquals(0, pupilRepository.findAll().size());
         assertEquals(0, templateRepository.findAll().size());
     }
+
+    public void clearAllData(){
+        attributeRepository.deleteAll();
+        attributeValueRepository.deleteAll();
+        groupRepository.deleteAll();
+        placementRepository.deleteAll();
+        placementClassroomRepository.deleteAll();
+        placementResultRepository.deleteAll();
+        pupilRepository.deleteAll();
+        templateRepository.deleteAll();
+    }
+
     public PageRequest getFirstPageRequest() throws PagesAndSortHandler.FieldNotSortableException {
         return pagesAndSortHandler.getFirstPageRequest();
     }

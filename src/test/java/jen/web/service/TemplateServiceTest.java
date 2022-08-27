@@ -32,8 +32,12 @@ class TemplateServiceTest {
     @Autowired RepositoryTestUtils repositoryTestUtils;
 
     @BeforeEach
+    void setUp() {
+        repositoryTestUtils.clearAllData();
+    }
+
     @AfterEach
-    void verifyDbIsEmpty() {
+    void tearDown() {
         repositoryTestUtils.verifyAllTablesAreEmpty();
     }
 
