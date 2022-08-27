@@ -56,11 +56,6 @@ public class PlacementService implements EntityService<Placement> {
         return placementRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
     }
 
-    public PlacementResult getPlacementResultOr404(Long placementId, Long resultId) {
-        getOr404(placementId);
-        return placementResultRepository.findById(resultId).orElseThrow(() -> new NotFound("Could not find placement result " + resultId));
-    }
-
     @Override
     public Page<Placement> all(PageRequest pageRequest) {
         return placementRepository.findAll(pageRequest);
@@ -191,26 +186,29 @@ public class PlacementService implements EntityService<Placement> {
         Long resultId = placementResult.getId();
 
         // update result will be called after the generation will finish
-        executor.submit(() -> updateResultStatus(placeEngine, resultId, placement.getId()));
+        executor.submit(() -> generateAndUpdateResultStatus(placeEngine, resultId, placement.getId()));
 
         return placementResult;
     }
 
-    private synchronized void updateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId){
-        PlacementResult placementResult = getPlacementResultOr404(placementId, resultId);
+    private synchronized void generateAndUpdateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId) {
         Placement placement = getOr404(placementId);
-
         try{
-            PlacementResult algResult = placeEngine.generatePlacementResult();
-            placementResult.setClasses(algResult.getClasses());
-            placementResult.setStatus(PlacementResult.Status.COMPLETED);
+            PlacementResult placementResult = getResultById(placement, resultId);
+            try {
+                PlacementResult algResult = placeEngine.generatePlacementResult();
+                placementResult.setClasses(algResult.getClasses());
+                placementResult.setStatus(PlacementResult.Status.COMPLETED);
 
-        } catch (Exception e){
-            placementResult.setStatus(PlacementResult.Status.FAILED);
-            logger.error("error during generation: " + e.getMessage());
+            } catch (Exception e){
+                placementResult.setStatus(PlacementResult.Status.FAILED);
+                logger.error("error during generation: " + e.getMessage());
+            }
+            savePlacementResult(placement, placementResult);
+
+        } catch (Placement.ResultNotExistsException e) {
+            logger.error("Could not start result generation" + e.getMessage());
         }
-
-        savePlacementResult(placement, placementResult);
     }
 
     private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
@@ -237,7 +235,8 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
-        return placement.getResultById(resultID);
+        PlacementResult placementResult = placement.getResultById(resultID);
+        return placementResultRepository.findById(placementResult.getId()).orElseThrow(() -> new NotFound("Could not find placement result " + placementResult.getId()));
     }
 
     public PlacementResult getSelectedResult(Placement placement) throws Placement.NoSelectedResultException {
