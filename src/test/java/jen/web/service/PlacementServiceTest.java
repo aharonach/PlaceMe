@@ -6,11 +6,12 @@ import jen.web.util.PagesAndSortHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -60,6 +61,7 @@ class PlacementServiceTest {
     }
 
     @Test
+    @Transactional
     void shouldCreateAndRemovePlacementWhenAddingPlacementWithGroupAndDeletingIt() throws PagesAndSortHandler.FieldNotSortableException, PlacementService.PlacementResultsInProgressException {
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", null));
         Placement receivedPlacement1 = placementService.add(new Placement("placement 1", 4, receivedGroup1));
@@ -129,6 +131,54 @@ class PlacementServiceTest {
         groupService.deleteById(receivedGroup.getId());
     }
 
+    @Test
+    void shouldGenerateFewResultsSuccessfullyAndDeleteThem() throws PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, InterruptedException, ExecutionException, Placement.ResultNotExistsException {
+        // replace Executor with Mock
+        ExecutorMock executorMock = new ExecutorMock();
+        placementService.setExecutor(executorMock);
+
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
+        Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
+        groupService.linkPupilToGroup(receivedGroup, receivedPupil1);
+        groupService.linkPupilToGroup(receivedGroup, receivedPupil2);
+        Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
+
+        List<PlacementResult> results = new ArrayList<>(3);
+        for(int i=0; i<3; i++){
+            PlacementResult placementResult = placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()));
+            results.add(placementResult);
+            assertEquals(PlacementResult.Status.IN_PROGRESS, placementResult.getStatus());
+            assertNotNull(placementResult.getId());
+        }
+        assertEquals(3, placementService.getOr404(receivedPlacement.getId()).getResults().size());
+
+        assertThrows(PlacementService.PlacementResultsInProgressException.class, () -> placementService.deletePlacementResultById(receivedPlacement, results.get(0).getId()));
+        PlacementResult r = (PlacementResult) executorMock.submitFirst().get();
+        assertEquals(PlacementResult.Status.COMPLETED, placementService.getResultById(receivedPlacement, results.get(0).getId()).getStatus());
+        placementService.deletePlacementResultById(receivedPlacement, results.get(0).getId());
+        assertEquals(2, placementService.getOr404(receivedPlacement.getId()).getResults().size());
+
+        assertThrows(PlacementService.PlacementResultsInProgressException.class, () -> placementService.deleteAllPlacementResults(placementService.getOr404(receivedPlacement.getId())));
+        executorMock.submitFirst().get();
+        executorMock.submitFirst().get();
+        assertEquals(PlacementResult.Status.COMPLETED, placementService.getResultById(receivedPlacement, results.get(1).getId()).getStatus());
+        assertEquals(PlacementResult.Status.COMPLETED, placementService.getResultById(receivedPlacement, results.get(2).getId()).getStatus());
+        placementService.deleteAllPlacementResults(receivedPlacement);
+        assertEquals(0, placementService.getOr404(receivedPlacement.getId()).getResults().size());
+
+        // generate one more result
+        placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()));
+        executorMock.submitFirst().get();
+        assertEquals(1, placementService.getOr404(receivedPlacement.getId()).getResults().size());
+
+        groupService.deleteById(receivedGroup.getId());
+        placementService.deleteById(receivedPlacement.getId());
+        templateService.deleteById(receivedTemplate.getId());
+        pupilService.deleteById(receivedPupil1.getId());
+        pupilService.deleteById(receivedPupil2.getId());
+    }
 
 
     // @Todo: Test update method

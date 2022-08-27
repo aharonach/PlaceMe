@@ -73,19 +73,6 @@ public class Placement extends BaseEntity {
         results.remove(placementResult);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Placement placement = (Placement) o;
-        return id != null && Objects.equals(id, placement.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
     public PlacementResult getResultById(Long resultId) throws ResultNotExistsException {
         return results.stream()
                 .filter(r -> r.getId().equals(resultId))
@@ -117,6 +104,19 @@ public class Placement extends BaseEntity {
             getResults().forEach(existsResult -> existsResult.setSelected(false));
             result.setSelected(true);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Placement placement = (Placement) o;
+        return id != null && Objects.equals(id, placement.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     public static class ResultNotExistsException extends Exception {

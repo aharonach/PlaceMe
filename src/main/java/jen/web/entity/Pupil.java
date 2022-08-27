@@ -195,6 +195,14 @@ public class Pupil extends BaseEntity {
         return totalScore;
     }
 
+    public double getPupilMaxScore() {
+        double totalScore = 0;
+        for(AttributeValue attributeValue : attributeValues){
+            totalScore += attributeValue.getMaxScore();
+        }
+        return totalScore;
+    }
+
     private void verifyPupilInGroup(Group group) throws Group.PupilNotBelongException {
         if(!isInGroup(group)){
             throw new Group.PupilNotBelongException(getId(), group);
@@ -228,13 +236,5 @@ public class Pupil extends BaseEntity {
         public GivenIdIsNotValidException(){
             super("Given id is not valid.");
         }
-    }
-
-    public double getPupilMaxScore() {
-        double totalScore = 0;
-        for(AttributeValue attributeValue : attributeValues){
-            totalScore += attributeValue.getMaxScore();
-        }
-        return totalScore;
     }
 }

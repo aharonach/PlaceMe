@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -143,11 +144,15 @@ public class PlacementService implements EntityService<Placement> {
         return savedResult;
     }
 
+    @Transactional
     public void deleteAllPlacementResults(Placement placement) throws PlacementResultsInProgressException {
-        for(PlacementResult placementResult : placement.getResults()){
+        List<Long> resultIdsToRemove = getOr404(placement.getId()).getResults().stream()
+                .map(BaseEntity::getId).toList();
+        for(Long resultId : resultIdsToRemove){
             try {
-                deletePlacementResultById(placement, placementResult.getId());
+                deletePlacementResultById(placement, resultId);
             } catch (Placement.ResultNotExistsException ignored) {
+                System.out.println("Error: " + ignored.getMessage());
             }
         }
     }
@@ -156,7 +161,7 @@ public class PlacementService implements EntityService<Placement> {
     public void deletePlacementResultById(Placement placement, Long resultId)
             throws Placement.ResultNotExistsException, PlacementResultsInProgressException {
 
-        PlacementResult placementResult = placement.getResultById(resultId);
+        PlacementResult placementResult = getOr404(placement.getId()).getResultById(resultId);
         if(PlacementResult.Status.IN_PROGRESS.equals(placementResult.getStatus())){
             throw new PlacementResultsInProgressException();
         }
@@ -235,7 +240,7 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
-        PlacementResult placementResult = placement.getResultById(resultID);
+        PlacementResult placementResult = getOr404(placement.getId()).getResultById(resultID);
         return placementResultRepository.findById(placementResult.getId()).orElseThrow(() -> new NotFound("Could not find placement result " + placementResult.getId()));
     }
 
