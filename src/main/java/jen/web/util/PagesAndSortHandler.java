@@ -15,6 +15,12 @@ public class PagesAndSortHandler {
     @Value("${placement.items.per.page}")
     public Integer PlacementsPerPage;
 
+    @Value("${placement.results.items.per.page}")
+    public Integer PlacementResultsPerPage;
+
+    @Value("${placement.result.classes.items.per.page}")
+    public Integer PlacementResultClassesPerPage;
+
     @Value("${group.items.per.page}")
     public Integer GroupsPerPage;
 

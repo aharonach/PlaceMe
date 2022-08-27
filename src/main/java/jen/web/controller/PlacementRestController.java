@@ -43,7 +43,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
+                                    @RequestParam Optional<String> sortBy) {
 
         try {
             PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.placementMap);
@@ -73,7 +74,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @Override
     @PostMapping("/{placementId}")
-    public ResponseEntity<?> update(@PathVariable Long placementId, @RequestBody Placement updatedRecord) {
+    public ResponseEntity<?> update(@PathVariable Long placementId,
+                                    @RequestBody Placement updatedRecord) {
         try {
             return ResponseEntity.ok(placementModelAssembler.toModel(placementService.updateById(placementId, updatedRecord)));
 
@@ -95,7 +97,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @PostMapping("/{placementId}/results/generate")
-    public ResponseEntity<?> startPlacement(@PathVariable Long placementId, @RequestBody Optional<Integer> amountOfResults) {
+    public ResponseEntity<?> startPlacement(@PathVariable Long placementId,
+                                            @RequestBody Optional<Integer> amountOfResults) {
         Placement placement = placementService.getOr404(placementId);
 
         int numOfResults = getHowManyResultsToGenerate(amountOfResults);
@@ -126,7 +129,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @GetMapping("/{placementId}/results")
-    public ResponseEntity<?> getResults(@PathVariable Long placementId, @RequestParam Optional<Integer> page,
+    public ResponseEntity<?> getResults(@PathVariable Long placementId,
+                                        @RequestParam Optional<Integer> page,
                                         @RequestParam Optional<String> sortBy) {
         Placement placement = placementService.getOr404(placementId);
 
@@ -141,7 +145,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @PostMapping("/{placementId}/results/selected")
-    public ResponseEntity<?> setSelectedResult(@PathVariable Long placementId, @RequestBody Long resultId) {
+    public ResponseEntity<?> setSelectedResult(@PathVariable Long placementId,
+                                               @RequestBody Long resultId) {
         try {
             Placement placement = placementService.getOr404(placementId);
             placementService.setSelectedResult(placement, resultId);
@@ -154,7 +159,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @GetMapping("/{placementId}/results/{resultId}")
-    public ResponseEntity<?> getResult(@PathVariable Long placementId, @PathVariable Long resultId) {
+    public ResponseEntity<?> getResult(@PathVariable Long placementId,
+                                       @PathVariable Long resultId) {
 
         Placement placement = placementService.getOr404(placementId);
 
@@ -168,21 +174,26 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @GetMapping("/{placementId}/results/{resultId}/classes")
-    public ResponseEntity<?> getResultClasses(@PathVariable Long placementId, @PathVariable Long resultId) {
+    public ResponseEntity<?> getResultClasses(@PathVariable Long placementId,
+                                              @PathVariable Long resultId,
+                                              @RequestParam Optional<Integer> page,
+                                              @RequestParam Optional<String> sortBy) {
 
         Placement placement = placementService.getOr404(placementId);
 
         try {
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap);
             PlacementResult placementResult = placementService.getResultById(placement, resultId);
-            CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toCollectionModel(placementResult.getClasses());
+            CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toPageCollection(placementService.getPlacementResultClasses(placementResult, pageRequest));
             return ResponseEntity.ok().body(entities);
-        } catch (Placement.ResultNotExistsException e) {
+        } catch (Placement.ResultNotExistsException | PagesAndSortHandler.FieldNotSortableException e) {
             throw new BadRequest(e.getMessage());
         }
     }
 
     @DeleteMapping("/{placementId}/results/{resultId}")
-    public ResponseEntity<?> deleteResult(@PathVariable Long placementId, @PathVariable Long resultId) {
+    public ResponseEntity<?> deleteResult(@PathVariable Long placementId,
+                                          @PathVariable Long resultId) {
         Placement placement = placementService.getOr404(placementId);
 
         try {
