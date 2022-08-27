@@ -29,7 +29,6 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     private final TemplateService templateService;
     private final TemplateModelAssembler templateAssembler;
-
     private final PagesAndSortHandler pagesAndSortHandler;
 
     @Override

@@ -11,6 +11,8 @@ import java.util.Set;
 
 @Component
 public class PagesAndSortHandler {
+    @Value("${default.items.per.page}")
+    public Integer DefaultItemsPerPage;
 
     @Value("${placement.items.per.page}")
     public Integer PlacementsPerPage;
@@ -29,8 +31,6 @@ public class PagesAndSortHandler {
 
     @Value("${template.items.per.page}")
     public Integer TemplatesPerPage;
-    @Value("${default.items.per.page}")
-    public Integer DefaultItemsPerPage;
 
     public PageRequest getFirstPageRequest() throws PagesAndSortHandler.FieldNotSortableException {
         return getPageRequest(Optional.of(0), Optional.of("id"), FieldSortingMaps.defaultMap);
