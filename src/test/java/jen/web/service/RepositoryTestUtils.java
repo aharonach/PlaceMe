@@ -4,17 +4,13 @@ import jen.web.entity.Pupil;
 import jen.web.entity.RangeAttribute;
 import jen.web.entity.Template;
 import jen.web.repository.*;
-import jen.web.util.FieldSortingMaps;
 import jen.web.util.PagesAndSortHandler;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,6 +66,10 @@ public class RepositoryTestUtils {
                 new RangeAttribute("attr 1", "attr 1 for template 2", 10),
                 new RangeAttribute("attr 2", "attr 2 for template 2", 20)
         ));
+    }
+
+    public Template createTemplateWithoutAttributes(){
+        return new Template("template 3", "template 3 desc");
     }
 
     public Pupil createPupil1() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
