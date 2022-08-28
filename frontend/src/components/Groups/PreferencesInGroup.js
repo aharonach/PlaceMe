@@ -121,7 +121,7 @@ const Preferences = ({ group, items }) => {
                             <Stack direction="horizontal" gap={2}>
                                 {!objectIsEmpty(items[selectorId].yes) && (
                                     <span>
-                                Want's to be with:<br />
+                                wants to be with:<br />
                                         {Object.keys(items[selectorId].yes)
                                             .map(selectedId => <Preference
                                                 key={selectedId}
@@ -136,7 +136,7 @@ const Preferences = ({ group, items }) => {
                                 {!objectIsEmpty(items[selectorId].no) && !objectIsEmpty(items[selectorId].yes) && <div className="vr"></div>}
                                 {!objectIsEmpty(items[selectorId].no) && (
                                     <span>
-                                Doesn't want to be with:<br />
+                                doesn't want to be with:<br />
                                         {Object.keys(items[selectorId].no)
                                             .map(selectedId => <Preference
                                                 key={selectedId}
