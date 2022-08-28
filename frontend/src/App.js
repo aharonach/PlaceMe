@@ -25,7 +25,11 @@ function App() {
                     <Route path="/groups" element={<Pages.Groups />}>
                         <Route index element={<Group.GroupsList />} />
                         <Route path="add" element={<Group.AddGroup />} />
-                        <Route path=":groupId" element={<Group.GroupPage />} />
+                        <Route path=":groupId" element={<Group.GroupPage />}>
+                            <Route index element={<Group.PupilList />} />
+                            <Route path="edit" element={<Group.EditGroup />} />
+                            <Route path="preferences" element={<Group.Preferences />} />
+                        </Route>
                     </Route>
                     <Route path="/templates" element={<Pages.Templates />}>
                         <Route index element={<Template.TemplatesList />} />

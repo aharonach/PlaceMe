@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
-const useAxios = (afterSubmit = null) => {
-    const [response, setResponse] = useState();
+const useAxios = (afterSubmit = null, defaultState) => {
+    const [response, setResponse] = useState(defaultState);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [controller, setController] = useState();

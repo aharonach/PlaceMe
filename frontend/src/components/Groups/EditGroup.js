@@ -6,8 +6,11 @@ import Api from '../../api';
 import { Alert } from 'react-bootstrap';
 import {getDefaultValuesByFields} from "../../utils";
 import FormFields from "./FormFields";
+import {useOutletContext} from "react-router-dom";
 
-export default function EditGroup({ group }) {
+export default function EditGroup() {
+    const {group} = useOutletContext();
+
     let methods = useForm({
         defaultValues: { ...getDefaultValuesByFields(FormFields(), group) }
     });

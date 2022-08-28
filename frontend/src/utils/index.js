@@ -33,3 +33,7 @@ export function getDefaultValuesByFields(fields, values) {
 export function setFormValues(form, values) {
     Object.keys(values).forEach(key => form.setValue(key, values[key]));
 }
+
+export function objectIsEmpty(obj) {
+    return obj && Object.entries(obj).length === 0;
+}

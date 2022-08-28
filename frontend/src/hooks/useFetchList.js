@@ -3,10 +3,10 @@ import useAxios from "./useAxios";
 import Api from "../api";
 import {extractListFromAPI} from "../utils";
 
-const useFetchRecord = (fetchUrl, thenCallback) => {
+const useFetchList = (fetchUrl, propertyName, thenCallback, mapCallback) => {
     const [response, error, loading, axiosFetch] = useAxios();
 
-    const getRecord = () => {
+    const getList = () => {
         axiosFetch({
             axiosInstance: Api,
             method: 'get',
@@ -15,11 +15,11 @@ const useFetchRecord = (fetchUrl, thenCallback) => {
     }
 
     useEffect(() => {
-        getRecord();
+        getList();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return [response, error, loading, axiosFetch];
-}
+    return [extractListFromAPI(response, propertyName, mapCallback), error, loading, axiosFetch, getList];
+};
 
-export default useFetchRecord;
+export default useFetchList;
