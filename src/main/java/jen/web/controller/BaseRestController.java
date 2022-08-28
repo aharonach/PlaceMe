@@ -1,6 +1,9 @@
 package jen.web.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Optional;
 
 public abstract class BaseRestController<T> {
 
@@ -9,7 +12,7 @@ public abstract class BaseRestController<T> {
      *
      * @return List of records
      */
-    public abstract ResponseEntity<?> getAll();
+    public abstract ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy);
 
     /**
      * Get one record by ID.

@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,10 +54,13 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Override
-    public List<Group> all() {
-        return groupRepository.findAll().stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+    public List<Group> allWithoutPages() {
+        return groupRepository.findAll();
+    }
+
+    @Override
+    public Page<Group> all(PageRequest pageRequest) {
+        return groupRepository.findAll(pageRequest);
     }
 
     @Override
@@ -93,14 +98,17 @@ public class GroupService implements EntityService<Group> {
         groupRepository.delete(group);
     }
 
-    public Set<Group> getByIds(Set<Long> ids) {
-        Set<Group> groups = new HashSet<>(ids.size());
-        for(Long id : ids){
-            groups.add(getOr404(id));
-        }
-        return groups;
-        // @todo: decide what to do, this line gets the same result but its not throwing exception for non existing ids
-        //return groupRepository.getAllByIdIn(ids);
+    public List<Group> getByIdsWithoutPages(Set<Long> ids) {
+        return groupRepository.getAllByIdInOrderById(ids);
+    }
+
+    public Page<Group> getByIds(Set<Long> ids, PageRequest pageRequest) {
+        return groupRepository.getAllByIdIn(ids, pageRequest);
+    }
+
+    public Page<Pupil> getPupilOfGroup(Group group, PageRequest pageRequest) {
+        Set<Long> pupilIds = group.getPupils().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        return pupilRepository.getAllByIdIn(pupilIds, pageRequest);
     }
 
     public void linkPupilToGroup(Group group, Pupil pupil){
@@ -162,7 +170,9 @@ public class GroupService implements EntityService<Group> {
         preferenceRepository.deleteAllBySelectorSelectedIdInAndGroupId(selectorSelectedIds, group.getId());
     }
 
-    public Set<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
-        return group.getAllPreferencesForPupil(pupil.getId());
+    public List<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
+        return group.getAllPreferencesForPupil(pupil.getId()).stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 }

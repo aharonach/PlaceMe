@@ -9,6 +9,8 @@ import jen.web.repository.PupilRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,15 +48,18 @@ public class PupilService implements EntityService<Pupil>{
         return pupilRepository.findById(id).orElseThrow(() -> new NotFound("Could not find pupil " + id));
     }
 
+    @Override
+    public List<Pupil> allWithoutPages() {
+        return pupilRepository.findAll();
+    }
+
     public Pupil getByGivenIdOr404(String givenId) {
         return pupilRepository.getPupilByGivenId(givenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
     }
 
     @Override
-    public List<Pupil> all() {
-        return pupilRepository.findAll().stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+    public Page<Pupil> all(PageRequest pageRequest) {
+        return pupilRepository.findAll(pageRequest);
     }
 
     @Override
@@ -86,7 +91,8 @@ public class PupilService implements EntityService<Pupil>{
         Pupil pupil = getOr404(id);
 
         attributeValueRepository.deleteAll(pupil.getAttributeValues());
-        Set<Group> groups = groupService.getByIds(new HashSet<>(pupil.getGroupIds()));
+        List<Group> groups = groupService.getByIdsWithoutPages(new HashSet<>(pupil.getGroupIds()));
+
         for(Group group : groups){
             group.getPlacements().forEach(placement -> placement.removePupilFromAllResults(pupil));
             group.removePupil(pupil);
@@ -95,6 +101,10 @@ public class PupilService implements EntityService<Pupil>{
         }
 
         pupilRepository.delete(pupil);
+    }
+
+    public Page<Group> getPupilGroups(Pupil pupil, PageRequest pageRequest) {
+        return groupService.getByIds(new HashSet<>(pupil.getGroupIds()), pageRequest);
     }
 
     public void addOrUpdateAttributeValuesFromIdValueMap(Pupil pupil, Group group, Map<Long, Double> attributeIdValueMap)
@@ -107,24 +117,25 @@ public class PupilService implements EntityService<Pupil>{
         attributeValueRepository.saveAllAndFlush(pupil.getAttributeValues());
     }
 
-    public Set<AttributeValue> getAttributeValues(Pupil pupil, Group group) throws Group.PupilNotBelongException {
+    public List<AttributeValue> getAttributeValues(Pupil pupil, Group group) throws Group.PupilNotBelongException {
+        Set<AttributeValue> attributeValues = pupil.getAttributeValues(group);
 
-        Set<AttributeValue> attributeValues = getOr404(pupil.getId()).getAttributeValues(group);
-        return attributeValues;
-
+        return attributeValueRepository.getAllByPupilAttributeIdInOrderByPupilAttributeId(attributeValues.stream()
+                .map(attributeValue -> attributeValue.getPupilAttributeId())
+                .collect(Collectors.toSet()));
     }
 
     @Transactional
-    public Set<Group> setPupilGroups(Pupil pupil, Set<Group> newGroups){
+    public List<Group> setPupilGroups(Pupil pupil, Collection<Group> newGroups){
         Set<Long> newGroupIds = newGroups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
-        pupil.setGroups(groupService.getByIds(newGroupIds));
+        pupil.setGroups(new HashSet<>(groupService.getByIdsWithoutPages(newGroupIds)));
         pupilRepository.save(pupil);
 
-        return pupil.getGroups();
+        return groupService.getByIdsWithoutPages(new HashSet<>(pupil.getGroupIds()));
     }
 
     @Transactional
-    public Set<Group> linkPupilToGroup(Pupil pupil, Group newGroup){
+    public List<Group> linkPupilToGroup(Pupil pupil, Group newGroup){
         Set<Group> pupilGroups = new HashSet<>(pupil.getGroups());
         pupilGroups.add(newGroup);
 

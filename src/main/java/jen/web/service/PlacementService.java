@@ -6,18 +6,17 @@ import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,16 +25,12 @@ public class PlacementService implements EntityService<Placement> {
     private static final Logger logger = LoggerFactory.getLogger(PlacementService.class);
 
     private final PlacementRepository placementRepository;
-
     private final PlacementResultRepository placementResultRepository;
-
     private final PlacementClassroomRepository placementClassroomRepository;
-
     private final PupilRepository pupilRepository;
     private final GroupService groupService;
-
     private final PlaceEngineConfigRepository engineConfigRepository;
-
+    @Setter
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -46,10 +41,12 @@ public class PlacementService implements EntityService<Placement> {
             throw new EntityAlreadyExists("Placement with Id '" + id + "' already exists.");
         }
 
-        if(placement.getGroup() != null){
+        if(placement.getGroup() != null && placement.getGroup().getId() != null){
             Group group = groupService.getOr404(placement.getGroup().getId());
             group.addPlacement(placement);
             placement.setGroup(group);
+        } else {
+            placement.setGroup(null);
         }
 
         Placement res = placementRepository.save(placement);
@@ -61,16 +58,14 @@ public class PlacementService implements EntityService<Placement> {
         return placementRepository.findById(id).orElseThrow(() -> new NotFound("Could not find placement " + id));
     }
 
-    public PlacementResult getPlacementResultOr404(Long placementId, Long resultId) {
-        getOr404(placementId);
-        return placementResultRepository.findById(resultId).orElseThrow(() -> new NotFound("Could not find placement result " + resultId));
+    @Override
+    public List<Placement> allWithoutPages() {
+        return placementRepository.findAll();
     }
 
     @Override
-    public List<Placement> all() {
-        return placementRepository.findAll().stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+    public Page<Placement> all(PageRequest pageRequest) {
+        return placementRepository.findAll(pageRequest);
     }
 
     @Override
@@ -85,15 +80,20 @@ public class PlacementService implements EntityService<Placement> {
         placement.setNumberOfClasses(newPlacement.getNumberOfClasses());
 
         if(isUpdateGroupNeeded){
-            Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
+            boolean newGroupIsNull = newPlacement.getGroup().getId() == null;
+            if(newGroupIsNull){
+                placement.setGroup(null);
+            } else {
+                Group newGroup = groupService.getOr404(newPlacement.getGroup().getId());
 
-            Set<Long> newPlacementIdsForGroup =placement.getGroup().getPlacementIds();
-            if(placement.getGroup() != null){
-                newPlacementIdsForGroup.remove(placement.getId());
+                Set<Long> newPlacementIdsForGroup = placement.getGroup() == null ? new HashSet<>() : placement.getGroup().getPlacementIds();
+                if(placement.getGroup() != null){
+                    newPlacementIdsForGroup.remove(placement.getId());
+                }
+
+                placement.setGroup(newGroup);
+                newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIdsForGroup));
             }
-
-            placement.setGroup(newGroup);
-            newGroup.setPlacements(placementRepository.getAllByIdIn(newPlacementIdsForGroup));
         }
 
         Placement res = placementRepository.save(placement);
@@ -126,7 +126,7 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     @Transactional
-    public PlacementResult savePlacementResult(Placement placement, PlacementResult placementResult) {
+    protected PlacementResult savePlacementResult(Placement placement, PlacementResult placementResult) {
         placementResult.setPlacement(placement);
 
         placementResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(placementResult));
@@ -148,11 +148,15 @@ public class PlacementService implements EntityService<Placement> {
         return savedResult;
     }
 
+    @Transactional
     public void deleteAllPlacementResults(Placement placement) throws PlacementResultsInProgressException {
-        for(PlacementResult placementResult : placement.getResults()){
+        List<Long> resultIdsToRemove = getOr404(placement.getId()).getResults().stream()
+                .map(BaseEntity::getId).toList();
+        for(Long resultId : resultIdsToRemove){
             try {
-                deletePlacementResultById(placement, placementResult.getId());
+                deletePlacementResultById(placement, resultId);
             } catch (Placement.ResultNotExistsException ignored) {
+                System.out.println("Error: " + ignored.getMessage());
             }
         }
     }
@@ -161,7 +165,7 @@ public class PlacementService implements EntityService<Placement> {
     public void deletePlacementResultById(Placement placement, Long resultId)
             throws Placement.ResultNotExistsException, PlacementResultsInProgressException {
 
-        PlacementResult placementResult = placement.getResultById(resultId);
+        PlacementResult placementResult = getOr404(placement.getId()).getResultById(resultId);
         if(PlacementResult.Status.IN_PROGRESS.equals(placementResult.getStatus())){
             throw new PlacementResultsInProgressException();
         }
@@ -184,35 +188,36 @@ public class PlacementService implements EntityService<Placement> {
     public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
         verifyPlacementContainsDataForGeneration(placement);
 
-        PlaceEngineConfig config = this.getGlobalConfig();
-        PlaceEngine placeEngine = new PlaceEngine(placement, config);
+        PlaceEngine placeEngine = new PlaceEngine(placement, getGlobalConfig());
 
         PlacementResult placementResult = new PlacementResult();
         placementResult = savePlacementResult(placement, placementResult);
-
         Long resultId = placementResult.getId();
 
         // update result will be called after the generation will finish
-        executor.submit(() -> updateResultStatus(placeEngine, resultId, placement.getId()));
+        executor.submit(() -> generateAndUpdateResultStatus(placeEngine, resultId, placement.getId()));
 
         return placementResult;
     }
 
-    private synchronized void updateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId){
-        PlacementResult placementResult = getPlacementResultOr404(placementId, resultId);
+    protected synchronized void generateAndUpdateResultStatus(PlaceEngine placeEngine, Long resultId, Long placementId) {
         Placement placement = getOr404(placementId);
-
         try{
-            PlacementResult algResult = placeEngine.generatePlacementResult();
-            placementResult.setClasses(algResult.getClasses());
-            placementResult.setStatus(PlacementResult.Status.COMPLETED);
+            PlacementResult placementResult = getResultById(placement, resultId);
+            try {
+                PlacementResult algResult = placeEngine.generatePlacementResult();
+                placementResult.setClasses(algResult.getClasses());
+                placementResult.setStatus(PlacementResult.Status.COMPLETED);
 
-        } catch (Exception e){
-            placementResult.setStatus(PlacementResult.Status.FAILED);
-            logger.error("error during generation: " + e.getMessage());
+            } catch (Exception e){
+                placementResult.setStatus(PlacementResult.Status.FAILED);
+                logger.error("error during generation: " + e.getMessage());
+            }
+            savePlacementResult(placement, placementResult);
+
+        } catch (Placement.ResultNotExistsException e) {
+            logger.error("Could not start result generation" + e.getMessage());
         }
-
-        savePlacementResult(placement, placementResult);
     }
 
     private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
@@ -230,8 +235,17 @@ public class PlacementService implements EntityService<Placement> {
         }
     }
 
+    public Page<PlacementResult> getPlacementResults(Placement placement, PageRequest pageRequest) {
+        return placementResultRepository.getAllByIdIn(placement.getResultIds(), pageRequest);
+    }
+
+    public Page<PlacementClassroom> getPlacementResultClasses(PlacementResult placementResult, PageRequest pageRequest) {
+        return placementClassroomRepository.getAllByIdIn(placementResult.getClassesIds(), pageRequest);
+    }
+
     public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
-        return placement.getResultById(resultID);
+        PlacementResult placementResult = getOr404(placement.getId()).getResultById(resultID);
+        return placementResultRepository.findById(placementResult.getId()).orElseThrow(() -> new NotFound("Could not find placement result " + placementResult.getId()));
     }
 
     public PlacementResult getSelectedResult(Placement placement) throws Placement.NoSelectedResultException {

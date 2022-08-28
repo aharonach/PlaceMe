@@ -1,7 +1,6 @@
 package jen.web.service;
 
 import jen.web.entity.Attribute;
-import jen.web.entity.BaseEntity;
 import jen.web.entity.Template;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
@@ -11,13 +10,12 @@ import jen.web.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +26,7 @@ public class TemplateService implements EntityService<Template> {
     private final TemplateRepository templateRepository;
     private final AttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
+
 
     @Override
     public Template add(Template template) {
@@ -45,15 +44,18 @@ public class TemplateService implements EntityService<Template> {
         return templateRepository.findById(id).orElseThrow(() -> new NotFound("Could not find template " + id));
     }
 
+    @Override
+    public List<Template> allWithoutPages() {
+        return templateRepository.findAll();
+    }
+
     public Attribute getAttributeOr404(Long id) {
         return attributeRepository.findById(id).orElseThrow(() -> new NotFound("Could not find attribute " + id));
     }
 
     @Override
-    public List<Template> all() {
-        return templateRepository.findAll().stream()
-                .sorted(Comparator.comparing(BaseEntity::getId))
-                .collect(Collectors.toList());
+    public Page<Template> all(PageRequest pageRequest) {
+        return templateRepository.findAll(pageRequest);
     }
 
     @Override
@@ -87,7 +89,7 @@ public class TemplateService implements EntityService<Template> {
         template.getAttributes().forEach(attribute -> {
             attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
         });
-        template.getGroups().forEach(group -> {
+        new HashSet<>(template.getGroups()).forEach(group -> {
             group.setTemplate(null);
         });
         template.clearGroups();

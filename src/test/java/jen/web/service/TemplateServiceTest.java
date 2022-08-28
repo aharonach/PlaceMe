@@ -1,9 +1,9 @@
 package jen.web.service;
 
-import jen.web.entity.Attribute;
-import jen.web.entity.RangeAttribute;
+import jen.web.entity.Group;
 import jen.web.entity.Template;
 import jen.web.exception.NotFound;
+import jen.web.util.PagesAndSortHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,71 +20,72 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class TemplateServiceTest {
 
-    public static final String TEMPLATE_1 = "Template 1";
-    public static final String TEMPLATE_DESCRIPTION_1 = "Template1 description";
-    public static final String TEMPLATE_2 = "Template 2";
-    public static final String TEMPLATE_DESCRIPTION_2 = "Template2 description";
-
-
-    @Autowired
-    TemplateService templateService;
-
-    @Autowired
-    RepositoryTestUtils repositoryTestUtils;
+    @Autowired TemplateService templateService;
+    @Autowired GroupService groupService;
+    @Autowired RepositoryTestUtils repositoryTestUtils;
 
     @BeforeEach
+    void setUp() {
+        repositoryTestUtils.clearAllData();
+    }
+
     @AfterEach
-    void verifyDbIsEmpty() {
+    void tearDown() {
         repositoryTestUtils.verifyAllTablesAreEmpty();
     }
 
     @Test
     @Transactional
-    void shouldCreateAndRemoveTemplateWhenAddingTemplateAndDeletingIt() {
-        assertEquals(0, templateService.all().size());
+    void shouldCreateAndRemoveTemplateWhenAddingTemplateAndDeletingIt() throws PagesAndSortHandler.FieldNotSortableException {
+        Template receivedTemplate1 = templateService.add(repositoryTestUtils.createTemplateWithoutAttributes());
+        Template receivedTemplate2 = templateService.add(repositoryTestUtils.createTemplate2());
+        assertEquals(2, getTemplatesFromService().size());
+        assertNotEquals(receivedTemplate1.getId(), receivedTemplate2.getId());
+        assertNotEquals(templateService.getOr404(receivedTemplate1.getId()), templateService.getOr404(receivedTemplate2.getId()));
 
-        Template template1 = new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1);
-        templateService.add(template1);
-
-        Template template2 = new Template(TEMPLATE_2, TEMPLATE_DESCRIPTION_2);
-        templateService.add(template2);
-
-        assertEquals(2, templateService.all().size());
-        Template receivedTemplate1 = templateService.all().get(0);
-        Template receivedTemplate2 = templateService.all().get(1);
-
-        assertEquals(receivedTemplate1, templateService.getOr404(receivedTemplate1.getId()));
-        assertNotEquals(receivedTemplate1, templateService.getOr404(receivedTemplate2.getId()));
-
-        assertEquals(TEMPLATE_1, receivedTemplate1.getName());
-        assertEquals(TEMPLATE_DESCRIPTION_1, receivedTemplate1.getDescription());
+        assertEquals("template 3", receivedTemplate1.getName());
+        assertEquals("template 3 desc", receivedTemplate1.getDescription());
         assertEquals(0, receivedTemplate1.getAttributes().size());
-
         templateService.deleteById(receivedTemplate1.getId());
+
+        assertEquals("template 2", receivedTemplate2.getName());
+        assertEquals("template 2 desc", receivedTemplate2.getDescription());
+        assertEquals(2, receivedTemplate2.getAttributes().size());
+        assertEquals(1, receivedTemplate2.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 1") && attribute.getDescription().equals("attr 1 for template 2"))
+                .count());
+        assertEquals(1, receivedTemplate2.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 2") && attribute.getDescription().equals("attr 2 for template 2"))
+                .count());
         templateService.deleteById(receivedTemplate2.getId());
-        assertEquals(0, templateService.all().size());
     }
 
     @Test
     @Transactional
-    void shouldCreateTemplateWithAttributesWhenAddTemplate() {
-        Set<Attribute> attributes = Set.of(new RangeAttribute("name", "attr desc", 10));
-        Template template = new Template(TEMPLATE_1, TEMPLATE_DESCRIPTION_1, attributes);
-        templateService.add(template);
+        void shouldDeleteTemplateWhenGroupUseTheTemplate() {
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate1());
+        Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
+        Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", receivedTemplate));
+        assertEquals(2, receivedTemplate.getGroups().size());
 
-        Template receivedTemplate = templateService.all().get(0);
-        Set<Attribute> receivedAttributes = receivedTemplate.getAttributes();
-        Attribute receivedAttribute = receivedAttributes.stream().findFirst().get();
-
-        assertEquals(1, receivedAttributes.size());
-        assertEquals("name", receivedAttribute.getName());
-        assertEquals("attr desc", receivedAttribute.getDescription());
-        assertEquals(10, receivedAttribute.getPriority());
         templateService.deleteById(receivedTemplate.getId());
+        groupService.deleteById(receivedGroup1.getId());
+        groupService.deleteById(receivedGroup2.getId());
     }
+
+    // check: update, deleteAttributeForTemplateById, updateAttributeForTemplateById, addAttributeForTemplateById
 
     @Test
     void shouldThrowNotFoundExceptionOnGetTemplateWhenTemplateNotExist() {
         assertThrows(NotFound.class, () -> templateService.getOr404(100L));
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionOnGetAttributeWhenAttributeNotExist() {
+        assertThrows(NotFound.class, () -> templateService.getAttributeOr404(100L));
+    }
+
+    private List<Template> getTemplatesFromService() throws PagesAndSortHandler.FieldNotSortableException {
+        return templateService.all(repositoryTestUtils.getFirstPageRequest()).getContent();
     }
 }

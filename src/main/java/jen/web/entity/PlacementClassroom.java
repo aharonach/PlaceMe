@@ -3,6 +3,7 @@ package jen.web.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jen.web.dto.PupilsConnectionsDto;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.*;
@@ -10,7 +11,8 @@ import java.util.*;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+@ToString
+@RequiredArgsConstructor
 public class PlacementClassroom extends BaseEntity {
     private String name;
     @ManyToOne
@@ -25,6 +27,7 @@ public class PlacementClassroom extends BaseEntity {
     @Setter(value = AccessLevel.NONE)
     private transient List<Pupil> pupilsForAlgorithm;
 
+    @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "classrooms")
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
@@ -157,5 +160,18 @@ public class PlacementClassroom extends BaseEntity {
 
     public void removePupilFromClass(Pupil pupil){
         pupils.remove(pupil);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        PlacementClassroom that = (PlacementClassroom) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

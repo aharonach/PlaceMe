@@ -5,14 +5,19 @@ import jen.web.entity.Attribute;
 import jen.web.entity.Template;
 import jen.web.exception.BadRequest;
 import jen.web.service.TemplateService;
+import jen.web.util.FieldSortingMaps;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 
 @RestController
@@ -23,23 +28,27 @@ public class TemplateRestController extends BaseRestController<Template> {
     private static final Logger logger = LoggerFactory.getLogger(TemplateRestController.class);
 
     private final TemplateService templateService;
-    private final TemplateModelAssembler assembler;
-
+    private final TemplateModelAssembler templateAssembler;
+    private final PagesAndSortHandler pagesAndSortHandler;
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll() {
-        CollectionModel<EntityModel<Template>> allEntities = assembler.toCollectionModel(templateService.all());
+    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
 
-        return ResponseEntity
-                .ok()
-                .body(allEntities);
+        try {
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.templateMap);
+            CollectionModel<EntityModel<Template>> pagesModel = templateAssembler.toPageCollection(templateService.all(pageRequest));
+            return ResponseEntity.ok().body(pagesModel);
+
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
     @GetMapping("/{templateId}")
     public ResponseEntity<?> get(@PathVariable Long templateId) {
-        EntityModel<Template> entity = assembler.toModel(templateService.getOr404(templateId));
+        EntityModel<Template> entity = templateAssembler.toModel(templateService.getOr404(templateId));
 
         return ResponseEntity
                 .ok()
@@ -49,7 +58,7 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Template newRecord) {
-        EntityModel<Template> entity = assembler.toModel(templateService.add(newRecord));
+        EntityModel<Template> entity = templateAssembler.toModel(templateService.add(newRecord));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -60,7 +69,7 @@ public class TemplateRestController extends BaseRestController<Template> {
     @PostMapping("/{templateId}")
     public ResponseEntity<?> update(@PathVariable Long templateId, @RequestBody Template updatedRecord) {
         Template updatedTemplate = templateService.updateById(templateId, updatedRecord);
-        EntityModel<Template> entity = assembler.toModel(updatedTemplate);
+        EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
 
         return ResponseEntity
                 .ok()
@@ -98,7 +107,7 @@ public class TemplateRestController extends BaseRestController<Template> {
         Attribute attribute = templateService.getAttributeOr404(attributeId);
         try {
             Template updatedTemplate = templateService.updateAttributeForTemplateById(template, attribute, newAttribute);
-            EntityModel<Template> entity = assembler.toModel(updatedTemplate);
+            EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
             return ResponseEntity.ok().body(entity);
 
         } catch (Template.AttributeNotBelongException e) {
@@ -111,7 +120,7 @@ public class TemplateRestController extends BaseRestController<Template> {
                                      @RequestBody Attribute newAttribute) {
 
         Template template = templateService.getOr404(templateId);
-        EntityModel<Template> entity = assembler.toModel(templateService.addAttributeForTemplateById(template, newAttribute));
+        EntityModel<Template> entity = templateAssembler.toModel(templateService.addAttributeForTemplateById(template, newAttribute));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
