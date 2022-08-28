@@ -89,7 +89,7 @@ public class TemplateService implements EntityService<Template> {
         template.getAttributes().forEach(attribute -> {
             attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
         });
-        template.getGroups().forEach(group -> {
+        new HashSet<>(template.getGroups()).forEach(group -> {
             group.setTemplate(null);
         });
         template.clearGroups();

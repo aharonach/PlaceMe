@@ -1,7 +1,6 @@
 package jen.web.service;
 
-import jen.web.entity.Attribute;
-import jen.web.entity.RangeAttribute;
+import jen.web.entity.Group;
 import jen.web.entity.Template;
 import jen.web.exception.NotFound;
 import jen.web.util.PagesAndSortHandler;
@@ -14,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TemplateServiceTest {
 
     @Autowired TemplateService templateService;
+    @Autowired GroupService groupService;
     @Autowired RepositoryTestUtils repositoryTestUtils;
 
     @BeforeEach
@@ -52,31 +51,38 @@ class TemplateServiceTest {
         assertEquals("template 2", receivedTemplate2.getName());
         assertEquals("template 2 desc", receivedTemplate2.getDescription());
         assertEquals(2, receivedTemplate2.getAttributes().size());
-        // check attr values
+        assertEquals(1, receivedTemplate2.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 1") && attribute.getDescription().equals("attr 1 for template 2"))
+                .count());
+        assertEquals(1, receivedTemplate2.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 2") && attribute.getDescription().equals("attr 2 for template 2"))
+                .count());
         templateService.deleteById(receivedTemplate2.getId());
     }
 
     @Test
     @Transactional
-    void shouldCreateTemplateWithAttributesWhenAddTemplate() throws PagesAndSortHandler.FieldNotSortableException {
-        Set<Attribute> attributes = Set.of(new RangeAttribute("name", "attr desc", 10));
-        Template template = new Template("Template 1", "Template1 description", attributes);
-        templateService.add(template);
+        void shouldDeleteTemplateWhenGroupUseTheTemplate() {
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate1());
+        Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
+        Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", receivedTemplate));
+        assertEquals(2, receivedTemplate.getGroups().size());
 
-        Template receivedTemplate = getTemplatesFromService().get(0);
-        Set<Attribute> receivedAttributes = receivedTemplate.getAttributes();
-        Attribute receivedAttribute = receivedAttributes.stream().findFirst().get();
-
-        assertEquals(1, receivedAttributes.size());
-        assertEquals("name", receivedAttribute.getName());
-        assertEquals("attr desc", receivedAttribute.getDescription());
-        assertEquals(10, receivedAttribute.getPriority());
         templateService.deleteById(receivedTemplate.getId());
+        groupService.deleteById(receivedGroup1.getId());
+        groupService.deleteById(receivedGroup2.getId());
     }
+
+    // check: update, deleteAttributeForTemplateById, updateAttributeForTemplateById, addAttributeForTemplateById
 
     @Test
     void shouldThrowNotFoundExceptionOnGetTemplateWhenTemplateNotExist() {
         assertThrows(NotFound.class, () -> templateService.getOr404(100L));
+    }
+
+    @Test
+    void shouldThrowNotFoundExceptionOnGetAttributeWhenAttributeNotExist() {
+        assertThrows(NotFound.class, () -> templateService.getAttributeOr404(100L));
     }
 
     private List<Template> getTemplatesFromService() throws PagesAndSortHandler.FieldNotSortableException {
