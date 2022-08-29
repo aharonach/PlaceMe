@@ -90,7 +90,7 @@ public class TemplateRestController extends BaseRestController<Template> {
         Template template = templateService.getOr404(templateId);
         Attribute attribute = templateService.getAttributeOr404(attributeId);
         try {
-            templateService.deleteAttributeForTemplateById(template, attribute);
+            templateService.deleteAttributeForTemplate(template, attribute);
         } catch (Template.AttributeNotBelongException e) {
             throw new BadRequest(e.getMessage());
         }
@@ -106,7 +106,7 @@ public class TemplateRestController extends BaseRestController<Template> {
         Template template = templateService.getOr404(templateId);
         Attribute attribute = templateService.getAttributeOr404(attributeId);
         try {
-            Template updatedTemplate = templateService.updateAttributeForTemplateById(template, attribute, newAttribute);
+            Template updatedTemplate = templateService.updateAttributeForTemplate(template, attribute, newAttribute);
             EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
             return ResponseEntity.ok().body(entity);
 
@@ -120,7 +120,7 @@ public class TemplateRestController extends BaseRestController<Template> {
                                      @RequestBody Attribute newAttribute) {
 
         Template template = templateService.getOr404(templateId);
-        EntityModel<Template> entity = templateAssembler.toModel(templateService.addAttributeForTemplateById(template, newAttribute));
+        EntityModel<Template> entity = templateAssembler.toModel(templateService.addAttributeForTemplate(template, newAttribute));
 
         return ResponseEntity
                 .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())

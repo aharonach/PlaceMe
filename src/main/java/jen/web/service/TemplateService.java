@@ -69,7 +69,7 @@ public class TemplateService implements EntityService<Template> {
 
         for(Attribute attribute : attributesToDelete){
             try {
-                deleteAttributeForTemplateById(template, attribute);
+                deleteAttributeForTemplate(template, attribute);
             } catch (Template.AttributeNotBelongException ignored) {
             }
         }
@@ -99,20 +99,20 @@ public class TemplateService implements EntityService<Template> {
     }
 
     @Transactional
-    public void deleteAttributeForTemplateById(Template template, Attribute attribute) throws Template.AttributeNotBelongException {
+    public void deleteAttributeForTemplate(Template template, Attribute attribute) throws Template.AttributeNotBelongException {
         template.verifyAttributeBelongsToTemplate(attribute.getId());
         attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
         template.deleteAttribute(attribute.getId());
         attributeRepository.delete(attribute);
     }
 
-    public Template updateAttributeForTemplateById(Template template, Attribute oldAttribute, Attribute newAttribute) throws Template.AttributeNotBelongException {
+    public Template updateAttributeForTemplate(Template template, Attribute oldAttribute, Attribute newAttribute) throws Template.AttributeNotBelongException {
         template.verifyAttributeBelongsToTemplate(oldAttribute.getId());
         template.updateAttribute(oldAttribute.getId(), newAttribute);
         return templateRepository.save(template);
     }
 
-    public Template addAttributeForTemplateById(Template template, Attribute newAttribute){
+    public Template addAttributeForTemplate(Template template, Attribute newAttribute){
         template.addAttribute(newAttribute);
         return templateRepository.save(template);
     }
