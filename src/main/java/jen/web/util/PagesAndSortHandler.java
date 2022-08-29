@@ -33,21 +33,25 @@ public class PagesAndSortHandler {
     public Integer TemplatesPerPage;
 
     public PageRequest getFirstPageRequest() throws PagesAndSortHandler.FieldNotSortableException {
-        return getPageRequest(Optional.of(0), Optional.of("id"), FieldSortingMaps.defaultMap);
+        return getPageRequest(Optional.of(0), Optional.of("id"), FieldSortingMaps.defaultMap, false);
     }
 
-    public PageRequest getPageRequest(Optional<Integer> pageNumber, Optional<String> sortBy, Map<String, Sort> fieldSortingMap) throws FieldNotSortableException {
-        return getPageRequest(pageNumber, sortBy, fieldSortingMap, DefaultItemsPerPage);
+    public PageRequest getPageRequest(Optional<Integer> pageNumber, Optional<String> sortBy,
+                                      Map<String, Sort> fieldSortingMap, boolean descending) throws FieldNotSortableException {
+        return getPageRequest(pageNumber, sortBy, fieldSortingMap, DefaultItemsPerPage, descending);
     }
 
-    public PageRequest getPageRequest(Optional<Integer> pageNumber, Optional<String> sortBy, Map<String, Sort> fieldSortingMap, int itemsPerPage) throws FieldNotSortableException {
+    public PageRequest getPageRequest(Optional<Integer> pageNumber, Optional<String> sortBy,
+                                      Map<String, Sort> fieldSortingMap, int itemsPerPage,
+                                      boolean descending) throws FieldNotSortableException {
         PageRequest pageRequest = PageRequest.ofSize(itemsPerPage);
-        Optional<Sort> sort = getSortByOptionalString(sortBy, fieldSortingMap);
+        Optional<Sort> optionalSort = getSortByOptionalString(sortBy, fieldSortingMap);
         if(pageNumber.isPresent()){
             pageRequest = pageRequest.withPage(pageNumber.get());
         }
-        if(sort.isPresent()){
-            pageRequest = pageRequest.withSort(sort.get());
+        if(optionalSort.isPresent()){
+            Sort sort = descending ? optionalSort.get().descending() : optionalSort.get();
+            pageRequest = pageRequest.withSort(sort);
         }
         return pageRequest;
     }

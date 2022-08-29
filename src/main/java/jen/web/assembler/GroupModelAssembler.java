@@ -33,7 +33,7 @@ public class GroupModelAssembler implements RepresentationModelAssembler<Group, 
             entityModel.add(linkTo(methodOn(templateController).get(entity.getTemplateId())).withRel("group_template"));
         }
 
-        entityModel.add(linkTo(methodOn(groupController).getAll(null, null)).withRel("groups"));
+        entityModel.add(linkTo(methodOn(groupController).getAll(null, null, false)).withRel("groups"));
 
         return entityModel;
     }
@@ -45,13 +45,13 @@ public class GroupModelAssembler implements RepresentationModelAssembler<Group, 
 
     public CollectionModel<EntityModel<Group>> toCollectionModelWithoutPages(Iterable<? extends Group> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(groupController).getAll(Optional.empty(),Optional.empty())).withSelfRel());
+                .add(linkTo(methodOn(groupController).getAll(Optional.empty(),Optional.empty(), false)).withSelfRel());
     }
 
     public CollectionModel<EntityModel<Group>> toPageCollection(Page<? extends Group> page) {
         PagedModel.PageMetadata pageMetadata = new PagedModel.PageMetadata(page.getSize(),page.getNumber(),page.getTotalElements(),page.getTotalPages());
         CollectionModel<EntityModel<Group>> collectionModel = RepresentationModelAssembler.super.toCollectionModel(page);
         return PagedModel.of(collectionModel.getContent(), pageMetadata)
-                .add(linkTo(methodOn(groupController).getAll(Optional.empty(),Optional.empty())).withSelfRel());
+                .add(linkTo(methodOn(groupController).getAll(Optional.empty(),Optional.empty(), false)).withSelfRel());
     }
 }

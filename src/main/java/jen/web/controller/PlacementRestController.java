@@ -44,10 +44,11 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @Override
     @GetMapping()
     public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
-                                    @RequestParam Optional<String> sortBy) {
+                                    @RequestParam Optional<String> sortBy,
+                                    @RequestParam(required = false) boolean descending) {
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.placementMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.placementMap, descending);
             CollectionModel<EntityModel<Placement>> pagesModel = placementModelAssembler.toPageCollection(placementService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -131,11 +132,12 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @GetMapping("/{placementId}/results")
     public ResponseEntity<?> getResults(@PathVariable Long placementId,
                                         @RequestParam Optional<Integer> page,
-                                        @RequestParam Optional<String> sortBy) {
+                                        @RequestParam Optional<String> sortBy,
+                                        @RequestParam(required = false) boolean descending) {
         Placement placement = placementService.getOr404(placementId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap, descending);
             CollectionModel<EntityModel<PlacementResult>> pagesModel = placementResultModelAssembler.toPageCollection(placementService.getPlacementResults(placement, pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -177,12 +179,13 @@ public class PlacementRestController extends BaseRestController<Placement> {
     public ResponseEntity<?> getResultClasses(@PathVariable Long placementId,
                                               @PathVariable Long resultId,
                                               @RequestParam Optional<Integer> page,
-                                              @RequestParam Optional<String> sortBy) {
+                                              @RequestParam Optional<String> sortBy,
+                                              @RequestParam(required = false) boolean descending) {
 
         Placement placement = placementService.getOr404(placementId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap, descending);
             PlacementResult placementResult = placementService.getResultById(placement, resultId);
             CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toPageCollection(placementService.getPlacementResultClasses(placementResult, pageRequest));
             return ResponseEntity.ok().body(entities);

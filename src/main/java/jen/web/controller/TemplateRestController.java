@@ -33,10 +33,12 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
+                                    @RequestParam Optional<String> sortBy,
+                                    @RequestParam(required = false) boolean descending) {
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.templateMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.templateMap, descending);
             CollectionModel<EntityModel<Template>> pagesModel = templateAssembler.toPageCollection(templateService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -67,7 +69,8 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @Override
     @PostMapping("/{templateId}")
-    public ResponseEntity<?> update(@PathVariable Long templateId, @RequestBody Template updatedRecord) {
+    public ResponseEntity<?> update(@PathVariable Long templateId,
+                                    @RequestBody Template updatedRecord) {
         Template updatedTemplate = templateService.updateById(templateId, updatedRecord);
         EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
 
@@ -85,7 +88,8 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     //Manage attributes
     @DeleteMapping("/{templateId}/attributes/{attributeId}")
-    public ResponseEntity<?> deleteAttributeForTemplate(@PathVariable Long templateId, @PathVariable Long attributeId) {
+    public ResponseEntity<?> deleteAttributeForTemplate(@PathVariable Long templateId,
+                                                        @PathVariable Long attributeId) {
 
         Template template = templateService.getOr404(templateId);
         Attribute attribute = templateService.getAttributeOr404(attributeId);
@@ -100,8 +104,8 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @PostMapping("/{templateId}/attributes/{attributeId}")
     public ResponseEntity<?> updateAttributeForTemplate(@PathVariable Long templateId,
-                                        @PathVariable Long attributeId,
-                                        @RequestBody Attribute newAttribute) {
+                                                        @PathVariable Long attributeId,
+                                                        @RequestBody Attribute newAttribute) {
 
         Template template = templateService.getOr404(templateId);
         Attribute attribute = templateService.getAttributeOr404(attributeId);
@@ -117,7 +121,7 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @PutMapping("/{templateId}/attributes")
     public ResponseEntity<?> addAttributeForTemplate(@PathVariable Long templateId,
-                                     @RequestBody Attribute newAttribute) {
+                                                     @RequestBody Attribute newAttribute) {
 
         Template template = templateService.getOr404(templateId);
         EntityModel<Template> entity = templateAssembler.toModel(templateService.addAttributeForTemplate(template, newAttribute));

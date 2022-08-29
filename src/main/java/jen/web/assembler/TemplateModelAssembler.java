@@ -22,7 +22,7 @@ public class TemplateModelAssembler implements RepresentationModelAssembler<Temp
     public EntityModel<Template> toModel(Template entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
-                linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withRel("templates")
+                linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty(), false)).withRel("templates")
         );
     }
 
@@ -33,13 +33,13 @@ public class TemplateModelAssembler implements RepresentationModelAssembler<Temp
 
     public CollectionModel<EntityModel<Template>> toCollectionModelWithoutPages(Iterable<? extends Template> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withSelfRel());
+                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty(), false)).withSelfRel());
     }
 
     public CollectionModel<EntityModel<Template>> toPageCollection(Page<? extends Template> page) {
         PagedModel.PageMetadata pageMetadata = new PagedModel.PageMetadata(page.getSize(),page.getNumber(),page.getTotalElements(),page.getTotalPages());
         CollectionModel<EntityModel<Template>> collectionModel = RepresentationModelAssembler.super.toCollectionModel(page);
         return PagedModel.of(collectionModel.getContent(), pageMetadata)
-                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withSelfRel());
+                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty(), false)).withSelfRel());
     }
 }

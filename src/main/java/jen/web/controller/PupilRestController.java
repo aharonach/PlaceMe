@@ -45,10 +45,12 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
+    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
+                                    @RequestParam Optional<String> sortBy,
+                                    @RequestParam(required = false) boolean descending) {
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.pupilMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.pupilMap, descending);
             CollectionModel<EntityModel<Pupil>> pagesModel = pupilAssembler.toPageCollection(pupilService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -76,7 +78,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
     @Override
     @PostMapping("/{pupilId}")
-    public ResponseEntity<?> update(@PathVariable Long pupilId, @RequestBody Pupil updatedRecord) {
+    public ResponseEntity<?> update(@PathVariable Long pupilId,
+                                    @RequestBody Pupil updatedRecord) {
 
         // update general information and groups if exists
         try {
@@ -98,12 +101,14 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
     
     @GetMapping("/{pupilId}/groups")
-    public ResponseEntity<?> getPupilGroups(@PathVariable Long pupilId, @RequestParam Optional<Integer> page,
-                                            @RequestParam Optional<String> sortBy) {
+    public ResponseEntity<?> getPupilGroups(@PathVariable Long pupilId,
+                                            @RequestParam Optional<Integer> page,
+                                            @RequestParam Optional<String> sortBy,
+                                            @RequestParam(required = false) boolean descending) {
         Pupil pupil = pupilService.getOr404(pupilId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap, descending);
             CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(pupilService.getPupilGroups(pupil, pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -114,7 +119,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
     
     @PutMapping("/{pupilId}/groups")
-    public ResponseEntity<?> assignGroupForPupil(@PathVariable Long pupilId, @RequestBody Long groupId) {
+    public ResponseEntity<?> assignGroupForPupil(@PathVariable Long pupilId,
+                                                 @RequestBody Long groupId) {
         Pupil pupil = pupilService.getOr404(pupilId);
         Group groupToAdd = groupService.getOr404(groupId);
 
@@ -125,7 +131,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
     
     @PostMapping(path = "/{pupilId}/groups")
-    public ResponseEntity<?> updatePupilGroup(@PathVariable Long pupilId, @RequestBody Set<Long> groupIds) {
+    public ResponseEntity<?> updatePupilGroup(@PathVariable Long pupilId,
+                                              @RequestBody Set<Long> groupIds) {
         Pupil pupil = pupilService.getOr404(pupilId);
         List<Group> newGroups = groupService.getByIdsWithoutPages(groupIds);
 
@@ -136,7 +143,8 @@ public class PupilRestController extends BaseRestController<Pupil> {
     }
     
     @DeleteMapping("/{pupilId}/groups")
-    public ResponseEntity<?> unlinkPupilFromGroup(@PathVariable Long pupilId, @RequestBody Long groupId) {
+    public ResponseEntity<?> unlinkPupilFromGroup(@PathVariable Long pupilId,
+                                                  @RequestBody Long groupId) {
         Pupil pupil = pupilService.getOr404(pupilId);
         Group group = groupService.getOr404(groupId);
 
@@ -181,7 +189,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     private CollectionModel<AttributeValue> preferencesToModelCollection(Long pupilId, Long groupId, Iterable<AttributeValue> attributeValues){
         return  CollectionModel.of(attributeValues,
                 linkTo(methodOn(this.getClass()).get(pupilId)).withRel("pupil"),
-                linkTo(methodOn(this.getClass()).getPupilGroups(groupId, Optional.empty(), Optional.empty())).withRel("group"),
+                linkTo(methodOn(this.getClass()).getPupilGroups(groupId, Optional.empty(), Optional.empty(), false)).withRel("group"),
                 linkTo(methodOn(this.getClass()).getAttributeValues(pupilId, groupId)).withSelfRel()
         );
     }

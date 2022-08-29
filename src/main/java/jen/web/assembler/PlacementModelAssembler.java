@@ -22,7 +22,7 @@ public class PlacementModelAssembler implements RepresentationModelAssembler<Pla
     public EntityModel<Placement> toModel(Placement entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).get(entity.getId())).withSelfRel(),
-                linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withRel("placements"),
+                linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty(), false)).withRel("placements"),
                 linkTo(methodOn(controller).getResults(entity.getId(), Optional.empty(), Optional.empty())).withRel("placement_results")
         );
     }
@@ -34,13 +34,13 @@ public class PlacementModelAssembler implements RepresentationModelAssembler<Pla
 
     public CollectionModel<EntityModel<Placement>> toCollectionModelWithoutPages(Iterable<? extends Placement> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities)
-                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withSelfRel());
+                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty(), false)).withSelfRel());
     }
 
     public CollectionModel<EntityModel<Placement>> toPageCollection(Page<? extends Placement> page) {
         PagedModel.PageMetadata pageMetadata = new PagedModel.PageMetadata(page.getSize(),page.getNumber(),page.getTotalElements(),page.getTotalPages());
         CollectionModel<EntityModel<Placement>> collectionModel = RepresentationModelAssembler.super.toCollectionModel(page);
         return PagedModel.of(collectionModel.getContent(), pageMetadata)
-                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty())).withSelfRel());
+                .add(linkTo(methodOn(controller).getAll(Optional.empty(),Optional.empty(), false)).withSelfRel());
     }
 }
