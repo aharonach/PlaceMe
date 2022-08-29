@@ -46,7 +46,6 @@ public class GroupRestController extends BaseRestController<Group> {
     public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
                                     @RequestParam Optional<String> sortBy,
                                     @RequestParam(required = false) boolean descending) {
-        System.out.println(descending);
         try {
             PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap, descending);
             CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(groupService.all(pageRequest));

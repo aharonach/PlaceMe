@@ -24,7 +24,7 @@ public class PlacementResultModelAssembler implements RepresentationModelAssembl
     public EntityModel<PlacementResult> toModel(PlacementResult entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).getResult(entity.getPlacement().getId(), entity.getId())).withSelfRel(),
-                linkTo(methodOn(controller).getResults(entity.getPlacement().getId(), Optional.empty(), Optional.empty())).withRel("placement_results"),
+                linkTo(methodOn(controller).getResults(entity.getPlacement().getId(), Optional.empty(), Optional.empty(), false)).withRel("placement_results"),
                 linkTo(methodOn(controller).get(entity.getPlacement().getId())).withRel("placement")
         );
     }
