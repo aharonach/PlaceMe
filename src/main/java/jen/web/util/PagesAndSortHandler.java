@@ -34,7 +34,7 @@ public class PagesAndSortHandler {
     public Integer TemplatesPerPage;
 
     public PageRequest getFirstPageRequest() throws PagesAndSortHandler.FieldNotSortableException {
-        PaginationInfo paginationInfo = new PaginationInfo(Optional.of(0), Optional.of("id"), false);
+        PaginationInfo paginationInfo = new PaginationInfo();
         return getPageRequest(paginationInfo, FieldSortingMaps.defaultMap);
     }
 
@@ -45,12 +45,12 @@ public class PagesAndSortHandler {
     public PageRequest getPageRequest(PaginationInfo paginationInfo, Map<String, Sort> fieldSortingMap,
                                       int itemsPerPage) throws FieldNotSortableException {
         PageRequest pageRequest = PageRequest.ofSize(itemsPerPage);
-        Optional<Sort> optionalSort = getSortByOptionalString(paginationInfo.getSortBy(), fieldSortingMap);
+        Optional<Sort> optionalSort = getSortByOptionalString(paginationInfo.getSortField(), fieldSortingMap);
         if(paginationInfo.getPageNumber().isPresent()){
             pageRequest = pageRequest.withPage(paginationInfo.getPageNumber().get());
         }
         if(optionalSort.isPresent()){
-            Sort sort = paginationInfo.isDescending() ? optionalSort.get().descending() : optionalSort.get();
+            Sort sort = paginationInfo.getSortDirection().isDescending() ? optionalSort.get().descending() : optionalSort.get();
             pageRequest = pageRequest.withSort(sort);
         }
         return pageRequest;
@@ -74,13 +74,13 @@ public class PagesAndSortHandler {
     @RequiredArgsConstructor
     public static class PaginationInfo{
         private final Optional<Integer> pageNumber;
-        private final Optional<String> sortBy;
-        private final boolean descending;
+        private final Optional<String> sortField;
+        private final Sort.Direction sortDirection;
 
         public PaginationInfo(){
             this.pageNumber = Optional.empty();
-            this.sortBy = Optional.empty();
-            this.descending = false;
+            this.sortField = Optional.empty();
+            this.sortDirection = Sort.Direction.ASC;
         }
     }
 
