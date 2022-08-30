@@ -10,6 +10,7 @@ import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,12 +34,10 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
-                                    @RequestParam Optional<String> sortBy,
-                                    @RequestParam(required = false) boolean descending) {
+    public ResponseEntity<?> getAll(@ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.templateMap, descending);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.templateMap);
             CollectionModel<EntityModel<Template>> pagesModel = templateAssembler.toPageCollection(templateService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 

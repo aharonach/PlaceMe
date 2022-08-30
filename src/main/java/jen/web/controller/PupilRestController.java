@@ -14,6 +14,7 @@ import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -45,12 +46,10 @@ public class PupilRestController extends BaseRestController<Pupil> {
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
-                                    @RequestParam Optional<String> sortBy,
-                                    @RequestParam(required = false) boolean descending) {
+    public ResponseEntity<?> getAll(@ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.pupilMap, descending);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.pupilMap);
             CollectionModel<EntityModel<Pupil>> pagesModel = pupilAssembler.toPageCollection(pupilService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -102,13 +101,11 @@ public class PupilRestController extends BaseRestController<Pupil> {
     
     @GetMapping("/{pupilId}/groups")
     public ResponseEntity<?> getPupilGroups(@PathVariable Long pupilId,
-                                            @RequestParam Optional<Integer> page,
-                                            @RequestParam Optional<String> sortBy,
-                                            @RequestParam(required = false) boolean descending) {
+                                            @ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
         Pupil pupil = pupilService.getOr404(pupilId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap, descending);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.groupMap);
             CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(pupilService.getPupilGroups(pupil, pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -189,7 +186,7 @@ public class PupilRestController extends BaseRestController<Pupil> {
     private CollectionModel<AttributeValue> preferencesToModelCollection(Long pupilId, Long groupId, Iterable<AttributeValue> attributeValues){
         return  CollectionModel.of(attributeValues,
                 linkTo(methodOn(this.getClass()).get(pupilId)).withRel("pupil"),
-                linkTo(methodOn(this.getClass()).getPupilGroups(groupId, Optional.empty(), Optional.empty(), false)).withRel("group"),
+                linkTo(methodOn(this.getClass()).getPupilGroups(groupId, new PagesAndSortHandler.PaginationInfo())).withRel("group"),
                 linkTo(methodOn(this.getClass()).getAttributeValues(pupilId, groupId)).withSelfRel()
         );
     }

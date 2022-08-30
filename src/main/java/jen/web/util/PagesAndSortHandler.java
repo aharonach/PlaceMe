@@ -1,5 +1,6 @@
 package jen.web.util;
 
+import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,24 +34,23 @@ public class PagesAndSortHandler {
     public Integer TemplatesPerPage;
 
     public PageRequest getFirstPageRequest() throws PagesAndSortHandler.FieldNotSortableException {
-        return getPageRequest(Optional.of(0), Optional.of("id"), FieldSortingMaps.defaultMap, false);
+        PaginationInfo paginationInfo = new PaginationInfo(Optional.of(0), Optional.of("id"), false);
+        return getPageRequest(paginationInfo, FieldSortingMaps.defaultMap);
     }
 
-    public PageRequest getPageRequest(Optional<Integer> pageNumber, Optional<String> sortBy,
-                                      Map<String, Sort> fieldSortingMap, boolean descending) throws FieldNotSortableException {
-        return getPageRequest(pageNumber, sortBy, fieldSortingMap, DefaultItemsPerPage, descending);
+    public PageRequest getPageRequest(PaginationInfo paginationInfo, Map<String, Sort> fieldSortingMap) throws FieldNotSortableException {
+        return getPageRequest(paginationInfo, fieldSortingMap, DefaultItemsPerPage);
     }
 
-    public PageRequest getPageRequest(Optional<Integer> pageNumber, Optional<String> sortBy,
-                                      Map<String, Sort> fieldSortingMap, int itemsPerPage,
-                                      boolean descending) throws FieldNotSortableException {
+    public PageRequest getPageRequest(PaginationInfo paginationInfo, Map<String, Sort> fieldSortingMap,
+                                      int itemsPerPage) throws FieldNotSortableException {
         PageRequest pageRequest = PageRequest.ofSize(itemsPerPage);
-        Optional<Sort> optionalSort = getSortByOptionalString(sortBy, fieldSortingMap);
-        if(pageNumber.isPresent()){
-            pageRequest = pageRequest.withPage(pageNumber.get());
+        Optional<Sort> optionalSort = getSortByOptionalString(paginationInfo.getSortBy(), fieldSortingMap);
+        if(paginationInfo.getPageNumber().isPresent()){
+            pageRequest = pageRequest.withPage(paginationInfo.getPageNumber().get());
         }
         if(optionalSort.isPresent()){
-            Sort sort = descending ? optionalSort.get().descending() : optionalSort.get();
+            Sort sort = paginationInfo.isDescending() ? optionalSort.get().descending() : optionalSort.get();
             pageRequest = pageRequest.withSort(sort);
         }
         return pageRequest;
@@ -66,6 +66,21 @@ public class PagesAndSortHandler {
             return Optional.of(fieldSortingMap.get(sortKey));
         } else {
             throw new FieldNotSortableException(fieldSortingMap.keySet());
+        }
+    }
+
+    @ToString
+    @Getter
+    @RequiredArgsConstructor
+    public static class PaginationInfo{
+        private final Optional<Integer> pageNumber;
+        private final Optional<String> sortBy;
+        private final boolean descending;
+
+        public PaginationInfo(){
+            this.pageNumber = Optional.empty();
+            this.sortBy = Optional.empty();
+            this.descending = false;
         }
     }
 

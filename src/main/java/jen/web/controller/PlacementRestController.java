@@ -13,6 +13,7 @@ import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
@@ -43,12 +44,10 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page,
-                                    @RequestParam Optional<String> sortBy,
-                                    @RequestParam(required = false) boolean descending) {
+    public ResponseEntity<?> getAll(@ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.placementMap, descending);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.placementMap);
             CollectionModel<EntityModel<Placement>> pagesModel = placementModelAssembler.toPageCollection(placementService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -131,13 +130,11 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @GetMapping("/{placementId}/results")
     public ResponseEntity<?> getResults(@PathVariable Long placementId,
-                                        @RequestParam Optional<Integer> page,
-                                        @RequestParam Optional<String> sortBy,
-                                        @RequestParam(required = false) boolean descending) {
+                                        @ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
         Placement placement = placementService.getOr404(placementId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap, descending);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.groupMap);
             CollectionModel<EntityModel<PlacementResult>> pagesModel = placementResultModelAssembler.toPageCollection(placementService.getPlacementResults(placement, pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -178,14 +175,12 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @GetMapping("/{placementId}/results/{resultId}/classes")
     public ResponseEntity<?> getResultClasses(@PathVariable Long placementId,
                                               @PathVariable Long resultId,
-                                              @RequestParam Optional<Integer> page,
-                                              @RequestParam Optional<String> sortBy,
-                                              @RequestParam(required = false) boolean descending) {
+                                              @ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
 
         Placement placement = placementService.getOr404(placementId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap, descending);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.groupMap);
             PlacementResult placementResult = placementService.getResultById(placement, resultId);
             CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toPageCollection(placementService.getPlacementResultClasses(placementResult, pageRequest));
             return ResponseEntity.ok().body(entities);
