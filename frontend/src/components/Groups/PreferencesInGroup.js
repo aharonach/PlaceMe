@@ -19,8 +19,8 @@ import { X } from 'react-bootstrap-icons';
 
 export default function PreferencesInGroup() {
     const {group} = useOutletContext();
-    const [pupils, loadingPupils, errorPupils] = useFetchList(`/groups/${group.id}/pupils`, "pupilList");
-    const [preferences, errorPreferences, loadingPreferences] = useFetchList(`/groups/${group.id}/preferences`, "preferenceList");
+    const [pupils, loadingPupils, errorPupils] = useFetchList({ fetchUrl: `/groups/${group.id}/pupils`, propertyName: "pupilList" });
+    const [preferences, errorPreferences, loadingPreferences] = useFetchList({ fetchUrl: `/groups/${group.id}/preferences`, propertyName: "preferenceList" });
     const [selector, setSelector] = useState(0);
     const [selected, setSelected] = useState(0);
     const [wantsToBe, setWantsToBe] = useState('yes');
@@ -214,7 +214,8 @@ const mapPreferencesByPupils = (pupils, preferences) => {
             };
         }
 
-        map[selectorId][wantsToBe ? 'yes' : 'no'][selectedId] = pupils.find(findPupil(selectedId)).firstName;
+        const name = pupils.find(findPupil(selectedId))?.firstName;
+        if ( name ) map[selectorId][wantsToBe ? 'yes' : 'no'][selectedId] = name;
     });
 
     return map;

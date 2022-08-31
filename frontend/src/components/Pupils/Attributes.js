@@ -1,7 +1,6 @@
 import React, {useEffect, useMemo} from 'react';
 import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
-import {useParams} from "react-router-dom";
 import HtmlForm from "../Forms/HtmlForm";
 import {useForm} from "react-hook-form";
 import {extractListFromAPI} from "../../utils";

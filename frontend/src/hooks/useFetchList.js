@@ -3,12 +3,11 @@ import useAxios from "./useAxios";
 import Api from "../api";
 import {extractListFromAPI} from "../utils";
 
-const useFetchList = (fetchUrl, propertyName, thenCallback, mapCallback) => {
+const useFetchList = ({ fetchUrl, propertyName, thenCallback, mapCallback }) => {
     const [response, error, loading, axiosFetch] = useAxios();
 
     const getList = () => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'get',
             url: fetchUrl,
         }).then(res => thenCallback && thenCallback(res));

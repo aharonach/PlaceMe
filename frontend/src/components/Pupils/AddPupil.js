@@ -35,7 +35,7 @@ export default function AddPupil() {
 
     return (
         <>
-            <h2>Add Pupil</h2>
+            <h1>Add Pupil</h1>
             {error && <Alert variant="danger">{error}</Alert>}
             <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading}></HtmlForm>
         </>

@@ -1,3 +1,6 @@
+import {Link} from "react-router-dom";
+import React from "react";
+
 export function extractListFromAPI(object, property, mapCallback = null ) {
     const embedded = object?._embedded;
 
@@ -36,4 +39,8 @@ export function setFormValues(form, values) {
 
 export function objectIsEmpty(obj) {
     return obj && Object.entries(obj).length === 0;
+}
+
+export function idLinkList(linkTo, ids, delimiter = ', ') {
+    return ids ? ids.map( (id, i) => <React.Fragment key={id}>{i > 0 && ", "}<Link to={`/${linkTo}/${id}`}>{id}</Link></React.Fragment> ) : '';
 }
