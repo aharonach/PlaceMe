@@ -13,6 +13,7 @@ import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
@@ -43,10 +44,9 @@ public class GroupRestController extends BaseRestController<Group> {
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll(@RequestParam Optional<Integer> page, @RequestParam Optional<String> sortBy) {
-
+    public ResponseEntity<?> getAll(@ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.groupMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.groupMap);
             CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(groupService.all(pageRequest));
             return ResponseEntity.ok().body(pagesModel);
 
@@ -77,7 +77,8 @@ public class GroupRestController extends BaseRestController<Group> {
 
     @Override
     @PostMapping("/{groupId}")
-    public ResponseEntity<?> update(@PathVariable Long groupId, @RequestBody Group updatedRecord) {
+    public ResponseEntity<?> update(@PathVariable Long groupId,
+                                    @RequestBody Group updatedRecord) {
         EntityModel<Group> entity = groupAssembler.toModel(groupService.updateById(groupId, updatedRecord));
 
         return ResponseEntity
@@ -93,12 +94,12 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @GetMapping("/{groupId}/pupils")
-    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId, @RequestParam Optional<Integer> page,
-                                              @RequestParam Optional<String> sortBy){
+    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId,
+                                              @ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo){
         Group group = groupService.getOr404(groupId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(page, sortBy, FieldSortingMaps.pupilMap);
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.pupilMap);
             Page<Pupil> pages = groupService.getPupilOfGroup(group, pageRequest);
             CollectionModel<EntityModel<Pupil>> allEntities = pupilAssembler.toPageCollection(pages);
             return ResponseEntity.ok().body(allEntities);
@@ -119,7 +120,8 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @GetMapping("/{groupId}/preferences/{pupilId}")
-    public ResponseEntity<?> getPreferencesForPupil(@PathVariable Long groupId, @PathVariable Long pupilId){
+    public ResponseEntity<?> getPreferencesForPupil(@PathVariable Long groupId,
+                                                    @PathVariable Long pupilId){
         Group group = groupService.getOr404(groupId);
         Pupil pupil = pupilService.getOr404(pupilId);
         List<Preference> preferences = groupService.getAllPreferencesForPupil(group, pupil);
@@ -132,7 +134,7 @@ public class GroupRestController extends BaseRestController<Group> {
 
     @PutMapping("/{groupId}/preferences")
     public ResponseEntity<?> addOrUpdatePreference(@PathVariable Long groupId,
-                                           @RequestBody Preference preference) {
+                                                   @RequestBody Preference preference) {
 
         try {
             Group group = groupService.getOr404(groupId);

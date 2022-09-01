@@ -32,7 +32,7 @@ public class Template extends BaseEntity {
     public Template(String name, String description, Set<Attribute> attributes){
         this.name = name;
         this.description = description;
-        this.attributes = attributes;
+        this.attributes.addAll(attributes);
     }
 
     public Integer getNumberOfAttributes(){
@@ -61,18 +61,18 @@ public class Template extends BaseEntity {
     }
 
     public void addAttribute(Attribute attribute){
-        attributes.add(attribute);
+        this.attributes.add(attribute);
     }
 
     public void deleteAttribute(Long attributeId){
-        attributes.stream()
+        this.attributes.stream()
                 .filter(attribute -> attribute.getId().equals(attributeId))
                 .findFirst()
                 .ifPresent(attribute -> attributes.remove(attribute));
     }
 
     public void updateAttribute(Long attributeId, Attribute newAttribute){
-        attributes.stream()
+        this.attributes.stream()
                 .filter(attribute -> attribute.getId().equals(attributeId))
                 .findFirst()
                 .ifPresent(attribute -> {
@@ -84,6 +84,10 @@ public class Template extends BaseEntity {
 
     public Set<Attribute> getAttributes(){
         return Collections.unmodifiableSet(attributes);
+    }
+
+    public Set<Long> getAttributeIds(){
+        return attributes.stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
 
     public Attribute getAttribute(Long attributeId) throws AttributeNotBelongException {

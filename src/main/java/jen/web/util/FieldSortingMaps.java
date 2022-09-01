@@ -12,8 +12,9 @@ public class FieldSortingMaps {
 
     public static final Map<String, Sort> pupilMap = Map.of(
             "id", Sort.by("id"),
-            "age", Sort.by("birthDate", "firstName", "LastName", "givenId"),
-            "full_name", Sort.by("firstName", "LastName", "givenId")
+            "birthDate", Sort.by("birthDate", "firstName", "lastName", "givenId"),
+            "firstName", Sort.by("firstName", "lastName", "givenId"),
+            "lastName", Sort.by("lastName", "firstName", "givenId")
     );
 
     public static final Map<String, Sort> placementMap = defaultMap;

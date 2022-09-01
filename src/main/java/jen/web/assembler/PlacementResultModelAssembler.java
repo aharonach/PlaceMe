@@ -2,6 +2,7 @@ package jen.web.assembler;
 
 import jen.web.controller.PlacementRestController;
 import jen.web.entity.PlacementResult;
+import jen.web.util.PagesAndSortHandler;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -9,8 +10,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
-
-import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -24,7 +23,7 @@ public class PlacementResultModelAssembler implements RepresentationModelAssembl
     public EntityModel<PlacementResult> toModel(PlacementResult entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(controller).getResult(entity.getPlacement().getId(), entity.getId())).withSelfRel(),
-                linkTo(methodOn(controller).getResults(entity.getPlacement().getId(), Optional.empty(), Optional.empty())).withRel("placement_results"),
+                linkTo(methodOn(controller).getResults(entity.getPlacement().getId(), new PagesAndSortHandler.PaginationInfo())).withRel("placement_results"),
                 linkTo(methodOn(controller).get(entity.getPlacement().getId())).withRel("placement")
         );
     }

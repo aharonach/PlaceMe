@@ -1,6 +1,8 @@
 package jen.web.service;
 
+import jen.web.entity.Attribute;
 import jen.web.entity.Group;
+import jen.web.entity.RangeAttribute;
 import jen.web.entity.Template;
 import jen.web.exception.NotFound;
 import jen.web.util.PagesAndSortHandler;
@@ -13,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -73,7 +76,88 @@ class TemplateServiceTest {
         groupService.deleteById(receivedGroup2.getId());
     }
 
-    // check: update, deleteAttributeForTemplateById, updateAttributeForTemplateById, addAttributeForTemplateById
+    @Test
+    @Transactional
+    void shouldAddUpdateAndDeleteAttributesFromTemplate() throws Template.AttributeNotBelongException {
+        Attribute attr1 = new RangeAttribute("attr 1", "attr 1 desc", 10);
+        Attribute attr2 = new RangeAttribute("attr 2", "attr 2 desc", 20);
+        Attribute newAttr = new RangeAttribute("new name", "new desc", 40);
+        Template receivedTemplate = templateService.add(new Template("template", "desc", Set.of(attr1)));
+        assertEquals(1, receivedTemplate.getAttributes().size());
+
+        receivedTemplate = templateService.addAttributeForTemplate(receivedTemplate, attr2);
+        assertEquals(2, receivedTemplate.getAttributes().size());
+
+        Attribute receivedAttr1 = receivedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 1"))
+                .findFirst().get();
+
+        templateService.deleteAttributeForTemplate(receivedTemplate, receivedAttr1);
+        assertEquals(1, receivedTemplate.getAttributes().size());
+
+        Attribute receivedAttr2 = receivedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 2"))
+                .findFirst().get();
+
+        receivedTemplate = templateService.updateAttributeForTemplate(receivedTemplate, receivedAttr2, newAttr);
+
+        Attribute receivedUpdatedAttr = templateService.getAttributeOr404(receivedAttr2.getId());
+        assertEquals("new name", receivedUpdatedAttr.getName());
+        assertEquals("new desc", receivedUpdatedAttr.getDescription());
+        assertEquals(40, receivedUpdatedAttr.getPriority());
+
+        templateService.deleteById(receivedTemplate.getId());
+    }
+
+    @Test
+    void shouldThrowNotBelongExceptionWhenPerformingOperationOnAttributeOfAnotherTemplate() {
+        Template receivedTemplate1 = templateService.add(repositoryTestUtils.createTemplate1());
+        Template receivedTemplate2 = templateService.add(repositoryTestUtils.createTemplate2());
+        Attribute attrOfTemplate2 = receivedTemplate2.getAttributes().stream().findFirst().get();
+
+        assertThrows(Template.AttributeNotBelongException.class, () -> templateService.deleteAttributeForTemplate(receivedTemplate1, attrOfTemplate2));
+        assertThrows(Template.AttributeNotBelongException.class, () -> templateService.updateAttributeForTemplate(receivedTemplate1, attrOfTemplate2, new RangeAttribute()));
+
+        templateService.deleteById(receivedTemplate1.getId());
+        templateService.deleteById(receivedTemplate2.getId());
+    }
+
+    @Test
+    void shouldUpdateGeneralInfoAndAttributesWhenUpdatingTemplate() {
+        Attribute attr1 = new RangeAttribute("attr 1", "attr 1 desc", 10);
+        Attribute attr2 = new RangeAttribute("attr 2", "attr 2 desc", 20);
+        Attribute attr3 = new RangeAttribute("attr 3", "attr 3 desc", 30);
+
+        Template receivedTemplate = templateService.add(new Template("template", "desc", Set.of(attr1, attr2)));
+        assertEquals(2, receivedTemplate.getAttributes().size());
+
+        assertEquals(1, receivedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 1")).count());
+        assertEquals(1, receivedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 2")).count());
+        assertEquals(0, receivedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 3")).count());
+
+        attr2.setName("new name");
+        Template newTemplate = new Template("template new", "desc new", Set.of(attr2, attr3));
+        templateService.updateById(receivedTemplate.getId(), newTemplate);
+        Template updatedTemplate = templateService.getOr404(receivedTemplate.getId());
+
+        assertEquals(2, updatedTemplate.getAttributes().size());
+        assertEquals("template new", updatedTemplate.getName());
+        assertEquals("desc new", updatedTemplate.getDescription());
+
+        assertEquals(0, updatedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 1")).count());
+        assertEquals(0, updatedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 2")).count());
+        assertEquals(1, updatedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("new name")).count());
+        assertEquals(1, updatedTemplate.getAttributes().stream()
+                .filter(attribute -> attribute.getName().equals("attr 3")).count());
+
+        templateService.deleteById(receivedTemplate.getId());
+    }
 
     @Test
     void shouldThrowNotFoundExceptionOnGetTemplateWhenTemplateNotExist() {
