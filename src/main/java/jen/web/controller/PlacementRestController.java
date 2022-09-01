@@ -8,7 +8,9 @@ import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
+import jen.web.util.CsvUtils;
 import jen.web.util.FieldSortingMaps;
+import jen.web.util.ImportExportUtils;
 import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -211,6 +213,33 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @PostMapping("/configs")
     public ResponseEntity<?> updateConfig(@RequestBody PlaceEngineConfig config) {
         return ResponseEntity.ok(placementService.updateGlobalConfig(config));
+    }
+
+    @GetMapping("/{placementId}/export/columns")
+    public ResponseEntity<?> getColumnsForPlacement(@PathVariable Long placementId) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            String columnsString = placementService.exportCsvHeadersByPlacement(placement);
+            return ResponseEntity.ok().body(columnsString);
+        } catch (CsvUtils.CsvContent.CsvNotValidException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
+    }
+
+    @PostMapping("/{placementId}/import")
+    public ResponseEntity<?> updateConfig(@PathVariable Long placementId,
+                                          @RequestBody String csvContent) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            placementService.importDataFromCsv(placement, csvContent);
+            return ResponseEntity.ok().build();
+        } catch (CsvUtils.CsvContent.CsvNotValidException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
     }
 
     public class IllegalNumberOfResultsException extends BadRequest {

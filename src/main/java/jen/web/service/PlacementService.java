@@ -5,6 +5,8 @@ import jen.web.entity.*;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.*;
+import jen.web.util.CsvUtils;
+import jen.web.util.ImportExportUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -30,6 +32,8 @@ public class PlacementService implements EntityService<Placement> {
     private final PupilRepository pupilRepository;
     private final GroupService groupService;
     private final PlaceEngineConfigRepository engineConfigRepository;
+    private final ImportExportUtils importExportUtils;
+
     @Setter
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -269,6 +273,27 @@ public class PlacementService implements EntityService<Placement> {
     public PlaceEngineConfig updateGlobalConfig(PlaceEngineConfig placeEngineConfig) {
         placeEngineConfig.setId(1L);
         return engineConfigRepository.save(placeEngineConfig);
+    }
+
+    public String exportCsvHeadersByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException {
+        List<String> columns = importExportUtils.getColumnNames(placement);
+        CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns);
+        return csvContent.getHeadersLine();
+    }
+
+    public String exportCsvDataByPlacement(Placement placement){
+        return "";
+    }
+
+    public void importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException {
+        System.out.println(input);
+
+        CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(input);
+
+        for(Map<String, String> rowMap : csvContent.getData()){
+            Pupil newPupil = importExportUtils.createPupilFromRowMap(rowMap);
+            System.out.println(rowMap);
+        }
     }
 
     public static class PlacementWithoutGroupException extends Exception {
