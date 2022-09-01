@@ -1,5 +1,6 @@
-export {default as PlacementsList} from './PlacementsList';
-export {default as PlacementPage} from './PlacementPage';
-export {default as AddPlacement} from './AddPlacement';
-export {default as PlacementResultsList} from './PlacementResultsList';
-export {default as PlacementResultPage} from './PlacementResultPage';
+export {default as List} from './PlacementsList';
+export {default as Page} from './PlacementPage';
+export {default as Data} from './PlacementData';
+export {default as Add} from './AddPlacement';
+export {default as Edit} from './EditPlacement';
+export * as Result from './Results';

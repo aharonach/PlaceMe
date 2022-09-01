@@ -90,7 +90,7 @@ class PlacementServiceTest {
         groupService.linkPupilToGroup(receivedGroup, receivedPupil2);
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
 
-        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement);
+        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement, "name", "description");
         assertEquals(PlacementResult.Status.IN_PROGRESS, placementResult.getStatus());
         assertNotNull(placementResult.getId());
 
@@ -118,7 +118,7 @@ class PlacementServiceTest {
     @Test
     void shouldThrowExceptionsOnGenerateResultWhenThereIsNoGroup() throws PlacementService.PlacementResultsInProgressException {
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, null));
-        assertThrows(PlacementService.PlacementWithoutGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement));
+        assertThrows(PlacementService.PlacementWithoutGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement, "name", "description"));
         placementService.deleteById(receivedPlacement.getId());
     }
 
@@ -126,7 +126,7 @@ class PlacementServiceTest {
     void shouldThrowExceptionsOnGenerateResultWhenThereAreNoPupilsGroup() throws PlacementService.PlacementResultsInProgressException {
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", null));
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
-        assertThrows(PlacementService.PlacementWithoutPupilsInGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement));
+        assertThrows(PlacementService.PlacementWithoutPupilsInGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement,"name", "description"));
         placementService.deleteById(receivedPlacement.getId());
         groupService.deleteById(receivedGroup.getId());
     }
@@ -147,7 +147,7 @@ class PlacementServiceTest {
 
         List<PlacementResult> results = new ArrayList<>(3);
         for(int i=0; i<3; i++){
-            PlacementResult placementResult = placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()));
+            PlacementResult placementResult = placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()), "name", "description");
             results.add(placementResult);
             assertEquals(PlacementResult.Status.IN_PROGRESS, placementResult.getStatus());
             assertNotNull(placementResult.getId());
@@ -169,7 +169,7 @@ class PlacementServiceTest {
         assertEquals(0, placementService.getOr404(receivedPlacement.getId()).getResults().size());
 
         // generate one more result
-        placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()));
+        placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()), "name", "description");
         executorMock.submitFirst().get();
         assertEquals(1, placementService.getOr404(receivedPlacement.getId()).getResults().size());
 
@@ -180,6 +180,46 @@ class PlacementServiceTest {
         pupilService.deleteById(receivedPupil2.getId());
     }
 
+    @Test
+    void shouldUpdatePlacementResultOnEditProperties() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, ExecutionException, InterruptedException, Placement.ResultNotExistsException, PlacementService.PlacementResultsInProgressException {
+        // replace Executor with Mock
+        ExecutorMock executorMock = new ExecutorMock();
+        placementService.setExecutor(executorMock);
+
+        Pupil receivedPupil1 = pupilService.add(repositoryTestUtils.createPupil1());
+        Pupil receivedPupil2 = pupilService.add(repositoryTestUtils.createPupil2());
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
+        Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
+        groupService.linkPupilToGroup(receivedGroup, receivedPupil1);
+        groupService.linkPupilToGroup(receivedGroup, receivedPupil2);
+        Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
+
+        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement, "name", "description");
+        PlacementResult updatedResult = new PlacementResult();
+
+        updatedResult.setName("name updated");
+        updatedResult.setDescription("desc updated");
+
+        // validate the result after generation
+        assertEquals("name", placementResult.getName() );
+        assertEquals("description", placementResult.getDescription() );
+
+        executorMock.submitFirst().get();
+        PlacementResult receivedResult = placementService.getResultById(receivedPlacement, placementResult.getId());
+
+        updatedResult = placementService.updatePlacementResult(receivedPlacement, receivedResult.getId(), updatedResult);
+
+        assertEquals("name updated", updatedResult.getName());
+        assertEquals("desc updated", updatedResult.getDescription());
+
+        assertEquals(1, placementService.getOr404(receivedPlacement.getId()).getResults().size());
+
+        groupService.deleteById(receivedGroup.getId());
+        placementService.deleteById(receivedPlacement.getId());
+        templateService.deleteById(receivedTemplate.getId());
+        pupilService.deleteById(receivedPupil1.getId());
+        pupilService.deleteById(receivedPupil2.getId());
+    }
 
     // @Todo: Test update method
 

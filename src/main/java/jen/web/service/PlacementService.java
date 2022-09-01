@@ -135,9 +135,11 @@ public class PlacementService implements EntityService<Placement> {
     protected PlacementResult savePlacementResult(Placement placement, PlacementResult placementResult) {
         placementResult.setPlacement(placement);
 
+        // Save classes of result
         placementResult.getClasses().forEach(placementClassroom -> placementClassroom.setPlacementResult(placementResult));
         placementClassroomRepository.saveAll(placementResult.getClasses());
 
+        // Add each class for each pupil
         placementResult.getClasses().forEach(placementClassroom -> {
             placementClassroom.getPupils().forEach(pupil -> {
                 Set<Long> classIds = pupil.getClassroomIds();
@@ -147,11 +149,22 @@ public class PlacementService implements EntityService<Placement> {
             pupilRepository.saveAll(placementClassroom.getPupils());
         });
 
+        // Save placement result
         PlacementResult savedResult = placementResultRepository.save(placementResult);
+
+        // Save placement
         placement.addResult(savedResult);
         placementRepository.save(placement);
 
         return savedResult;
+    }
+
+    public PlacementResult updatePlacementResult(Placement placement, Long resultId, PlacementResult result) throws Placement.ResultNotExistsException {
+        PlacementResult resultFromDB = getResultById(placement, resultId);
+        resultFromDB.setName(result.getName());
+        resultFromDB.setDescription(result.getDescription());
+        placementResultRepository.save(resultFromDB);
+        return resultFromDB;
     }
 
     @Transactional
@@ -191,12 +204,15 @@ public class PlacementService implements EntityService<Placement> {
         placementResultRepository.deleteById(resultId);
     }
 
-    public PlacementResult generatePlacementResult(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
+    public PlacementResult generatePlacementResult(Placement placement, String name, String description) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
         verifyPlacementContainsDataForGeneration(placement);
 
         PlaceEngine placeEngine = new PlaceEngine(placement, getGlobalConfig());
 
         PlacementResult placementResult = new PlacementResult();
+        if (name != null) placementResult.setName(name);
+        if (description != null) placementResult.setDescription(description);
+
         placementResult = savePlacementResult(placement, placementResult);
         Long resultId = placementResult.getId();
 

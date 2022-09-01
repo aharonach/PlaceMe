@@ -29,7 +29,7 @@ export default function Groups({ pupilGroups, onSubmit }) {
 
     return (
         <>
-            {loading && <Loading />}
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert> }
             {!loading && !error && (
                 <>

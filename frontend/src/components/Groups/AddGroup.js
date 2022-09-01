@@ -24,7 +24,7 @@ export default function AddGroup() {
             method: 'put',
             url: '/groups',
             data: {name: data.name, description: data.description, template: { id: data.templateId }}
-        }).then((group) => group && navigate(`/groups/${group.id}`));
+        }).then((group) => group && navigate(`/groups/${group.id}`, {replace: true}));
     };
 
     return (

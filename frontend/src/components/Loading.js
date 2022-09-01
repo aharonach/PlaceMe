@@ -1,9 +1,14 @@
 import React from 'react';
+import {Spinner} from "react-bootstrap";
 
-function Loading() {
-    return (
-        <p>Loading...</p>
-    );
+export default function Loading({ show, size = 'xl' }) {
+    const spinner = <Spinner
+        as="span"
+        animation="border"
+        role="status"
+        size={size}
+        aria-hidden="true"
+    />;
+
+    return show && spinner;
 }
-
-export default Loading;

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Profile;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -175,6 +176,6 @@ public class LoadDatabase {
 
     private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, PagesAndSortHandler.FieldNotSortableException {
         Placement placement = placementService.allWithoutPages().get(0);
-        placementService.generatePlacementResult(placement);
+        placementService.generatePlacementResult(placement, "name", "description");
     }
 }

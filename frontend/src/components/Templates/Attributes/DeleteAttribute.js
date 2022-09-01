@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Spinner} from "react-bootstrap";
-import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
+import useAxios from "../../../hooks/useAxios";
+import Api from "../../../api";
 
 export default function DeleteAttribute({ templateId, attributeId, attributeList, setAttributeList }) {
     const [response, error, loading, axiosFetch] = useAxios(() => {
