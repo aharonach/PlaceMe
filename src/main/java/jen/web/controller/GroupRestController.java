@@ -138,8 +138,9 @@ public class GroupRestController extends BaseRestController<Group> {
 
         try {
             Group group = groupService.getOr404(groupId);
-            groupService.addPupilPreference(group, preference);
-            return ResponseEntity.ok().build();
+            List<Preference> preferences = groupService.addPupilPreference(group, preference);
+            CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+            return ResponseEntity.ok().body(allEntities);
 
         } catch (Group.PupilNotBelongException | Preference.SamePupilException e) {
             throw new BadRequest(e.getMessage());
@@ -155,9 +156,9 @@ public class GroupRestController extends BaseRestController<Group> {
         Long selectorId = preference.getSelectorSelectedId().getSelectorId();
         Long selectedId = preference.getSelectorSelectedId().getSelectedId();
 
-        groupService.deletePupilPreferences(group, selectorId, selectedId);
-
-        return ResponseEntity.ok().build();
+        List<Preference> preferences = groupService.deletePupilPreferences(group, selectorId, selectedId);
+        CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+        return ResponseEntity.ok().body(allEntities);
     }
 
     private CollectionModel<Preference> preferencesToModelCollection(Long groupId, Iterable<Preference> preferences){

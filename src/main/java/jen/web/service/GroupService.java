@@ -130,7 +130,7 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Transactional
-    public void addPupilPreference(Group group, Preference preference) throws Group.PupilNotBelongException, Preference.SamePupilException {
+    public List<Preference> addPupilPreference(Group group, Preference preference) throws Group.PupilNotBelongException, Preference.SamePupilException {
         Pupil selector = group.getPupilById(preference.getSelectorSelectedId().getSelectorId());
         Pupil selected = group.getPupilById(preference.getSelectorSelectedId().getSelectedId());
 
@@ -138,10 +138,14 @@ public class GroupService implements EntityService<Group> {
 
         preferenceRepository.saveAllAndFlush(group.getPreferences());
         groupRepository.save(group);
+
+        return group.getPreferences().stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public void deletePupilPreferences(Group group, Long selectorId, Long selectedId) {
+    public List<Preference> deletePupilPreferences(Group group, Long selectorId, Long selectedId) {
 
         Set<SelectorSelectedId> selectorSelectedIds = group.getPreferenceForPupils(selectorId, selectedId)
                 .stream()
@@ -149,6 +153,10 @@ public class GroupService implements EntityService<Group> {
                 .collect(Collectors.toSet());
         group.getPreferenceForPupils(selectorId, selectedId).ifPresent(group::deletePreference);
         preferenceRepository.deleteAllById(selectorSelectedIds);
+
+        return group.getPreferences().stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     @Transactional
