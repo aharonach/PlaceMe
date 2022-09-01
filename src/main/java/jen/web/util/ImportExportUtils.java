@@ -138,7 +138,6 @@ public class ImportExportUtils {
                 pupilDataMap.put(attributeValue.getAttribute().getName(), String.valueOf(attributeValue.getValue()));
             }
 
-            //System.out.println(pupilDataMap);
 
             List<String> values = new ArrayList<>();
             for(String column : getColumnNames(placement)){

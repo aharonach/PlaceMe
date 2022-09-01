@@ -57,6 +57,15 @@ public class PupilService implements EntityService<Pupil>{
         return pupilRepository.getPupilByGivenId(givenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
     }
 
+    public Pupil updateOrCreatePupilByGivenId(Pupil newPupil) throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+        Optional<Pupil> currentPupil = pupilRepository.getPupilByGivenId(newPupil.getGivenId());
+        if(currentPupil.isPresent()){
+            return updateById(currentPupil.get().getId(), newPupil);
+        } else {
+            return add(newPupil);
+        }
+    }
+
     @Override
     public Page<Pupil> all(PageRequest pageRequest) {
         return pupilRepository.findAll(pageRequest);

@@ -74,10 +74,10 @@ public class Pupil extends BaseEntity {
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
 
         if(!givenId.matches(DIGITS_REGEX)){
-            throw new GivenIdContainsProhibitedCharsException();
+            throw new GivenIdContainsProhibitedCharsException(givenId);
         }
         if(!IsraeliIdValidator.isValid(givenId)){
-            throw new GivenIdIsNotValidException();
+            throw new GivenIdIsNotValidException(givenId);
         }
 
         this.givenId = givenId;
@@ -234,14 +234,14 @@ public class Pupil extends BaseEntity {
     }
 
     public static class GivenIdContainsProhibitedCharsException extends Exception {
-        public GivenIdContainsProhibitedCharsException(){
-            super("Given id must contain only digits.");
+        public GivenIdContainsProhibitedCharsException(String givenId){
+            super("Given id must contain only digits: '" + givenId + "'.");
         }
     }
 
     public static class GivenIdIsNotValidException extends Exception {
-        public GivenIdIsNotValidException(){
-            super("Given id is not valid.");
+        public GivenIdIsNotValidException(String givenId){
+            super("Given id is not valid: '" + givenId + "'.");
         }
     }
 }
