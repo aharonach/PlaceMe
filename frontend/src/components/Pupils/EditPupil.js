@@ -24,7 +24,6 @@ export default function EditPupil() {
     return (
         <>
             {error && <Alert variant="danger">{error}</Alert>}
-            {/*{pupil && !error && <Alert variant="success">Pupil {pupil.firstName} {pupil.lastName} ({pupil.id}) updated</Alert>}*/}
             <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading} submitLabel="Update" />
         </>
     );

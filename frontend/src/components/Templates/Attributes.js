@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import TableList from "../TableList";
-import AddAttribute from "../Attributes/AddAttribute";
-import DeleteAttribute from "../Attributes/DeleteAttribute";
-import EditAttribute from "../Attributes/EditAttribute";
+import AddAttribute from "./Attributes/AddAttribute";
+import DeleteAttribute from "./Attributes/DeleteAttribute";
+import EditAttribute from "./Attributes/EditAttribute";
 import {Button} from "react-bootstrap";
 import {useOutletContext} from "react-router-dom";
 

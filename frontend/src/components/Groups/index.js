@@ -1,7 +1,7 @@
-export {default as GroupData} from './GroupData';
-export {default as GroupsList} from './GroupsList';
-export {default as GroupPage} from './GroupPage';
-export {default as AddGroup} from './AddGroup';
-export {default as EditGroup} from './EditGroup';
-export {default as PupilList} from './PupilsList';
+export {default as Data} from './GroupData';
+export {default as List} from './GroupsList';
+export {default as Page} from './GroupPage';
+export {default as Add} from './AddGroup';
+export {default as Edit} from './EditGroup';
+export {default as Pupils} from './PupilsList';
 export {default as Preferences} from './PreferencesInGroup';

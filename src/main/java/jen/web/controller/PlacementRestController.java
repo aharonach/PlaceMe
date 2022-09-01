@@ -98,15 +98,16 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @PostMapping("/{placementId}/results/generate")
     public ResponseEntity<?> startPlacement(@PathVariable Long placementId,
-                                            @RequestBody Optional<Integer> amountOfResults) {
+                                            @RequestParam Optional<Integer> amountOfResults,
+                                            @RequestBody PlacementResult result) {
         Placement placement = placementService.getOr404(placementId);
-
         int numOfResults = getHowManyResultsToGenerate(amountOfResults);
         Set<PlacementResult> results = new HashSet<>(numOfResults);
 
-        for(int i=0; i< numOfResults; i++) {
+        for(int i=1; i <= numOfResults; i++) {
             try {
-                results.add(placementService.generatePlacementResult(placement));
+                String name = numOfResults > 1 ? result.getName().concat(" " + i) : result.getName();
+                results.add(placementService.generatePlacementResult(placement, name, result.getDescription()));
             } catch (PlacementService.PlacementWithoutGroupException | PlacementService.PlacementWithoutPupilsInGroupException e) {
                 throw new PreconditionFailed(e.getMessage());
             }
@@ -166,6 +167,21 @@ public class PlacementRestController extends BaseRestController<Placement> {
         try {
             PlacementResult placementResult = placementService.getResultById(placement, resultId);
             EntityModel<PlacementResult> entityModel = placementResultModelAssembler.toModel(placementResult);
+            return ResponseEntity.ok().body(entityModel);
+        } catch (Placement.ResultNotExistsException e) {
+            throw new BadRequest(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{placementId}/results/{resultId}")
+    public ResponseEntity<?> updateResult(@PathVariable Long placementId,
+                                          @PathVariable Long resultId,
+                                          @RequestBody PlacementResult updatedResult) {
+        Placement placement = placementService.getOr404(placementId);
+
+        try {
+            updatedResult = placementService.updatePlacementResult(placement, resultId, updatedResult);
+            EntityModel<PlacementResult> entityModel = placementResultModelAssembler.toModel(updatedResult);
             return ResponseEntity.ok().body(entityModel);
         } catch (Placement.ResultNotExistsException e) {
             throw new BadRequest(e.getMessage());

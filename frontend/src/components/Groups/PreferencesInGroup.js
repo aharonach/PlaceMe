@@ -49,7 +49,7 @@ export default function PreferencesInGroup() {
 
     return (
         <>
-            {loadingFetch && <Loading />}
+            <Loading show={loadingFetch} />
             {!loadingFetch && errorFetch && <Alert variant="danger">{errorFetch}</Alert> }
             {!loadingFetch && !errorFetch && pupils && preferences && (
                 <>

@@ -23,7 +23,7 @@ export default function TemplatePage() {
 
     return (
         <>
-            {loading && <Loading />}
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && template &&
                 <article className="template">

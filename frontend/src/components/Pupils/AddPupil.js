@@ -28,9 +28,7 @@ export default function AddPupil() {
             method: 'put',
             url: '/pupils',
             data: {...data}
-        }).then((pupil) => {
-            pupil && navigate(`/pupils/${pupil.id}`);
-        });
+        }).then(pupil => pupil && navigate(`/pupils/${pupil.id}`, { replace: true }));
     };
 
     return (

@@ -2,7 +2,7 @@ import {Link, useOutletContext} from "react-router-dom";
 import {idLinkList} from "../../utils";
 import React from "react";
 import RecordDetails from "../RecordDetails";
-import {PupilList} from "./index";
+import {Pupils} from "./index";
 
 export default function GroupData() {
     const {group} = useOutletContext();
@@ -19,7 +19,7 @@ export default function GroupData() {
     return (
         <>
             <RecordDetails details={details} />
-            <PupilList />
+            <Pupils />
         </>
     )
 }

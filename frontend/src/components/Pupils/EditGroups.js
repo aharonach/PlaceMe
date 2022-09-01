@@ -33,7 +33,7 @@ export default function EditGroups() {
     return (
         <>
             <h2>Edit Groups</h2>
-            {loading && <Loading />}
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && pupilGroups && (
                 <>

@@ -21,7 +21,7 @@ export default function PupilPage() {
 
     return (
         <>
-            {loading && <Loading />}
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && pupil &&
                 <article className="pupil">

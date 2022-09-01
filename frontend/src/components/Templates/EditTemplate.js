@@ -19,7 +19,7 @@ export default function EditTemplate() {
         axiosFetch({
             method: 'post',
             url: `/templates/${template.id}`,
-            data: {...data}
+            data: {...data, attributes: null }
         }).then( template => template && navigate(`/templates/${template.id}`, { replace: true }));
     };
 

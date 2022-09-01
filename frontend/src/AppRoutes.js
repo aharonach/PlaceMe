@@ -11,22 +11,22 @@ import React from "react";
 export default function AppRoutes() {
     return (
         <Routes>
-            <Route path="/" element={<Page><HomePage /></Page>}></Route>
+            <Route path="/" element={<Page><HomePage /></Page>} />
             <Route path="/pupils" element={<Page />}>
-                <Route index element={<Pupil.PupilsList />}></Route>
-                <Route path="add" element={<Pupil.AddPupil />}></Route>
-                <Route path=":pupilId" element={<Pupil.Profile />}>
-                    <Route index element={<Pupil.PupilData />}></Route>
-                    <Route path="edit" element={<Pupil.EditPupil />}></Route>
-                    <Route path="groups" element={<Pupil.Groups />}></Route>
+                <Route index element={<Pupil.List />} />
+                <Route path="add" element={<Pupil.Add />} />
+                <Route path=":pupilId" element={<Pupil.Page />}>
+                    <Route index element={<Pupil.Data />} />
+                    <Route path="edit" element={<Pupil.Edit />} />
+                    <Route path="groups" element={<Pupil.Groups />} />
                 </Route>
             </Route>
             <Route path="/groups" element={<Page />}>
-                <Route index element={<Group.GroupsList />} />
-                <Route path="add" element={<Group.AddGroup />} />
-                <Route path=":groupId" element={<Group.GroupPage />}>
-                    <Route index element={<Group.GroupData />} />
-                    <Route path="edit" element={<Group.EditGroup />} />
+                <Route index element={<Group.List />} />
+                <Route path="add" element={<Group.Add />} />
+                <Route path=":groupId" element={<Group.Page />}>
+                    <Route index element={<Group.Data />} />
+                    <Route path="edit" element={<Group.Edit />} />
                     <Route path="preferences" element={<Group.Preferences />} />
                 </Route>
             </Route>
@@ -39,12 +39,20 @@ export default function AppRoutes() {
                 </Route>
             </Route>
             <Route path="/placements" element={<Page />}>
-                <Route index element={<Placement.PlacementsList />}></Route>
-                <Route path="add" element={<Placement.AddPlacement />}></Route>
-                <Route path=":placementId" element={<Placement.PlacementPage />}></Route>
-                <Route path=":placementId/edit" element={<Placement.PlacementPage edit={true} />}></Route>
-                <Route path=":placementId/results" element={<Placement.PlacementResultsList />}></Route>
-                <Route path=":placementId/results/:resultId" element={<Placement.PlacementResultPage />}></Route>
+                <Route index element={<Placement.List />} />
+                <Route path="add" element={<Placement.Add />} />
+                <Route path=":placementId" element={<Placement.Page />}>
+                    <Route index element={<Placement.Data />} />
+                    <Route path="edit" element={<Placement.Edit />} />
+                    <Route path="results">
+                        <Route index element={<Placement.Result.List />} />
+                        <Route path="add" element={<Placement.Result.Add />} />
+                        <Route path=":resultId" element={<Placement.Result.Page />}>
+                            <Route index element={<Placement.Result.Data />} />
+                            <Route path="edit" element={<Placement.Result.Edit />} />
+                        </Route>
+                    </Route>
+                </Route>
             </Route>
             <Route path="*" element={<ErrorPage />}></Route>
         </Routes>

@@ -1,12 +1,12 @@
 import React from "react";
 import {useForm} from "react-hook-form";
-import HtmlForm from "../Forms/HtmlForm";
+import HtmlForm from "../../Forms/HtmlForm";
 import FormFields from "./FormFields";
 import {Alert, Modal} from "react-bootstrap";
-import useAxios from "../../hooks/useAxios";
-import {getDefaultValuesByFields} from "../../utils";
+import useAxios from "../../../hooks/useAxios";
+import {getDefaultValuesByFields} from "../../../utils";
 
-export default function EditAttribute({  templateId, attribute, setAttribute, setAttributeList }) {
+export default function EditAttribute({ templateId, attribute, setAttribute, setAttributeList }) {
     let methods = useForm({
         defaultValues: getDefaultValuesByFields( FormFields(), attribute ),
     });
