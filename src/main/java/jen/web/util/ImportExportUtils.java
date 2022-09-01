@@ -19,12 +19,9 @@ public class ImportExportUtils {
     public List<String> getColumnNames(Placement placement){
         List<String> columns = new ArrayList<>();
 
-        List<Field> fields = Arrays.stream(pupilClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(ImportField.class))
-                .collect(Collectors.toList());
-
-        for(Field field : fields){
-            ImportField importField = field.getAnnotation(ImportField.class);
+        Constructor<?> constructor = getImportConstructorOfPupil();
+        for(Parameter parameter : constructor.getParameters()){
+            ImportField importField = parameter.getAnnotation(ImportField.class);
             columns.add(importField.title());
         }
 
@@ -40,6 +37,16 @@ public class ImportExportUtils {
 
     public Pupil createPupilFromRowMap(Map<String, String> rowMap, int lineNumber) throws ParseValueException {
 
+        try {
+            Constructor<?> constructor = getImportConstructorOfPupil();
+            List<Object> fields = getFieldList(constructor, rowMap, lineNumber);
+            return  (Pupil) constructor.newInstance(fields.toArray());
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new DataDontFeetToConstructorException(e.getMessage());
+        }
+    }
+
+    private Constructor<?> getImportConstructorOfPupil(){
         List<Constructor<?>> importConstructors = Arrays.stream(pupilClass.getDeclaredConstructors())
                 .filter(constructor -> constructor.isAnnotationPresent(ImportConstructor.class))
                 .toList();
@@ -49,14 +56,7 @@ public class ImportExportUtils {
         } else if (importConstructors.size() > 1){
             throw new MoreThanOneConstructorException();
         }
-
-        try {
-            Constructor<?> constructor = importConstructors.get(0);
-            List<Object> fields = getFieldList(constructor, rowMap, lineNumber);
-            return  (Pupil) constructor.newInstance(fields.toArray());
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new DataDontFeetToConstructorException(e.getMessage());
-        }
+        return importConstructors.get(0);
     }
 
     private List<Object> getFieldList(Constructor<?> constructor, Map<String, String> rowMap, int lineNumber) throws ParseValueException {
