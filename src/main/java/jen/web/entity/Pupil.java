@@ -2,6 +2,8 @@ package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jen.web.util.ExportField;
+import jen.web.util.ImportConstructor;
 import jen.web.util.IsraeliIdValidator;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -25,11 +27,16 @@ public class Pupil extends BaseEntity {
     public static final String DIGITS_REGEX = "\\d+";
 
     @NaturalId(mutable=true)
+    @ExportField(title = "Given ID")
     private String givenId;
+    @ExportField(title = "First Name")
     private String firstName;
+    @ExportField(title = "Last Name")
     private String lastName;
     @Enumerated(EnumType.STRING)
+    @ExportField(title = "Gender")
     private Gender gender;
+    @ExportField(title = "Birth Date")
     private LocalDate birthDate;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "pupil")
@@ -51,6 +58,7 @@ public class Pupil extends BaseEntity {
             joinColumns = @JoinColumn(name = "pupil_id", referencedColumnName = "id"))
     private Set<PlacementClassroom> classrooms = new LinkedHashSet<>();
 
+    @ImportConstructor
     public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate)
             throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         setGivenId(givenId);
