@@ -5,11 +5,11 @@ import jen.web.assembler.PlacementModelAssembler;
 import jen.web.assembler.PlacementResultModelAssembler;
 import jen.web.entity.*;
 import jen.web.exception.BadRequest;
+import jen.web.exception.InternalError;
 import jen.web.exception.NotFound;
 import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
-import jen.web.util.FieldSortingMaps;
-import jen.web.util.PagesAndSortHandler;
+import jen.web.util.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,6 +227,46 @@ public class PlacementRestController extends BaseRestController<Placement> {
     @PostMapping("/configs")
     public ResponseEntity<?> updateConfig(@RequestBody PlaceEngineConfig config) {
         return ResponseEntity.ok(placementService.updateGlobalConfig(config));
+    }
+
+    @GetMapping("/{placementId}/export/columns")
+    public ResponseEntity<?> exportCsvColumnsForPlacement(@PathVariable Long placementId) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            String columnsString = placementService.exportCsvHeadersByPlacement(placement);
+            return ResponseEntity.ok().body(columnsString);
+        } catch (CsvUtils.CsvContent.CsvNotValidException e) {
+            throw new BadRequest(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{placementId}/export")
+    public ResponseEntity<?> exportCsvDataForPlacement(@PathVariable Long placementId) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            String columnsString = placementService.exportCsvDataByPlacement(placement);
+            return ResponseEntity.ok().body(columnsString);
+        } catch (CsvUtils.CsvContent.CsvNotValidException | Group.PupilNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InternalError(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{placementId}/import")
+    public ResponseEntity<?> updateConfig(@PathVariable Long placementId,
+                                          @RequestBody String csvContent) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            OperationInfo operationInfo = placementService.importDataFromCsv(placement, csvContent);
+            return ResponseEntity.ok().body(operationInfo);
+        } catch (CsvUtils.CsvContent.CsvNotValidException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
     }
 
     public class IllegalNumberOfResultsException extends BadRequest {

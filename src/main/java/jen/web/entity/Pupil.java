@@ -2,6 +2,8 @@ package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jen.web.util.ImportField;
+import jen.web.util.ImportConstructor;
 import jen.web.util.IsraeliIdValidator;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -51,7 +53,12 @@ public class Pupil extends BaseEntity {
             joinColumns = @JoinColumn(name = "pupil_id", referencedColumnName = "id"))
     private Set<PlacementClassroom> classrooms = new LinkedHashSet<>();
 
-    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate)
+    @ImportConstructor
+    public Pupil(@ImportField(title = "Given ID", fieldName = "givenId") String givenId,
+                 @ImportField(title = "First Name", fieldName = "firstName") String firstName,
+                 @ImportField(title = "Last Name", fieldName = "lastName") String lastName,
+                 @ImportField(title = "Gender", fieldName = "gender") Gender gender,
+                 @ImportField(title = "Birth Date", fieldName = "birthDate") LocalDate birthDate)
             throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         setGivenId(givenId);
         this.firstName = firstName;

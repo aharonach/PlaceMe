@@ -160,6 +160,32 @@ class TemplateServiceTest {
     }
 
     @Test
+    void shouldUpdateGeneralInfoWhenUpdatingTemplateWithoutAttributesInfo() {
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate1());
+        assertEquals(2, receivedTemplate.getAttributes().size());
+
+        Template newTemplateInfo = new Template("new name", "new desc");
+        newTemplateInfo.setAttributes(null);
+
+        Template updatedTemplate = templateService.updateById(receivedTemplate.getId(), newTemplateInfo);
+
+        assertEquals(2, updatedTemplate.getAttributes().size());
+        templateService.deleteById(receivedTemplate.getId());
+    }
+
+    @Test
+    void shouldUpdateGeneralInfoAndEraseAttributesWhenUpdatingTemplateWithEmptyAttributesList() {
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate1());
+        assertEquals(2, receivedTemplate.getAttributes().size());
+
+        Template newTemplateInfo = new Template("new name", "new desc");
+        Template updatedTemplate = templateService.updateById(receivedTemplate.getId(), newTemplateInfo);
+
+        assertEquals(0, updatedTemplate.getAttributes().size());
+        templateService.deleteById(receivedTemplate.getId());
+    }
+
+    @Test
     void shouldThrowNotFoundExceptionOnGetTemplateWhenTemplateNotExist() {
         assertThrows(NotFound.class, () -> templateService.getOr404(100L));
     }
