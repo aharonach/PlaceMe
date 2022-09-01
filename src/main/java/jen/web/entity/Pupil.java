@@ -54,11 +54,11 @@ public class Pupil extends BaseEntity {
     private Set<PlacementClassroom> classrooms = new LinkedHashSet<>();
 
     @ImportConstructor
-    public Pupil(@ImportField(title = "Given ID") String givenId,
-                 @ImportField(title = "First Name") String firstName,
-                 @ImportField(title = "Last Name") String lastName,
-                 @ImportField(title = "Gender") Gender gender,
-                 @ImportField(title = "Birth Date") LocalDate birthDate)
+    public Pupil(@ImportField(title = "Given ID", fieldName = "givenId") String givenId,
+                 @ImportField(title = "First Name", fieldName = "firstName") String firstName,
+                 @ImportField(title = "Last Name", fieldName = "lastName") String lastName,
+                 @ImportField(title = "Gender", fieldName = "gender") Gender gender,
+                 @ImportField(title = "Birth Date", fieldName = "birthDate") LocalDate birthDate)
             throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         setGivenId(givenId);
         this.firstName = firstName;

@@ -2,6 +2,7 @@ package jen.web.service;
 
 import jen.web.engine.PlaceEngine;
 import jen.web.entity.*;
+import jen.web.exception.BadRequest;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.*;
@@ -282,8 +283,11 @@ public class PlacementService implements EntityService<Placement> {
         return csvContent.getHeadersLine();
     }
 
-    public String exportCsvDataByPlacement(Placement placement){
-        return "";
+    public String exportCsvDataByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException {
+        List<String> columns = importExportUtils.getColumnNames(placement);
+        List<String> rows = importExportUtils.createRowDataForPupils(placement);
+        CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns, rows);
+        return csvContent.getFullFileContent();
     }
 
     public OperationInfo importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException {

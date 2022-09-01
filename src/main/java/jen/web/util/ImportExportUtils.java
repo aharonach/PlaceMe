@@ -1,16 +1,18 @@
 package jen.web.util;
 
-import jen.web.entity.Attribute;
-import jen.web.entity.Placement;
-import jen.web.entity.Pupil;
+import jen.web.entity.*;
+import jen.web.repository.PupilRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ImportExportUtils {
     public final static String PREFER_TO_BE_WITH = "Prefer to be with";
     public final static String PREFER_NOT_TO_BE_WITH = "Prefer Not to be with";
@@ -21,6 +23,8 @@ public class ImportExportUtils {
             PREFER_TO_BE_WITH,
             PREFER_NOT_TO_BE_WITH
     );
+
+    private final PupilRepository pupilRepository;
 
     static {
         pupilImportConstructor = getImportConstructorOfPupil();
@@ -104,6 +108,56 @@ public class ImportExportUtils {
         }
 
         return value;
+    }
+
+    public List<String> createRowDataForPupils(Placement placement) throws Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException {
+        List<String> rows = new ArrayList<>(placement.getGroup().getNumberOfPupils());
+
+        List<String> columns = getColumnNames(placement);
+        Group group = placement.getGroup();
+        List<ImportField> importFields = Arrays.stream(pupilImportConstructor.getParameters())
+                .map(parameter -> parameter.getAnnotation(ImportField.class))
+                .toList();
+
+        for(Pupil pupil : group.getPupils()){
+            Map<String, String> pupilDataMap = new HashMap<>(columns.size());
+
+            // add pupil data
+            for(ImportField importField : importFields){
+                Field field = pupil.getClass().getDeclaredField(importField.fieldName());
+                field.setAccessible(true);
+                pupilDataMap.put(importField.title(), String.valueOf(field.get(pupil)));
+            }
+
+            // add preferences values data
+            pupilDataMap.put(PREFER_TO_BE_WITH, getGivenIds(group, pupil, true));
+            pupilDataMap.put(PREFER_NOT_TO_BE_WITH, getGivenIds(group, pupil, false));
+
+            // add attribute values data
+            for(AttributeValue attributeValue : pupil.getAttributeValues(group)){
+                pupilDataMap.put(attributeValue.getAttribute().getName(), String.valueOf(attributeValue.getValue()));
+            }
+
+            //System.out.println(pupilDataMap);
+
+            List<String> values = new ArrayList<>();
+            for(String column : getColumnNames(placement)){
+                values.add(pupilDataMap.get(column));
+            }
+            rows.add(CsvUtils.createLineFromValues(values));
+        }
+
+        return rows;
+    }
+
+    private String getGivenIds(Group group, Pupil pupil, boolean wantsToBeTogether){
+        Set<Long> wantToBeWithIds = group.getAllPreferencesForPupil(pupil.getId()).stream()
+                .filter(preference ->  preference.getIsSelectorWantToBeWithSelected() == wantsToBeTogether)
+                .map(preference -> preference.getSelectorSelectedId().getSelectedId())
+                .collect(Collectors.toSet());
+        return pupilRepository.getAllByIdIn(wantToBeWithIds).stream()
+                .map(Pupil::getGivenId)
+                .collect(Collectors.joining(";"));
     }
 
     public static class CantFindImportConstructorException extends RuntimeException {

@@ -5,6 +5,7 @@ import jen.web.assembler.PlacementModelAssembler;
 import jen.web.assembler.PlacementResultModelAssembler;
 import jen.web.entity.*;
 import jen.web.exception.BadRequest;
+import jen.web.exception.InternalError;
 import jen.web.exception.NotFound;
 import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
@@ -213,7 +214,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @GetMapping("/{placementId}/export/columns")
-    public ResponseEntity<?> getColumnsForPlacement(@PathVariable Long placementId) {
+    public ResponseEntity<?> exportCsvColumnsForPlacement(@PathVariable Long placementId) {
 
         Placement placement = placementService.getOr404(placementId);
         try {
@@ -222,7 +223,20 @@ public class PlacementRestController extends BaseRestController<Placement> {
         } catch (CsvUtils.CsvContent.CsvNotValidException e) {
             throw new BadRequest(e.getMessage());
         }
+    }
 
+    @GetMapping("/{placementId}/export")
+    public ResponseEntity<?> exportCsvDataForPlacement(@PathVariable Long placementId) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            String columnsString = placementService.exportCsvDataByPlacement(placement);
+            return ResponseEntity.ok().body(columnsString);
+        } catch (CsvUtils.CsvContent.CsvNotValidException | Group.PupilNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InternalError(e.getMessage());
+        }
     }
 
     @PostMapping("/{placementId}/import")

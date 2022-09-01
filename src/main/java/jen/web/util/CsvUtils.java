@@ -9,6 +9,10 @@ public class CsvUtils {
     public static String SEPARATOR = ",";
     public static String LINE_SEPARATOR = "\n";
 
+    public static String createLineFromValues(List<String> values){
+        return new StringBuilder(String.join(SEPARATOR, values)).toString();
+    }
+
     public static class CsvContent{
         @Getter private final List<String> columns;
         @Getter private final List<String> rows;
@@ -18,17 +22,46 @@ public class CsvUtils {
             String[] lines = input.split(LINE_SEPARATOR);
             this.columns = Arrays.stream(lines[0].split(SEPARATOR)).toList();
             this.rows = Arrays.stream(lines).toList().subList(1, lines.length);
-            this.data = createDataList(columns, rows);
+            validateRows();
+            this.data = createDataList(this.columns, this.rows);
         }
 
-        public CsvContent(List<String> columns) throws CsvNotValidException {
+        public CsvContent(List<String> columns, List<String> rows) throws CsvNotValidException {
+            this.columns = new ArrayList<>(columns);
+            this.rows = new ArrayList<>(rows);
+            validateRows();
+            this.data = createDataList(this.columns, this.rows);
+        }
+
+        public CsvContent(List<String> columns) {
             this.columns = new ArrayList<>(columns);
             this.rows = new ArrayList<>();
             this.data = new ArrayList<>();
         }
 
+        private void validateRows() throws CsvNotValidException {
+            for(String row : this.rows){
+                if(row.trim().length() == 0){
+                    continue;
+                }
+
+                String[] splittedRow = row.split(SEPARATOR);
+                if(splittedRow.length != columns.size()){
+                    throw new CsvNotValidException("line " + (rows.indexOf(row) + 1) + " is not valid.");
+                }
+            }
+        }
+
         public String getHeadersLine(){
-            return new StringBuilder(String.join(SEPARATOR, this.columns)).toString();
+            return createLineFromValues(this.columns);
+        }
+
+        public String getFullFileContent(){
+            StringBuilder stringBuilder =  new StringBuilder(getHeadersLine()).append(LINE_SEPARATOR);
+            for(String row : this.rows){
+                stringBuilder.append(row).append(LINE_SEPARATOR);
+            }
+            return stringBuilder.toString();
         }
 
         private List<Map<String, String>> createDataList(List<String> columns, List<String> rows) throws CsvNotValidException {
@@ -41,10 +74,6 @@ public class CsvUtils {
 
                 Map<String, String> currentRow = new HashMap<>(columns.size());
                 String[] splittedRow = row.split(SEPARATOR);
-                if(splittedRow.length != columns.size()){
-                    throw new CsvNotValidException("line " + rows.indexOf(row) + 1 + " is not valid.");
-                }
-
                 for(String column : columns){
                     currentRow.put(column, splittedRow[columns.indexOf(column)]);
                 }
