@@ -8,10 +8,7 @@ import jen.web.exception.BadRequest;
 import jen.web.exception.NotFound;
 import jen.web.exception.PreconditionFailed;
 import jen.web.service.PlacementService;
-import jen.web.util.CsvUtils;
-import jen.web.util.FieldSortingMaps;
-import jen.web.util.ImportExportUtils;
-import jen.web.util.PagesAndSortHandler;
+import jen.web.util.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -234,8 +231,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
         Placement placement = placementService.getOr404(placementId);
         try {
-            placementService.importDataFromCsv(placement, csvContent);
-            return ResponseEntity.ok().build();
+            OperationInfo operationInfo = placementService.importDataFromCsv(placement, csvContent);
+            return ResponseEntity.ok().body(operationInfo);
         } catch (CsvUtils.CsvContent.CsvNotValidException e) {
             throw new BadRequest(e.getMessage());
         }

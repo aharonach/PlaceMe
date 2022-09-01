@@ -7,6 +7,7 @@ import jen.web.exception.NotFound;
 import jen.web.repository.*;
 import jen.web.util.CsvUtils;
 import jen.web.util.ImportExportUtils;
+import jen.web.util.OperationInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -285,15 +286,26 @@ public class PlacementService implements EntityService<Placement> {
         return "";
     }
 
-    public void importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException {
-        System.out.println(input);
-
+    public OperationInfo importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException {
+        OperationInfo operationInfo = new OperationInfo();
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(input);
+        List<Map<String, String>> contentData = csvContent.getData();
+        int lineNumber = 2; // first line + headers
 
-        for(Map<String, String> rowMap : csvContent.getData()){
-            Pupil newPupil = importExportUtils.createPupilFromRowMap(rowMap);
+        for(Map<String, String> rowMap : contentData){
             System.out.println(rowMap);
+            try {
+                Pupil newPupil = importExportUtils.createPupilFromRowMap(rowMap, lineNumber);
+                System.out.println(newPupil);
+                operationInfo.addSuccess();
+            } catch (ImportExportUtils.ParseValueException e) {
+                operationInfo.addError(e.getMessage());
+            } finally {
+                lineNumber++;
+            }
         }
+
+        return operationInfo;
     }
 
     public static class PlacementWithoutGroupException extends Exception {
