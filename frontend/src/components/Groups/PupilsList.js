@@ -1,13 +1,15 @@
 import React, {useState} from 'react';
 import {useOutletContext} from "react-router-dom";
-import {PupilsList} from "../Pupils";
 import DeletePupilFromGroup from "./DeletePupilFromGroup";
+import columns from "../Pupils/columns";
+import RecordList from "../RecordList";
 
-export default function PupilList() {
+export default function PupilsList() {
     const { group } = useOutletContext();
     const [updated, setUpdated] = useState(false);
 
     const pupilColumns = {
+        ...columns,
         'actions': {
             label: "",
             callbacks: [
@@ -16,15 +18,13 @@ export default function PupilList() {
         }
     }
 
-    return (
-        <>
-            <h3>Pupils in the group</h3>
-            <PupilsList
-                fetchUrl={`/groups/${group.id}/pupils`}
-                addButton={false}
-                additionalColumns={pupilColumns}
-                updated={updated}
-            />
-        </>
-    )
+    return <RecordList
+            fetchUrl={`/groups/${group.id}/pupils`}
+            propertyName="pupilList"
+            title={<h3>Pupils in the group</h3>}
+            columns={pupilColumns}
+            basePath="/pupils/"
+            linkField="givenId"
+            updated={updated}
+        />;
 }

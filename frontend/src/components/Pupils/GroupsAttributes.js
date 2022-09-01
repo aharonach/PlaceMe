@@ -1,12 +1,10 @@
 import React, {useMemo, useState} from 'react';
 import {Col, Nav, Row, Tab} from "react-bootstrap";
 import Attributes from "./Attributes";
-import {extractListFromAPI} from "../../utils";
 import {useParams} from "react-router-dom";
 
-export default function GroupsAttributes({ pupilGroups }) {
+export default function GroupsAttributes({ groups }) {
     const { pupilId } = useParams();
-    const groups = useMemo(() => extractListFromAPI(pupilGroups, 'groupList'), [pupilGroups]);
     const [group, setGroup] = useState( groups && groups.length > 0 ? groups[0] : null );
 
     const onSelect = eventKey => {

@@ -3,7 +3,6 @@ import {useForm} from "react-hook-form";
 import HtmlForm from "../Forms/HtmlForm";
 import FormFields from "./FormFields";
 import {Alert, Modal} from "react-bootstrap";
-import Api from '../../api';
 import useAxios from "../../hooks/useAxios";
 import {getDefaultValuesByFields} from "../../utils";
 
@@ -20,11 +19,10 @@ export default function EditAttribute({  templateId, attribute, setAttribute, se
 
     const onHide = () => {
         setAttribute(null);
-    }
+    };
 
     const onSubmit = (data) => {
         axiosFetch({
-            axiosInstance: Api,
             url: `/templates/${templateId}/attributes/${attribute.id}`,
             method: 'post',
             data: data,

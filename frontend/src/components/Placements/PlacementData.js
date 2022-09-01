@@ -1,9 +1,5 @@
 import React from 'react';
-import PlacementResultsList from "./PlacementResultsList";
 import RecordDetails from "../RecordDetails";
-import {Button} from "react-bootstrap";
-import {LinkContainer} from "react-router-bootstrap";
-
 
 export default function PlacementData({placement}){
 

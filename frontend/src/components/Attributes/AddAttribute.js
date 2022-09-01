@@ -2,11 +2,10 @@ import React from "react";
 import {useForm} from "react-hook-form";
 import HtmlForm from "../Forms/HtmlForm";
 import FormFields from "./FormFields";
-import {Alert} from "react-bootstrap";
-import Api from '../../api';
+import {Alert, Modal} from "react-bootstrap";
 import useAxios from "../../hooks/useAxios";
 
-export default function AddAttribute({ templateId, setAttributeList }) {
+export default function AddAttribute({ show, setMode, templateId, setAttributeList }) {
     let methods = useForm({
         defaultValues: {
             name: '',
@@ -23,18 +22,21 @@ export default function AddAttribute({ templateId, setAttributeList }) {
 
     const onSubmit = (data) => {
         axiosFetch({
-            axiosInstance: Api,
             url: `/templates/${templateId}/attributes`,
             method: 'put',
             data: data,
-        });
+        }).then( res => res && setMode(''));
     }
 
     return (
         <>
-            <h3>Add Attribute</h3>
-            {!loading && error && <Alert variant="danger">{error}</Alert> }
-            <HtmlForm formProps={methods} fields={FormFields} submitCallback={onSubmit} loading={loading} submitLabel={"Add"}></HtmlForm>
+            <Modal centered show={show}>
+                <Modal.Header closeButton onHide={()=> setMode('')}><Modal.Title>Add Attribute</Modal.Title></Modal.Header>
+                <Modal.Body>
+                    {!loading && error && <Alert variant="danger">{error}</Alert> }
+                    <HtmlForm formProps={methods} fields={FormFields} submitCallback={onSubmit} loading={loading} submitLabel={"Add"}></HtmlForm>
+                </Modal.Body>
+            </Modal>
         </>
     );
 }

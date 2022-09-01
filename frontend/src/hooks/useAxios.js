@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Api from "../api";
 
 const useAxios = (afterSubmit = null, defaultState) => {
     const [response, setResponse] = useState(defaultState);
@@ -8,7 +9,7 @@ const useAxios = (afterSubmit = null, defaultState) => {
 
     const axiosFetch = async (configObj) => {
         const {
-            axiosInstance,
+            axiosInstance = Api,
             method,
             url,
             data = null,

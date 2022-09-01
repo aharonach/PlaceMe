@@ -1,17 +1,21 @@
-import { useEffect } from 'react';
+import {useContext, useEffect} from 'react';
 import useAxios from "./useAxios";
-import Api from "../api";
-import {extractListFromAPI} from "../utils";
+import {useLocation} from "react-router-dom";
+import RecordContext from "../context/RecordContext";
 
-const useFetchRecord = (fetchUrl, thenCallback) => {
+const useFetchRecord = ({ fetchUrl, thenCallback, displayFields, updateContext = true }) => {
+    // const { setRecord } = useContext(RecordContext);
     const [response, error, loading, axiosFetch] = useAxios();
+    // let location = useLocation();
 
     const getRecord = () => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'get',
             url: fetchUrl,
-        }).then(res => thenCallback && thenCallback(res));
+        }).then(res => {
+            thenCallback && thenCallback(res);
+            // updateContext && res && setRecord({ record: res, displayFields: displayFields, pathname: location.pathname });
+        });
     }
 
     useEffect(() => {
