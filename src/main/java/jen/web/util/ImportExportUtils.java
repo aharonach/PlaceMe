@@ -9,45 +9,32 @@ import java.lang.reflect.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class ImportExportUtils {
+    public final static String PREFER_TO_BE_WITH = "Prefer to be with";
+    public final static String PREFER_NOT_TO_BE_WITH = "Prefer Not to be with";
 
-    Class<?> pupilClass = Pupil.class;
+    private final static Constructor<?> pupilImportConstructor;
+    private final static List<String> pupilColumns;
+    private final static List<String> preferencesColumns = List.of(
+            PREFER_TO_BE_WITH,
+            PREFER_NOT_TO_BE_WITH
+    );
 
-    public List<String> getColumnNames(Placement placement){
-        List<String> columns = new ArrayList<>();
+    static {
+        pupilImportConstructor = getImportConstructorOfPupil();
 
-        Constructor<?> constructor = getImportConstructorOfPupil();
-        for(Parameter parameter : constructor.getParameters()){
+        List<String> pupilFieldColumns = new ArrayList<>();
+        for(Parameter parameter : pupilImportConstructor.getParameters()){
             ImportField importField = parameter.getAnnotation(ImportField.class);
-            columns.add(importField.title());
+            pupilFieldColumns.add(importField.title());
         }
-
-        columns.add("Prefer to be with");
-        columns.add("Prefer not to be with");
-
-        for(Attribute attribute : placement.getGroup().getTemplate().getAttributes()){
-            columns.add(attribute.getName().replace(",", ""));
-        }
-
-        return columns;
+        pupilColumns = pupilFieldColumns;
     }
 
-    public Pupil createPupilFromRowMap(Map<String, String> rowMap, int lineNumber) throws ParseValueException {
-
-        try {
-            Constructor<?> constructor = getImportConstructorOfPupil();
-            List<Object> fields = getFieldList(constructor, rowMap, lineNumber);
-            return  (Pupil) constructor.newInstance(fields.toArray());
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new DataDontFeetToConstructorException(e.getMessage());
-        }
-    }
-
-    private Constructor<?> getImportConstructorOfPupil(){
-        List<Constructor<?>> importConstructors = Arrays.stream(pupilClass.getDeclaredConstructors())
+    private static Constructor<?> getImportConstructorOfPupil(){
+        List<Constructor<?>> importConstructors = Arrays.stream(Pupil.class.getDeclaredConstructors())
                 .filter(constructor -> constructor.isAnnotationPresent(ImportConstructor.class))
                 .toList();
 
@@ -57,6 +44,34 @@ public class ImportExportUtils {
             throw new MoreThanOneConstructorException();
         }
         return importConstructors.get(0);
+    }
+
+    public List<String> getColumnNames(Placement placement){
+        List<String> columns = new ArrayList<>();
+
+        columns.addAll(pupilColumns);
+        columns.addAll(preferencesColumns);
+        columns.addAll(getAttributesColumns(placement));
+
+        return columns;
+    }
+
+    private List<String> getAttributesColumns(Placement placement){
+        List<String> attributesColumns = new ArrayList<>();
+        for(Attribute attribute : placement.getGroup().getTemplate().getAttributes()){
+            attributesColumns.add(attribute.getName().replace(",", ""));
+        }
+        return attributesColumns;
+    }
+
+    public Pupil createPupilFromRowMap(Map<String, String> rowMap, int lineNumber) throws ParseValueException {
+
+        try {
+            List<Object> fields = getFieldList(pupilImportConstructor, rowMap, lineNumber);
+            return  (Pupil) pupilImportConstructor.newInstance(fields.toArray());
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new DataDontFeetToConstructorException(e.getMessage());
+        }
     }
 
     private List<Object> getFieldList(Constructor<?> constructor, Map<String, String> rowMap, int lineNumber) throws ParseValueException {
@@ -91,23 +106,6 @@ public class ImportExportUtils {
         return value;
     }
 
-//    public boolean isFileValid(Placement placement, String input){
-//        return true;
-//    }
-//
-//    public String createCsvFile(Placement placement) throws IOException {
-//
-//        try(BufferedReader csvReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream("text".getBytes())))){
-//            String line;
-//            while((line = csvReader.readLine()) != null){
-//                System.out.println(line);
-//            }
-//        }
-//
-//        return "";
-//    }
-
-
     public static class CantFindImportConstructorException extends RuntimeException {
         public CantFindImportConstructorException(){
             super("Cant create pupil from data. no import constructor.");
@@ -137,5 +135,4 @@ public class ImportExportUtils {
             super("Line " + lineNumber + ". Cant parse value '" + data + "' for column '" + column + "'.");
         }
     }
-
 }
