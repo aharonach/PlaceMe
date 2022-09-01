@@ -64,17 +64,19 @@ public class TemplateService implements EntityService<Template> {
     public Template updateById(Long id, Template newTemplate) {
         Template template = getOr404(id);
 
-        List<Long> newAttributeIds = newTemplate.getAttributes().stream().map(Attribute::getId).filter(Objects::nonNull).toList();
-        List<Attribute> attributesToDelete = template.getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
+        if(newTemplate.getAttributes() != null){
+            List<Long> newAttributeIds = newTemplate.getAttributes().stream().map(Attribute::getId).filter(Objects::nonNull).toList();
+            List<Attribute> attributesToDelete = template.getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
 
-        for(Attribute attribute : attributesToDelete){
-            try {
-                deleteAttributeForTemplate(template, attribute);
-            } catch (Template.AttributeNotBelongException ignored) {
+            for(Attribute attribute : attributesToDelete){
+                try {
+                    deleteAttributeForTemplate(template, attribute);
+                } catch (Template.AttributeNotBelongException ignored) {
+                }
             }
+            template.updateAttributes(newTemplate.getAttributes());
         }
 
-        template.updateAttributes(newTemplate.getAttributes());
         template.setName(newTemplate.getName());
         template.setDescription(newTemplate.getDescription());
 

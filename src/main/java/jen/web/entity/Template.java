@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class Template extends BaseEntity {
     private String name;
     private String description;
-    @Setter(AccessLevel.NONE)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Attribute> attributes = new HashSet<>();
 
@@ -83,7 +82,7 @@ public class Template extends BaseEntity {
     }
 
     public Set<Attribute> getAttributes(){
-        return Collections.unmodifiableSet(attributes);
+        return attributes == null ? null : Collections.unmodifiableSet(attributes);
     }
 
     public Set<Long> getAttributeIds(){
