@@ -1,4 +1,6 @@
-export {default as TemplatesList} from './TemplatesList';
-export {default as TemplatePage} from './TemplatePage';
-export {default as AddTemplate} from './AddTemplate';
-export {default as EditTemplate} from './EditTemplate';
+export {default as List} from './TemplatesList';
+export {default as Data} from './TemplateData';
+export {default as Page} from './TemplatePage';
+export {default as Add} from './AddTemplate';
+export {default as Edit} from './EditTemplate';
+export {default as Attributes} from './Attributes';

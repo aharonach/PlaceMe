@@ -12,7 +12,7 @@ export default function GroupPage() {
         displayFields: ['name']
     });
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     const handleDelete = () => {
         axiosFetch({

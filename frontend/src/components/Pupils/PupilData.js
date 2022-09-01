@@ -12,5 +12,5 @@ export default function PupilData() {
         { label: "Created Time", value: pupil.createdTime },
     ];
 
-    return <RecordDetails details={details} numOfColumns={3} />
+    return <RecordDetails details={details} />
 }

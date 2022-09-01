@@ -7,7 +7,6 @@ import * as Template from "./components/Templates";
 import * as Placement from "./components/Placements";
 import ErrorPage from "./components/ErrorPage";
 import React from "react";
-import RecordDetails from "./components/RecordDetails";
 
 export default function AppRoutes() {
     return (
@@ -32,9 +31,12 @@ export default function AppRoutes() {
                 </Route>
             </Route>
             <Route path="/templates" element={<Page />}>
-                <Route index element={<Template.TemplatesList />} />
-                <Route path="add" element={<Template.AddTemplate />} />
-                <Route path=":templateId" element={<Template.TemplatePage />} />
+                <Route index element={<Template.List />} />
+                <Route path="add" element={<Template.Add />} />
+                <Route path=":templateId" element={<Template.Page />}>
+                    <Route index element={<Template.Data />} />
+                    <Route path="edit" element={<Template.Edit />} />
+                </Route>
             </Route>
             <Route path="/placements" element={<Page />}>
                 <Route index element={<Placement.PlacementsList />}></Route>

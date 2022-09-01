@@ -14,7 +14,7 @@ export default function RecordList(
        columns = {},
         basePath = '',
         linkField = '',
-       updated = false,
+       updated = false
     }) {
 
     const [list, error, loading, axiosFetch, getList] = useFetchList({

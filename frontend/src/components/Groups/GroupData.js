@@ -18,7 +18,7 @@ export default function GroupData() {
 
     return (
         <>
-            <RecordDetails details={details} numOfColumns={3} />
+            <RecordDetails details={details} />
             <PupilList />
         </>
     )

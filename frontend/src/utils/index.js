@@ -41,6 +41,10 @@ export function objectIsEmpty(obj) {
     return obj && Object.entries(obj).length === 0;
 }
 
+export function objectLinkList(linkTo, objects, displayField, delimiter = ', ') {
+    return objects ? objects.map( (obj, i) => <React.Fragment key={obj.id}>{i > 0 && delimiter}<Link to={`/${linkTo}/${obj.id}`}>{obj[displayField]}</Link></React.Fragment> ) : '';
+}
+
 export function idLinkList(linkTo, ids, delimiter = ', ') {
-    return ids ? ids.map( (id, i) => <React.Fragment key={id}>{i > 0 && ", "}<Link to={`/${linkTo}/${id}`}>{id}</Link></React.Fragment> ) : '';
+    return ids ? ids.map( (id, i) => <React.Fragment key={id}>{i > 0 && delimiter}<Link to={`/${linkTo}/${id}`}>{id}</Link></React.Fragment> ) : '';
 }

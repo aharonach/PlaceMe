@@ -2,7 +2,6 @@ import React from 'react';
 import {useForm} from "react-hook-form";
 import HtmlForm from "../Forms/HtmlForm";
 import useAxios from "../../hooks/useAxios";
-import Api from '../../api';
 import { Alert } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import FormFields from "./FormFields";
@@ -22,7 +21,6 @@ export default function AddTemplate() {
 
     const onSubmit = (data) => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'put',
             url: '/templates',
             data: {...data}
