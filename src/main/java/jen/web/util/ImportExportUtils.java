@@ -190,7 +190,7 @@ public class ImportExportUtils {
                 operationInfo.addErrors(errors);
 
                 // add attribute values
-                errors = null;
+                errors = addAttributeValuesForPupil();
                 operationInfo.addErrors(errors);
             }
 
@@ -198,6 +198,13 @@ public class ImportExportUtils {
         }
 
         return operationInfo;
+    }
+
+    private List<String> addAttributeValuesForPupil(){
+        // addOrUpdateAttributeValuesFromIdValueMap(pupil, group, )
+        //Map<Long, Double> attributeIdValueMap
+
+        return new ArrayList<>();
     }
 
     // get string list of given ids from import file in format 123456789;546845678 and add them as preferences
