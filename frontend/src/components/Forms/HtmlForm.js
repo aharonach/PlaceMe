@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Col, Form, Spinner} from "react-bootstrap";
+import {Button, Col, Form} from "react-bootstrap";
 import Select from "./Select";
 import Input from "./Input";
 import Checkbox from './Checkbox';
@@ -29,7 +29,7 @@ export default function HtmlForm({ fields, submitCallback, formProps, loading, s
             })}
             {children}
             <Button type="submit" variant="primary">
-                <Loading show={loading} size="sm" />
+                <Loading show={loading} size="sm" block={false} />
                 {submitLabel ? submitLabel : 'Submit'}
             </Button>
         </Form>

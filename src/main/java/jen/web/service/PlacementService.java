@@ -55,8 +55,7 @@ public class PlacementService implements EntityService<Placement> {
             placement.setGroup(null);
         }
 
-        Placement res = placementRepository.save(placement);
-        return res;
+        return placementRepository.save(placement);
     }
 
     @Override
@@ -102,8 +101,7 @@ public class PlacementService implements EntityService<Placement> {
             }
         }
 
-        Placement res = placementRepository.save(placement);
-        return res;
+        return placementRepository.save(placement);
     }
 
     @Override
@@ -278,10 +276,11 @@ public class PlacementService implements EntityService<Placement> {
         return placementResult;
     }
 
-    public void setSelectedResult(Placement placement, Long resultId) throws Placement.ResultNotExistsException, PlacementResult.NotCompletedException {
+    public PlacementResult setSelectedResult(Placement placement, Long resultId) throws Placement.ResultNotExistsException, PlacementResult.NotCompletedException {
         PlacementResult placementResult = placement.getResultById(resultId);
         placement.setSelectedResult(placementResult);
         placementRepository.save(placement);
+        return placementResult;
     }
 
     public PlaceEngineConfig getGlobalConfig() {

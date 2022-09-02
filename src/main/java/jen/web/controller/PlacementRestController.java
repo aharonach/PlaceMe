@@ -149,8 +149,9 @@ public class PlacementRestController extends BaseRestController<Placement> {
                                                @RequestBody Long resultId) {
         try {
             Placement placement = placementService.getOr404(placementId);
-            placementService.setSelectedResult(placement, resultId);
-            return ResponseEntity.ok().build();
+            PlacementResult result = placementService.setSelectedResult(placement, resultId);
+            EntityModel<PlacementResult> entityModel = placementResultModelAssembler.toModel(result);
+            return ResponseEntity.ok().body(entityModel);
         } catch (Placement.ResultNotExistsException e) {
             throw new NotFound(e.getMessage());
         } catch (PlacementResult.NotCompletedException e) {

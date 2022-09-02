@@ -16,12 +16,14 @@ export default function RecordList(
         linkField = '',
        updated = false,
         additionalButtons = null,
+        mapCallback = null,
         children
     }) {
 
     const [list, error, loading, axiosFetch, getList] = useFetchList({
         fetchUrl: fetchUrl,
         propertyName: propertyName,
+        mapCallback: mapCallback,
     });
 
     useEffect(() => {
@@ -34,10 +36,10 @@ export default function RecordList(
     return (
         <>
             {title}
-            {additionalButtons ? <ButtonGroup>
-                {additionalButtons}
+            <ButtonGroup>
                 {addButtonRender}
-            </ButtonGroup> : addButtonRender}
+                {additionalButtons}
+            </ButtonGroup>
             <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && list && <>
