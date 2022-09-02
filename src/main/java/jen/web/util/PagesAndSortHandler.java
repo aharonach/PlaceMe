@@ -63,7 +63,8 @@ public class PagesAndSortHandler {
         }
 
         if(fieldSortingMap.containsKey(sortKey)){
-            return Optional.of(fieldSortingMap.get(sortKey));
+            Sort sort = fieldSortingMap.get(sortKey);
+            return Optional.of(Sort.by(sort.get().map(Sort.Order::ignoreCase).toList()));
         } else {
             throw new FieldNotSortableException(fieldSortingMap.keySet());
         }
