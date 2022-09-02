@@ -5,11 +5,13 @@ import jen.web.service.GroupService;
 import jen.web.service.PlacementService;
 import jen.web.service.PupilService;
 import jen.web.service.TemplateService;
+import jen.web.util.IsraeliIdValidator;
 import jen.web.util.PagesAndSortHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,8 +34,14 @@ public class LoadDatabase {
     @NonNull PupilService pupilService;
     @NonNull GroupService groupService;
     @NonNull PlacementService placementService;
+
+    @Value("${validate.israeli.id}")
+    public Boolean ValidateId;
+
     @Bean
     CommandLineRunner initDatabase() {
+        IsraeliIdValidator.validateId = ValidateId;
+
         return args -> {
             // add
             createEngineConfig();
@@ -116,18 +124,18 @@ public class LoadDatabase {
                 new Pupil("307944710", "Shir", "Halfon", Pupil.Gender.FEMALE, LocalDate.of(1993, 4, 6))
         ));
 
-        // add more pupils
-        for(int i=0; i< 9; i++){
-            logger.info("Preloading " + pupilService.add(
-                    new Pupil(String.valueOf(i), "name" + i, "sdfsdfas", Pupil.Gender.FEMALE, LocalDate.of(1990, 1, 1))
-            ));
-        }
-
-        for(int i=20; i< 34; i++){
-            logger.info("Preloading " + pupilService.add(
-                    new Pupil(String.valueOf(i), "name" + i, "sdfsdfas", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
-            ));
-        }
+//        // add more pupils
+//        for(int i=0; i< 9; i++){
+//            logger.info("Preloading " + pupilService.add(
+//                    new Pupil(String.valueOf(i), "name" + i, "sdfsdfas", Pupil.Gender.FEMALE, LocalDate.of(1990, 1, 1))
+//            ));
+//        }
+//
+//        for(int i=20; i< 34; i++){
+//            logger.info("Preloading " + pupilService.add(
+//                    new Pupil(String.valueOf(i), "name" + i, "sdfsdfas", Pupil.Gender.MALE, LocalDate.of(1990, 1, 1))
+//            ));
+//        }
 
     }
 
