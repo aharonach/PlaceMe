@@ -1,24 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import useFetchList from "../hooks/useFetchList";
 import {LinkContainer} from "react-router-bootstrap";
-import {Alert, Button, ButtonGroup} from "react-bootstrap";
+import {Alert, Button, ButtonGroup, Stack} from "react-bootstrap";
 import TableList from "./TableList";
 import PageNumbers from "./PageNumbers";
-
-const buildUrl = (url, params) => {
-    const searchParams = new URLSearchParams();
-
-    Object.keys(params).forEach(key => {
-        if ( params[key] === undefined || params[key] === null ) {
-            return;
-        }
-
-        searchParams.append(key, params[key]);
-    });
-
-    const queryString = searchParams.toString();
-    return url + (queryString ? '?' + queryString : '');
-}
 
 export default function RecordList({
        fetchUrl = '',
@@ -44,14 +29,19 @@ export default function RecordList({
         propertyName: propertyName,
         mapCallback: mapCallback,
     });
-
+    const resetSort = () => {
+        setSort(null);
+        setDirection('ASC');
+    };
     useEffect(() => {
         getList();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [updated, page, sort, direction]);
 
     const addButtonRender = addButton && <LinkContainer to="add"><Button>{addButton}</Button></LinkContainer>;
+    const resetSortingButton = sort && <Button variant="link" onClick={resetSort}>Reset</Button>;
     const pageNumbers = showPagination ? <PageNumbers pagination={pagination} setPage={setPage} arrows totals /> : null;
+    const topBottomRow = <Stack gap={2} direction="horizontal" className="align-items-start">{pageNumbers}{resetSortingButton}</Stack>;
 
     return (
         <>
@@ -60,8 +50,8 @@ export default function RecordList({
                 {addButtonRender}
                 {additionalButtons}
             </ButtonGroup>
-            {pageNumbers}
             {error && <Alert variant="danger">{error}</Alert>}
+            {topBottomRow}
             <>
                 {children}
                 <TableList
@@ -73,7 +63,22 @@ export default function RecordList({
                     direction={ sorting ? {value: direction, set: setDirection} : null}
                 />
             </>
-            {pageNumbers}
+            {topBottomRow}
         </>
     )
+}
+
+const buildUrl = (url, params) => {
+    const searchParams = new URLSearchParams();
+
+    Object.keys(params).forEach(key => {
+        if ( params[key] === undefined || params[key] === null ) {
+            return;
+        }
+
+        searchParams.append(key, params[key]);
+    });
+
+    const queryString = searchParams.toString();
+    return url + (queryString ? '?' + queryString : '');
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link} from "react-router-dom";
 import {Alert, Button, Table} from "react-bootstrap";
+import {CaretDownFill, CaretUpFill} from "react-bootstrap-icons";
 
 function TableList({
     items,
@@ -37,17 +38,27 @@ function TableList({
                         let label = columns[key];
 
                         if ( sorting && sorting.fields.includes( key ) ) {
-                            label = <Button
-                                variant="link"
-                                className="p-0"
-                                active={sorting.value === key}
-                                onClick={() => sorting.set(key)}
-                            >{label}</Button>;
+                            const activeSort = sorting.value === key;
+                            const directionArrow = <span className="ms-1">
+                                {direction.value === 'ASC' ? <CaretUpFill /> : <CaretDownFill />}
+                            </span>;
+                            const changeSort = () => {
+                                sorting.set(key);
+                                direction.set(direction.value === 'ASC' ? 'DESC' : 'ASC');
+                            };
+
+                            label = <>
+                                <Button
+                                    variant="link"
+                                    className="p-0"
+                                    active={activeSort}
+                                    onClick={changeSort}
+                                >{label}</Button>
+                                {activeSort && directionArrow}
+                            </>;
                         }
 
-                        return (
-                            <th scope="col" key={key}>{label}</th>
-                        )
+                        return <th scope="col" key={key}>{label}</th>;
                     })}
                 </tr>
             </thead>
