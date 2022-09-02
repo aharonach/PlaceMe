@@ -48,7 +48,7 @@ function TableList({
                             return <td key={key}>{columns[key].callbacks.map( callback => callback(item))}</td>
                         }
 
-                        if ( ['undefined', 'object'].includes( typeof( item[key] ) ) ) {
+                        if ( ['undefined', 'object'].includes( typeof( item[key] ) ) && ! React.isValidElement( item[key] ) ) {
                             return <td key={key}></td>;
                         }
 

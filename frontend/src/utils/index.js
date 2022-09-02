@@ -48,3 +48,7 @@ export function objectLinkList(linkTo, objects, displayField, delimiter = ', ') 
 export function idLinkList(linkTo, ids, delimiter = ', ') {
     return ids ? ids.map( (id, i) => <React.Fragment key={id}>{i > 0 && delimiter}<Link to={`/${linkTo}/${id}`}>{id}</Link></React.Fragment> ) : '';
 }
+
+export function boolToString(bool){
+    return bool ? 'Yes' : 'No';
+}

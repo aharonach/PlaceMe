@@ -1,4 +1,4 @@
-import {useOutletContext, useParams} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import useFetchList from "../../../hooks/useFetchList";
 import {Alert, Card, Col, Row, Stack} from "react-bootstrap";
 import React from "react";
@@ -6,10 +6,9 @@ import Gender from "../../General/Gender";
 import Loading from "../../Loading";
 import {PeopleFill} from "react-bootstrap-icons";
 
-export default function Classes() {
+export default function Classes({ result }) {
     const { placementId } = useParams();
-    const { result } = useOutletContext();
-    const [classes, error, loading, axiosFetch] = useFetchList({
+    const [classes, error, loading] = useFetchList({
         fetchUrl: `/placements/${placementId}/results/${result.id}/classes`,
         propertyName: "placementClassroomList"
     });

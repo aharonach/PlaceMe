@@ -1,6 +1,8 @@
 import React from 'react';
 import RecordDetails from "../RecordDetails";
 import {useOutletContext} from "react-router-dom";
+import ResultData from "./Results/ResultData";
+import {Card} from "react-bootstrap";
 
 export default function PlacementData(){
     const { placement } = useOutletContext();
@@ -13,7 +15,14 @@ export default function PlacementData(){
     return (
         <>
             <RecordDetails details={details} />
-            <h3>Selected Result</h3>
+            {placement?.selectedResult ? (
+                <Card as="article">
+                    <Card.Body>
+                        <h3>Selected Result</h3>
+                        <ResultData externalResult={placement.selectedResult} />
+                    </Card.Body>
+                </Card>
+            ) : null}
         </>
     );
 }
