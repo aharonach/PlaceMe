@@ -21,8 +21,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static jen.web.util.ImportExportUtils.PREFER_NOT_TO_BE_WITH;
-import static jen.web.util.ImportExportUtils.PREFER_TO_BE_WITH;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +33,6 @@ public class PlacementService implements EntityService<Placement> {
     private final PlacementClassroomRepository placementClassroomRepository;
     private final PupilRepository pupilRepository;
     private final GroupService groupService;
-    private final PupilService pupilService;
     private final PlaceEngineConfigRepository engineConfigRepository;
     private final ImportExportUtils importExportUtils;
 
@@ -310,48 +307,11 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     public OperationInfo importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException {
-        OperationInfo operationInfo = new OperationInfo();
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(input);
-        List<Map<String, String>> contentData = csvContent.getData();
         Group group = placement.getGroup();
 
         // parse data and create pupils map
-        Map<String, Pupil> givenIdToPupilMap = new HashMap<>(contentData.size());
-        int lineNumber = 2; // first line + headers
-        for(Map<String, String> rowMap : contentData){
-            String currentGivenId = null;
-            try {
-                Pupil newPupil = importExportUtils.createPupilFromRowMap(rowMap, lineNumber);
-                Pupil receivedPupil = pupilService.updateOrCreatePupilByGivenId(newPupil);
-                currentGivenId = receivedPupil.getGivenId();
-                givenIdToPupilMap.put(currentGivenId, receivedPupil);
-            } catch (ImportExportUtils.ParseValueException | Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
-                operationInfo.addError(e.getMessage());
-            } finally {
-                lineNumber++;
-            }
-
-            // add preferences
-            if(rowMap.get(PREFER_TO_BE_WITH) != null && !rowMap.get(PREFER_TO_BE_WITH).isBlank()){
-                try{
-                    for(String selectedGivenId : rowMap.get(PREFER_TO_BE_WITH).split(";")){
-                        group.addOrUpdatePreference(givenIdToPupilMap.get(currentGivenId), givenIdToPupilMap.get(selectedGivenId), true);
-                    }
-                } catch (Preference.SamePupilException e) {
-                    operationInfo.addError(e.getMessage());
-                }
-            }
-
-            if(rowMap.get(PREFER_NOT_TO_BE_WITH) != null && !rowMap.get(PREFER_NOT_TO_BE_WITH).isBlank()){
-                try{
-                    for(String selectedGivenId : rowMap.get(PREFER_NOT_TO_BE_WITH).split(";")){
-                        group.addOrUpdatePreference(givenIdToPupilMap.get(currentGivenId), givenIdToPupilMap.get(selectedGivenId), false);
-                    }
-                } catch (Preference.SamePupilException e) {
-                    operationInfo.addError(e.getMessage());
-                }
-            }
-        }
+        OperationInfo operationInfo = importExportUtils.parseAndAddDataFromFile(csvContent, group);
 
         return operationInfo;
     }

@@ -73,14 +73,18 @@ public class Pupil extends BaseEntity {
 
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
 
+        validateGivenId(givenId);
+
+        this.givenId = givenId;
+    }
+
+    public static void validateGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         if(!givenId.matches(DIGITS_REGEX)){
             throw new GivenIdContainsProhibitedCharsException(givenId);
         }
         if(!IsraeliIdValidator.isValid(givenId)){
             throw new GivenIdIsNotValidException(givenId);
         }
-
-        this.givenId = givenId;
     }
 
     public void addAttributeValue(Group group, Long attributeId, Double value)

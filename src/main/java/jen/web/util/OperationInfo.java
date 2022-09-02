@@ -8,7 +8,10 @@ public class OperationInfo {
     private List<String> errors = new ArrayList<>();
 
     public void addError(String error){
-        errors.add(error);
+        this.errors.add(error);
+    }
+    public void addErrors(List<String> errors){
+        this.errors.addAll(errors);
     }
     public List<String> getErrors(){
         return Collections.unmodifiableList(errors);

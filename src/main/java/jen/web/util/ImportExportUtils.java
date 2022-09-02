@@ -2,6 +2,7 @@ package jen.web.util;
 
 import jen.web.entity.*;
 import jen.web.repository.PupilRepository;
+import jen.web.service.PupilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,8 @@ public class ImportExportUtils {
     );
 
     private final PupilRepository pupilRepository;
+    private final PupilService pupilService;
+
 
     static {
         pupilImportConstructor = getImportConstructorOfPupil();
@@ -159,6 +162,70 @@ public class ImportExportUtils {
                 .collect(Collectors.joining(";"));
     }
 
+    public OperationInfo parseAndAddDataFromFile(CsvUtils.CsvContent csvContent, Group group){
+        OperationInfo operationInfo = new OperationInfo();
+        List<Map<String, String>> contentData = csvContent.getData();
+        Map<String, Pupil> givenIdToPupilMap = new HashMap<>(contentData.size());
+        int lineNumber = 2; // first line + headers
+
+        for(Map<String, String> rowMap : contentData){
+            List<String> errors;
+            String currentGivenId = null;
+
+            try {
+                Pupil newPupil = createPupilFromRowMap(rowMap, lineNumber);
+                Pupil receivedPupil = pupilService.updateOrCreatePupilByGivenId(newPupil);
+                currentGivenId = receivedPupil.getGivenId();
+                givenIdToPupilMap.put(currentGivenId, receivedPupil);
+            } catch (ImportExportUtils.ParseValueException | Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
+                operationInfo.addError(e.getMessage());
+            }
+
+            if(currentGivenId != null){
+                // add preferences
+                errors = addPreferencesFromImportData(rowMap.get(PREFER_TO_BE_WITH), givenIdToPupilMap, group, currentGivenId, true, lineNumber);
+                operationInfo.addErrors(errors);
+
+                errors = addPreferencesFromImportData(rowMap.get(PREFER_NOT_TO_BE_WITH), givenIdToPupilMap, group, currentGivenId, false, lineNumber);
+                operationInfo.addErrors(errors);
+
+                // add attribute values
+                errors = null;
+                operationInfo.addErrors(errors);
+            }
+
+            lineNumber ++; // number for parse messages error message
+        }
+
+        return operationInfo;
+    }
+
+    // get string list of given ids from import file in format 123456789;546845678 and add them as preferences
+    private List<String> addPreferencesFromImportData(String listString, Map<String, Pupil> givenIdToPupilMap, Group group,
+                                                      String currentGivenId, boolean WantToBeTogether, int lineNumber){
+        List<String> errors = new ArrayList<>();
+        if(listString != null && !listString.isBlank()){
+            for(String selectedGivenId : listString.split(";")){
+                try{
+                    Pupil.validateGivenId(selectedGivenId);
+                    Pupil selector = givenIdToPupilMap.get(currentGivenId);
+                    Pupil selected = givenIdToPupilMap.get(selectedGivenId);
+                    if(selector == null ){
+                        throw new CantFindPupilException(currentGivenId);
+                    }
+                    if( selected == null){
+                        throw new CantFindPupilException(selectedGivenId);
+                    }
+                    group.addOrUpdatePreference(selector, selected, WantToBeTogether);
+                } catch (Preference.SamePupilException | Pupil.GivenIdContainsProhibitedCharsException |
+                         Pupil.GivenIdIsNotValidException | CantFindPupilException e) {
+                    errors.add("Line " + lineNumber + ". Preferences error: " + e.getMessage());
+                }
+            }
+        }
+        return errors;
+    }
+
     public static class CantFindImportConstructorException extends RuntimeException {
         public CantFindImportConstructorException(){
             super("Cant create pupil from data. no import constructor.");
@@ -186,6 +253,12 @@ public class ImportExportUtils {
     public static class ParseValueException extends Exception {
         public ParseValueException(String column, String data, int lineNumber){
             super("Line " + lineNumber + ". Cant parse value '" + data + "' for column '" + column + "'.");
+        }
+    }
+
+    public static class CantFindPupilException extends Exception {
+        public CantFindPupilException(String givenId){
+            super("Cant find pupil with given id: " + givenId + "'.");
         }
     }
 }

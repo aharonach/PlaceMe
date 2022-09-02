@@ -35,7 +35,7 @@ public class PupilService implements EntityService<Pupil>{
             throw new EntityAlreadyExists("Pupil with Id '" + id + "' already exists.");
         }
 
-        validateGivenIdNotExists(pupil.getGivenId());
+        validateThatGivenIdNotExists(pupil.getGivenId());
         if(!pupil.getGroups().isEmpty()){
             setPupilGroups(pupil, pupil.getGroups());
         }
@@ -78,7 +78,7 @@ public class PupilService implements EntityService<Pupil>{
 
         // edit general information
         if (newPupil.getGivenId() != null && !pupil.getGivenId().equals(newPupil.getGivenId())) {
-            validateGivenIdNotExists(newPupil.getGivenId());
+            validateThatGivenIdNotExists(newPupil.getGivenId());
             pupil.setGivenId(newPupil.getGivenId());
         }
         pupil.setFirstName(newPupil.getFirstName());
@@ -161,7 +161,7 @@ public class PupilService implements EntityService<Pupil>{
         return givenId != null && pupilRepository.existsByGivenId(givenId);
     }
 
-    private void validateGivenIdNotExists(String givenId){
+    private void validateThatGivenIdNotExists(String givenId){
         if(givenId == null){
             throw new BadRequest("given ID cannot be null");
         }
