@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import useAxios from "./useAxios";
-import Api from "../api";
 import {extractListFromAPI} from "../utils";
 
 const useFetchList = ({ fetchUrl, propertyName, thenCallback, mapCallback }) => {
@@ -18,7 +17,16 @@ const useFetchList = ({ fetchUrl, propertyName, thenCallback, mapCallback }) => 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return [extractListFromAPI(response, propertyName, mapCallback), error, loading, axiosFetch, getList];
+    const pagination = response?.page;
+
+    return [
+        extractListFromAPI(response, propertyName, mapCallback),
+        error,
+        loading,
+        axiosFetch,
+        getList,
+        pagination,
+    ];
 };
 
 export default useFetchList;

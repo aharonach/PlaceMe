@@ -10,5 +10,6 @@ export default function PupilsList() {
         addButton="Add Pupil"
         columns={columns}
         linkField="givenId"
+        sorting={['givenId', 'firstName', 'lastName', 'birthDate']}
     />
 }

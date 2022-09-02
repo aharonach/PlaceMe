@@ -1,19 +1,24 @@
 import React from 'react';
 import {Link} from "react-router-dom";
-import {Alert, Table} from "react-bootstrap";
+import {Alert, Button, Table} from "react-bootstrap";
 
 function TableList({
-           items,
-           columns,
-           linkTo = {field: 'id', basePath: ''},
-           numbering= {enabled: true, startFrom: 1},
-           bsProps = { bordered: true, hover: true }
-       }) {
+    items,
+    columns,
+    linkTo = {field: 'id', basePath: ''},
+    numbering= {enabled: true, startFrom: 1},
+    bsProps = {bordered: true, hover: true},
+    nothingToShow = false,
+    sorting,
+    direction
+}) {
 
-    if ( ! items || items.length <= 0 ) {
-        return (
-            <Alert variant="info">Nothing to show.</Alert>
-        )
+    if ( nothingToShow ) {
+        if ( ! items || items.length <= 0 ) {
+            return (
+                <Alert variant="info">Nothing to show.</Alert>
+            )
+        }
     }
 
     let currentNumber = numbering.startFrom ? Number(numbering.startFrom) : 1;
@@ -29,7 +34,20 @@ function TableList({
                             return <th scope="col" key={key}>{columns[key].label}</th>;
                         }
 
-                        return <th scope="col" key={key}>{columns[key]}</th>
+                        let label = columns[key];
+
+                        if ( sorting && sorting.fields.includes( key ) ) {
+                            label = <Button
+                                variant="link"
+                                className="p-0"
+                                active={sorting.value === key}
+                                onClick={() => sorting.set(key)}
+                            >{label}</Button>;
+                        }
+
+                        return (
+                            <th scope="col" key={key}>{label}</th>
+                        )
                     })}
                 </tr>
             </thead>
