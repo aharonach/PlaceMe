@@ -91,7 +91,8 @@ public class Pupil extends BaseEntity {
             throws Group.PupilNotBelongException, Template.AttributeNotBelongException, AttributeValue.ValueOutOfRangeException {
 
         verifyPupilInGroup(group);
-        Attribute attribute = group.getTemplate().getAttribute(attributeId);
+        group.getTemplate().verifyAttributeBelongsToTemplate(attributeId);
+        Attribute attribute = group.getTemplate().getAttribute(attributeId).get();
 
         // Find if the attribute is already has a value for pupil
         AttributeValue attributeValue = getAttributeValueOfUserByAttribute(attribute);

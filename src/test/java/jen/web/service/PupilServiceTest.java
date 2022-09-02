@@ -199,7 +199,7 @@ class PupilServiceTest {
     }
 
     @Test
-    void shouldAddOrUpdateAttributeValues() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Group.PupilNotBelongException, AttributeValue.ValueOutOfRangeException, Template.AttributeNotBelongException {
+    void shouldAddOrUpdateAttributeValues() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Group.PupilNotBelongException, AttributeValue.ValueOutOfRangeException, Template.AttributeNotBelongException, Template.AttributeAlreadyExistException {
         Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", null));

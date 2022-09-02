@@ -59,23 +59,27 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Template newRecord) {
-        EntityModel<Template> entity = templateAssembler.toModel(templateService.add(newRecord));
 
-        return ResponseEntity
-                .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entity);
+        try{
+            EntityModel<Template> entity = templateAssembler.toModel(templateService.add(newRecord));
+            return ResponseEntity.created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entity);
+        } catch (Template.AttributeAlreadyExistException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
     @PostMapping("/{templateId}")
     public ResponseEntity<?> update(@PathVariable Long templateId,
                                     @RequestBody Template updatedRecord) {
-        Template updatedTemplate = templateService.updateById(templateId, updatedRecord);
-        EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
+        try{
+            Template updatedTemplate = templateService.updateById(templateId, updatedRecord);
+            EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
+            return ResponseEntity.ok().body(entity);
 
-        return ResponseEntity
-                .ok()
-                .body(entity);
+        } catch (Template.AttributeAlreadyExistException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
@@ -113,7 +117,7 @@ public class TemplateRestController extends BaseRestController<Template> {
             EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
             return ResponseEntity.ok().body(entity);
 
-        } catch (Template.AttributeNotBelongException e) {
+        } catch (Template.AttributeNotBelongException | Template.AttributeAlreadyExistException e) {
             throw new BadRequest(e.getMessage());
         }
     }
@@ -123,10 +127,14 @@ public class TemplateRestController extends BaseRestController<Template> {
                                                      @RequestBody Attribute newAttribute) {
 
         Template template = templateService.getOr404(templateId);
-        EntityModel<Template> entity = templateAssembler.toModel(templateService.addAttributeForTemplate(template, newAttribute));
+        try{
+            Template updatedTemplate = templateService.addAttributeForTemplate(template, newAttribute);
+            EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
 
-        return ResponseEntity
-                .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entity);
+            return ResponseEntity.created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entity);
+
+        } catch (Template.AttributeAlreadyExistException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 }

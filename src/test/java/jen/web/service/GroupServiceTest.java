@@ -64,7 +64,7 @@ class GroupServiceTest {
 
     @Test
     @Transactional
-    void shouldCreateAndRemoveGroupWithTemplateWhenAddingGroupAndDeletingIt() {
+    void shouldCreateAndRemoveGroupWithTemplateWhenAddingGroupAndDeletingIt() throws Template.AttributeAlreadyExistException {
         Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
         receivedTemplate = templateService.getOr404(receivedTemplate.getId());
@@ -241,7 +241,7 @@ class GroupServiceTest {
 
     @Test
     @Transactional
-    void shouldSetNewTemplateWhenUpdatingGroup() {
+    void shouldSetNewTemplateWhenUpdatingGroup() throws Template.AttributeAlreadyExistException {
         Template receivedTemplate1 = templateService.add(repositoryTestUtils.createTemplate1());
         Template receivedTemplate2 = templateService.add(repositoryTestUtils.createTemplate2());
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate1));

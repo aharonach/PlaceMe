@@ -28,10 +28,12 @@ public class Template extends BaseEntity {
         this.description = description;
     }
 
-    public Template(String name, String description, Set<Attribute> attributes){
+    public Template(String name, String description, Set<Attribute> attributes) throws AttributeAlreadyExistException {
         this.name = name;
         this.description = description;
-        this.attributes.addAll(attributes);
+        for(Attribute attribute : attributes){
+            addAttribute(attribute);
+        }
     }
 
     public Integer getNumberOfAttributes(){
@@ -59,7 +61,10 @@ public class Template extends BaseEntity {
         return this.groups.stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
 
-    public void addAttribute(Attribute attribute){
+    public void addAttribute(Attribute attribute) throws AttributeAlreadyExistException {
+        if(getAttribute(attribute.getName()).isPresent()){
+            throw new AttributeAlreadyExistException(attribute.getName());
+        }
         this.attributes.add(attribute);
     }
 
@@ -70,10 +75,11 @@ public class Template extends BaseEntity {
                 .ifPresent(attribute -> attributes.remove(attribute));
     }
 
-    public void updateAttribute(Long attributeId, Attribute newAttribute){
-        this.attributes.stream()
-                .filter(attribute -> attribute.getId().equals(attributeId))
-                .findFirst()
+    public void updateAttribute(Long attributeId, Attribute newAttribute) throws AttributeAlreadyExistException {
+        if(getAttribute(newAttribute.getName()).isPresent()){
+            throw new AttributeAlreadyExistException(newAttribute.getName());
+        }
+        getAttribute(attributeId)
                 .ifPresent(attribute -> {
                     attribute.setName(newAttribute.getName());
                     attribute.setDescription(newAttribute.getDescription());
@@ -89,29 +95,28 @@ public class Template extends BaseEntity {
         return attributes.stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
 
-    public Attribute getAttribute(Long attributeId) throws AttributeNotBelongException {
-        Optional<Attribute> attribute = attributes.stream().filter(attr -> attr.getId().equals(attributeId)).findFirst();
+    public Optional<Attribute> getAttribute(Long attributeId) {
+        return attributes.stream().filter(attr -> attr.getId().equals(attributeId)).findFirst();
+    }
 
-        if(attribute.isEmpty()){
+    public Optional<Attribute> getAttribute(String name) {
+        return attributes.stream().filter(attr -> attr.getName().equals(name)).findFirst();
+    }
+
+    public void verifyAttributeBelongsToTemplate(Long attributeId) throws AttributeNotBelongException {
+        if(getAttribute(attributeId).isEmpty()){
             throw new AttributeNotBelongException(attributeId);
         }
-
-        return attribute.get();
     }
 
-    public boolean verifyAttributeBelongsToTemplate(Long attributeId) throws AttributeNotBelongException {
-        getAttribute(attributeId);
-        return true;
-    }
-
-    public void updateAttributes(Set<Attribute> newAttributes){
-        newAttributes.forEach(attribute -> {
+    public void updateAttributes(Set<Attribute> newAttributes) throws AttributeAlreadyExistException {
+        for(Attribute attribute : newAttributes){
             if(attribute.getId() == null){
                 addAttribute(attribute);
             } else {
                 updateAttribute(attribute.getId(), attribute);
             }
-        });
+        }
     }
 
     @Override
@@ -130,6 +135,16 @@ public class Template extends BaseEntity {
     public static class AttributeNotBelongException extends Exception {
         public AttributeNotBelongException(Long attributeId){
             super("Template does not contain attribute with id: " + attributeId);
+        }
+
+        public AttributeNotBelongException(String name){
+            super("Template does not contain attribute with name: " + name);
+        }
+    }
+
+    public static class AttributeAlreadyExistException extends Exception {
+        public AttributeAlreadyExistException(String name){
+            super("Attribute with the name '" + name + "' already exist. template can't contain attributes with the same name");
         }
     }
 }

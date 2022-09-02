@@ -55,13 +55,13 @@ public class RepositoryTestUtils {
         return pagesAndSortHandler.getFirstPageRequest();
     }
 
-    public Template createTemplate1(){
+    public Template createTemplate1() throws Template.AttributeAlreadyExistException {
         return new Template("template 1", "template 1 desc", Set.of(
                 new RangeAttribute("attr 1", "attr 1 for template 1", 10),
                 new RangeAttribute("attr 2", "attr 2 for template 1", 20)
         ));
     }
-    public Template createTemplate2(){
+    public Template createTemplate2() throws Template.AttributeAlreadyExistException {
         return new Template("template 2", "template 2 desc", Set.of(
                 new RangeAttribute("attr 1", "attr 1 for template 2", 10),
                 new RangeAttribute("attr 2", "attr 2 for template 2", 20)

@@ -58,17 +58,36 @@ public class ImportExportUtils {
 
         columns.addAll(pupilColumns);
         columns.addAll(preferencesColumns);
-        columns.addAll(getAttributesColumns(placement));
+        columns.addAll(getAttributesNames(placement));
 
         return columns;
     }
 
-    private List<String> getAttributesColumns(Placement placement){
-        List<String> attributesColumns = new ArrayList<>();
-        for(Attribute attribute : placement.getGroup().getTemplate().getAttributes()){
-            attributesColumns.add(attribute.getName().replace(",", ""));
+    private List<String> getAttributesNames(Placement placement){
+        return getAttributesNames(getAttributesForPlacement(placement));
+    }
+
+    private List<Attribute> getAttributesForPlacement(Placement placement){
+        return placement.getGroup().getTemplate().getAttributes().stream()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getAttributesNames(List<Attribute> attributes){
+        return attributes.stream()
+                .map(Attribute::getName)
+                .map(s -> s.replace(",", ""))
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Attribute> getNameToAttributeMap(List<Attribute> attributes){
+        Map<String, Attribute> attributeMap = new HashMap<>(attributes.size());
+
+        for(Attribute attribute : attributes){
+            attributeMap.put(attribute.getName(), attribute);
         }
-        return attributesColumns;
+
+        return attributeMap;
     }
 
     public Pupil createPupilFromRowMap(Map<String, String> rowMap, int lineNumber) throws ParseValueException {
@@ -76,8 +95,10 @@ public class ImportExportUtils {
         try {
             List<Object> fields = getFieldList(pupilImportConstructor, rowMap, lineNumber);
             return  (Pupil) pupilImportConstructor.newInstance(fields.toArray());
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new DataDontFeetToConstructorException(e.getMessage());
+        } catch (InvocationTargetException e){
+            throw new ParseValueException(e.getCause().getMessage(), lineNumber);
         }
     }
 
@@ -141,7 +162,6 @@ public class ImportExportUtils {
                 pupilDataMap.put(attributeValue.getAttribute().getName(), String.valueOf(attributeValue.getValue()));
             }
 
-
             List<String> values = new ArrayList<>();
             for(String column : getColumnNames(placement)){
                 values.add(pupilDataMap.get(column));
@@ -162,9 +182,12 @@ public class ImportExportUtils {
                 .collect(Collectors.joining(";"));
     }
 
-    public OperationInfo parseAndAddDataFromFile(CsvUtils.CsvContent csvContent, Group group){
+    public OperationInfo parseAndAddDataFromFile(CsvUtils.CsvContent csvContent, Placement placement){
         OperationInfo operationInfo = new OperationInfo();
         List<Map<String, String>> contentData = csvContent.getData();
+        Group group = placement.getGroup();
+        Map<String, Attribute> attributeMap = getNameToAttributeMap(getAttributesForPlacement(placement));
+
         Map<String, Pupil> givenIdToPupilMap = new HashMap<>(contentData.size());
         int lineNumber = 2; // first line + headers
 
@@ -174,6 +197,7 @@ public class ImportExportUtils {
 
             try {
                 Pupil newPupil = createPupilFromRowMap(rowMap, lineNumber);
+                newPupil.addToGroup(group);
                 Pupil receivedPupil = pupilService.updateOrCreatePupilByGivenId(newPupil);
                 currentGivenId = receivedPupil.getGivenId();
                 givenIdToPupilMap.put(currentGivenId, receivedPupil);
@@ -181,16 +205,18 @@ public class ImportExportUtils {
                 operationInfo.addError(e.getMessage());
             }
 
-            if(currentGivenId != null){
+            Pupil currentPupil = givenIdToPupilMap.get(currentGivenId);
+
+            if(currentGivenId != null && currentPupil != null){
                 // add preferences
-                errors = addPreferencesFromImportData(rowMap.get(PREFER_TO_BE_WITH), givenIdToPupilMap, group, currentGivenId, true, lineNumber);
+                errors = addPreferencesFromImportData(rowMap.get(PREFER_TO_BE_WITH), givenIdToPupilMap, group, currentPupil, true, lineNumber);
                 operationInfo.addErrors(errors);
 
-                errors = addPreferencesFromImportData(rowMap.get(PREFER_NOT_TO_BE_WITH), givenIdToPupilMap, group, currentGivenId, false, lineNumber);
+                errors = addPreferencesFromImportData(rowMap.get(PREFER_NOT_TO_BE_WITH), givenIdToPupilMap, group, currentPupil, false, lineNumber);
                 operationInfo.addErrors(errors);
 
                 // add attribute values
-                errors = addAttributeValuesForPupil();
+                errors = addAttributeValuesForPupil(currentPupil, group, attributeMap, lineNumber, rowMap);
                 operationInfo.addErrors(errors);
             }
 
@@ -200,26 +226,34 @@ public class ImportExportUtils {
         return operationInfo;
     }
 
-    private List<String> addAttributeValuesForPupil(){
-        // addOrUpdateAttributeValuesFromIdValueMap(pupil, group, )
-        //Map<Long, Double> attributeIdValueMap
+    private List<String> addAttributeValuesForPupil(Pupil pupil, Group group, Map<String, Attribute> attributeMap,
+                                                    int lineNumber, Map<String, String> rowMap){
+        List<String> errors = new ArrayList<>();
 
-        return new ArrayList<>();
+        Map<Long, Double> attributeValues = new HashMap<>(attributeMap.size());
+        for(String name : attributeMap.keySet()){
+            attributeValues.put(attributeMap.get(name).getId(), Double.valueOf(rowMap.get(name)));
+        }
+
+        try {
+            pupilService.addOrUpdateAttributeValuesFromIdValueMap(pupil, group, attributeValues);
+        } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException |
+                 AttributeValue.ValueOutOfRangeException e) {
+            errors.add("Line " + lineNumber + ". Attribute values error: " + e.getMessage());
+        }
+
+        return errors;
     }
 
     // get string list of given ids from import file in format 123456789;546845678 and add them as preferences
     private List<String> addPreferencesFromImportData(String listString, Map<String, Pupil> givenIdToPupilMap, Group group,
-                                                      String currentGivenId, boolean WantToBeTogether, int lineNumber){
+                                                      Pupil selector, boolean WantToBeTogether, int lineNumber){
         List<String> errors = new ArrayList<>();
         if(listString != null && !listString.isBlank()){
             for(String selectedGivenId : listString.split(";")){
                 try{
                     Pupil.validateGivenId(selectedGivenId);
-                    Pupil selector = givenIdToPupilMap.get(currentGivenId);
                     Pupil selected = givenIdToPupilMap.get(selectedGivenId);
-                    if(selector == null ){
-                        throw new CantFindPupilException(currentGivenId);
-                    }
                     if( selected == null){
                         throw new CantFindPupilException(selectedGivenId);
                     }
@@ -260,6 +294,10 @@ public class ImportExportUtils {
     public static class ParseValueException extends Exception {
         public ParseValueException(String column, String data, int lineNumber){
             super("Line " + lineNumber + ". Cant parse value '" + data + "' for column '" + column + "'.");
+        }
+
+        public ParseValueException(String message, int lineNumber){
+            super("Line " + lineNumber + ". " + message);
         }
     }
 

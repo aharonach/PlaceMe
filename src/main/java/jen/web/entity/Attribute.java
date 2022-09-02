@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.Locale;
 import java.util.Objects;
 
 @Entity
@@ -18,7 +19,7 @@ import java.util.Objects;
 @JsonSubTypes({@JsonSubTypes.Type(value = RangeAttribute.class, name = "range")})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "attributes")
-public abstract class Attribute extends BaseEntity {
+public abstract class Attribute extends BaseEntity implements Comparable<Attribute> {
     protected String name;
     protected String description;
     protected int priority;
@@ -44,5 +45,10 @@ public abstract class Attribute extends BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @Override
+    public int compareTo(Attribute o){
+        return (this.getName().toLowerCase()).compareTo(o.getName().toLowerCase());
     }
 }
