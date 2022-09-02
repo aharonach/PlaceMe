@@ -58,17 +58,36 @@ public class ImportExportUtils {
 
         columns.addAll(pupilColumns);
         columns.addAll(preferencesColumns);
-        columns.addAll(getAttributesColumns(placement));
+        columns.addAll(getAttributesNames(placement));
 
         return columns;
     }
 
-    private List<String> getAttributesColumns(Placement placement){
-        List<String> attributesColumns = new ArrayList<>();
-        for(Attribute attribute : placement.getGroup().getTemplate().getAttributes()){
-            attributesColumns.add(attribute.getName().replace(",", ""));
+    private List<String> getAttributesNames(Placement placement){
+        return getAttributesNames(getAttributesForPlacement(placement));
+    }
+
+    private List<Attribute> getAttributesForPlacement(Placement placement){
+        return placement.getGroup().getTemplate().getAttributes().stream()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getAttributesNames(List<Attribute> attributes){
+        return attributes.stream()
+                .map(Attribute::getName)
+                .map(s -> s.replace(",", ""))
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Attribute> getNameToAttributeMap(List<Attribute> attributes){
+        Map<String, Attribute> attributeMap = new HashMap<>(attributes.size());
+
+        for(Attribute attribute : attributes){
+            attributeMap.put(attribute.getName(), attribute);
         }
-        return attributesColumns;
+
+        return attributeMap;
     }
 
     public Pupil createPupilFromRowMap(Map<String, String> rowMap, int lineNumber) throws ParseValueException {
@@ -163,9 +182,12 @@ public class ImportExportUtils {
                 .collect(Collectors.joining(";"));
     }
 
-    public OperationInfo parseAndAddDataFromFile(CsvUtils.CsvContent csvContent, Group group){
+    public OperationInfo parseAndAddDataFromFile(CsvUtils.CsvContent csvContent, Placement placement){
         OperationInfo operationInfo = new OperationInfo();
         List<Map<String, String>> contentData = csvContent.getData();
+        Group group = placement.getGroup();
+        Map<String, Attribute> attributeMap = getNameToAttributeMap(getAttributesForPlacement(placement));
+
         Map<String, Pupil> givenIdToPupilMap = new HashMap<>(contentData.size());
         int lineNumber = 2; // first line + headers
 
@@ -175,6 +197,7 @@ public class ImportExportUtils {
 
             try {
                 Pupil newPupil = createPupilFromRowMap(rowMap, lineNumber);
+                newPupil.addToGroup(group);
                 Pupil receivedPupil = pupilService.updateOrCreatePupilByGivenId(newPupil);
                 currentGivenId = receivedPupil.getGivenId();
                 givenIdToPupilMap.put(currentGivenId, receivedPupil);
@@ -193,7 +216,7 @@ public class ImportExportUtils {
                 operationInfo.addErrors(errors);
 
                 // add attribute values
-                errors = addAttributeValuesForPupil(currentPupil, group, lineNumber);
+                errors = addAttributeValuesForPupil(currentPupil, group, attributeMap, lineNumber, rowMap);
                 operationInfo.addErrors(errors);
             }
 
@@ -203,20 +226,21 @@ public class ImportExportUtils {
         return operationInfo;
     }
 
-    private List<String> addAttributeValuesForPupil(Pupil pupil, Group group, int lineNumber){
+    private List<String> addAttributeValuesForPupil(Pupil pupil, Group group, Map<String, Attribute> attributeMap,
+                                                    int lineNumber, Map<String, String> rowMap){
         List<String> errors = new ArrayList<>();
 
-        // for
-        // addOrUpdateAttributeValuesFromIdValueMap(pupil, group, )
-        //Map<Long, Double> attributeIdValueMap
-//        try{
-//
-//
-//
-//        } catch (CantFindPupilException e) {
-//            errors.add("Line " + lineNumber + ". Preferences error: " + e.getMessage());
-//        }
-        // end for
+        Map<Long, Double> attributeValues = new HashMap<>(attributeMap.size());
+        for(String name : attributeMap.keySet()){
+            attributeValues.put(attributeMap.get(name).getId(), Double.valueOf(rowMap.get(name)));
+        }
+
+        try {
+            pupilService.addOrUpdateAttributeValuesFromIdValueMap(pupil, group, attributeValues);
+        } catch (Group.PupilNotBelongException | Template.AttributeNotBelongException |
+                 AttributeValue.ValueOutOfRangeException e) {
+            errors.add("Line " + lineNumber + ". Attribute values error: " + e.getMessage());
+        }
 
         return errors;
     }

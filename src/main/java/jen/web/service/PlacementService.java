@@ -307,10 +307,9 @@ public class PlacementService implements EntityService<Placement> {
 
     public OperationInfo importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException {
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(input);
-        Group group = placement.getGroup();
 
         // parse data and create pupils map
-        OperationInfo operationInfo = importExportUtils.parseAndAddDataFromFile(csvContent, group);
+        OperationInfo operationInfo = importExportUtils.parseAndAddDataFromFile(csvContent, placement);
 
         return operationInfo;
     }
