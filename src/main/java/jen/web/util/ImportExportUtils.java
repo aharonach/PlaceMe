@@ -76,8 +76,10 @@ public class ImportExportUtils {
         try {
             List<Object> fields = getFieldList(pupilImportConstructor, rowMap, lineNumber);
             return  (Pupil) pupilImportConstructor.newInstance(fields.toArray());
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new DataDontFeetToConstructorException(e.getMessage());
+        } catch (InvocationTargetException e){
+            throw new ParseValueException(e.getCause().getMessage(), lineNumber);
         }
     }
 
@@ -141,7 +143,6 @@ public class ImportExportUtils {
                 pupilDataMap.put(attributeValue.getAttribute().getName(), String.valueOf(attributeValue.getValue()));
             }
 
-
             List<String> values = new ArrayList<>();
             for(String column : getColumnNames(placement)){
                 values.add(pupilDataMap.get(column));
@@ -181,16 +182,18 @@ public class ImportExportUtils {
                 operationInfo.addError(e.getMessage());
             }
 
-            if(currentGivenId != null){
+            Pupil currentPupil = givenIdToPupilMap.get(currentGivenId);
+
+            if(currentGivenId != null && currentPupil != null){
                 // add preferences
-                errors = addPreferencesFromImportData(rowMap.get(PREFER_TO_BE_WITH), givenIdToPupilMap, group, currentGivenId, true, lineNumber);
+                errors = addPreferencesFromImportData(rowMap.get(PREFER_TO_BE_WITH), givenIdToPupilMap, group, currentPupil, true, lineNumber);
                 operationInfo.addErrors(errors);
 
-                errors = addPreferencesFromImportData(rowMap.get(PREFER_NOT_TO_BE_WITH), givenIdToPupilMap, group, currentGivenId, false, lineNumber);
+                errors = addPreferencesFromImportData(rowMap.get(PREFER_NOT_TO_BE_WITH), givenIdToPupilMap, group, currentPupil, false, lineNumber);
                 operationInfo.addErrors(errors);
 
                 // add attribute values
-                errors = addAttributeValuesForPupil();
+                errors = addAttributeValuesForPupil(currentPupil, group, lineNumber);
                 operationInfo.addErrors(errors);
             }
 
@@ -200,26 +203,33 @@ public class ImportExportUtils {
         return operationInfo;
     }
 
-    private List<String> addAttributeValuesForPupil(){
+    private List<String> addAttributeValuesForPupil(Pupil pupil, Group group, int lineNumber){
+        List<String> errors = new ArrayList<>();
+
+        // for
         // addOrUpdateAttributeValuesFromIdValueMap(pupil, group, )
         //Map<Long, Double> attributeIdValueMap
+//        try{
+//
+//
+//
+//        } catch (CantFindPupilException e) {
+//            errors.add("Line " + lineNumber + ". Preferences error: " + e.getMessage());
+//        }
+        // end for
 
-        return new ArrayList<>();
+        return errors;
     }
 
     // get string list of given ids from import file in format 123456789;546845678 and add them as preferences
     private List<String> addPreferencesFromImportData(String listString, Map<String, Pupil> givenIdToPupilMap, Group group,
-                                                      String currentGivenId, boolean WantToBeTogether, int lineNumber){
+                                                      Pupil selector, boolean WantToBeTogether, int lineNumber){
         List<String> errors = new ArrayList<>();
         if(listString != null && !listString.isBlank()){
             for(String selectedGivenId : listString.split(";")){
                 try{
                     Pupil.validateGivenId(selectedGivenId);
-                    Pupil selector = givenIdToPupilMap.get(currentGivenId);
                     Pupil selected = givenIdToPupilMap.get(selectedGivenId);
-                    if(selector == null ){
-                        throw new CantFindPupilException(currentGivenId);
-                    }
                     if( selected == null){
                         throw new CantFindPupilException(selectedGivenId);
                     }
@@ -260,6 +270,10 @@ public class ImportExportUtils {
     public static class ParseValueException extends Exception {
         public ParseValueException(String column, String data, int lineNumber){
             super("Line " + lineNumber + ". Cant parse value '" + data + "' for column '" + column + "'.");
+        }
+
+        public ParseValueException(String message, int lineNumber){
+            super("Line " + lineNumber + ". " + message);
         }
     }
 

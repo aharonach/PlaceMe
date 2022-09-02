@@ -26,7 +26,7 @@ public class PupilInClassesEntities {
 
     final static int NUM_OF_CLASSES = 3;
 
-    public void start() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+    public void start() throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Template.AttributeAlreadyExistException {
         TEMPLATE.addAttribute(new RangeAttribute("attr 1", "attr 1 for template", 10));
         TEMPLATE.addAttribute(new RangeAttribute("attr 2", "attr 2 for template", 20));
         TEMPLATE.addAttribute(new RangeAttribute("attr 3", "attr 3 for template", 30));

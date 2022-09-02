@@ -89,7 +89,7 @@ public class LoadDatabase {
         placementService.updateGlobalConfig(placeEngineConfig);
     }
 
-    private void createTemplates(){
+    private void createTemplates() throws Template.AttributeAlreadyExistException {
         logger.info("Preloading " + templateService.add(new Template("template 1", "template 1 desc")));
 
         logger.info("Preloading " + templateService.add(new Template("template 2", "template 2 desc", Set.of(

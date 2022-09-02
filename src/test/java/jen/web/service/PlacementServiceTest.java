@@ -77,7 +77,7 @@ class PlacementServiceTest {
     }
 
     @Test
-    void shouldGenerateResultSuccessfullyWhenAllTheRequirementsAreExist() throws PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, InterruptedException, ExecutionException, Placement.ResultNotExistsException {
+    void shouldGenerateResultSuccessfullyWhenAllTheRequirementsAreExist() throws PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, InterruptedException, ExecutionException, Placement.ResultNotExistsException, Template.AttributeAlreadyExistException {
         // replace Executor with Mock
         ExecutorMock executorMock = new ExecutorMock();
         placementService.setExecutor(executorMock);
@@ -132,7 +132,7 @@ class PlacementServiceTest {
     }
 
     @Test
-    void shouldGenerateFewResultsSuccessfullyAndDeleteThem() throws PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, InterruptedException, ExecutionException, Placement.ResultNotExistsException {
+    void shouldGenerateFewResultsSuccessfullyAndDeleteThem() throws PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, InterruptedException, ExecutionException, Placement.ResultNotExistsException, Template.AttributeAlreadyExistException {
         // replace Executor with Mock
         ExecutorMock executorMock = new ExecutorMock();
         placementService.setExecutor(executorMock);
@@ -181,7 +181,7 @@ class PlacementServiceTest {
     }
 
     @Test
-    void shouldUpdatePlacementResultOnEditProperties() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, ExecutionException, InterruptedException, Placement.ResultNotExistsException, PlacementService.PlacementResultsInProgressException {
+    void shouldUpdatePlacementResultOnEditProperties() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, ExecutionException, InterruptedException, Placement.ResultNotExistsException, PlacementService.PlacementResultsInProgressException, Template.AttributeAlreadyExistException {
         // replace Executor with Mock
         ExecutorMock executorMock = new ExecutorMock();
         placementService.setExecutor(executorMock);

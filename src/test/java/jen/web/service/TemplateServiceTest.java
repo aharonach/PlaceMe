@@ -39,7 +39,7 @@ class TemplateServiceTest {
 
     @Test
     @Transactional
-    void shouldCreateAndRemoveTemplateWhenAddingTemplateAndDeletingIt() throws PagesAndSortHandler.FieldNotSortableException {
+    void shouldCreateAndRemoveTemplateWhenAddingTemplateAndDeletingIt() throws PagesAndSortHandler.FieldNotSortableException, Template.AttributeAlreadyExistException {
         Template receivedTemplate1 = templateService.add(repositoryTestUtils.createTemplateWithoutAttributes());
         Template receivedTemplate2 = templateService.add(repositoryTestUtils.createTemplate2());
         assertEquals(2, getTemplatesFromService().size());
@@ -65,7 +65,7 @@ class TemplateServiceTest {
 
     @Test
     @Transactional
-        void shouldDeleteTemplateWhenGroupUseTheTemplate() {
+        void shouldDeleteTemplateWhenGroupUseTheTemplate() throws Template.AttributeAlreadyExistException {
         Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate1());
         Group receivedGroup1 = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
         Group receivedGroup2 = groupService.add(new Group("group 2", "group 2 desc", receivedTemplate));
@@ -78,7 +78,7 @@ class TemplateServiceTest {
 
     @Test
     @Transactional
-    void shouldAddUpdateAndDeleteAttributesFromTemplate() throws Template.AttributeNotBelongException {
+    void shouldAddUpdateAndDeleteAttributesFromTemplate() throws Template.AttributeNotBelongException, Template.AttributeAlreadyExistException {
         Attribute attr1 = new RangeAttribute("attr 1", "attr 1 desc", 10);
         Attribute attr2 = new RangeAttribute("attr 2", "attr 2 desc", 20);
         Attribute newAttr = new RangeAttribute("new name", "new desc", 40);
@@ -110,7 +110,25 @@ class TemplateServiceTest {
     }
 
     @Test
-    void shouldThrowNotBelongExceptionWhenPerformingOperationOnAttributeOfAnotherTemplate() {
+    @Transactional
+    void shouldThrowAnExceptionForTwoAttributesWithSameNameOnSameTemplate() throws Template.AttributeAlreadyExistException {
+        Attribute attr1 = new RangeAttribute("attr 1", "attr 1 desc", 10);
+        Attribute attr2 = new RangeAttribute("attr 2", "attr 2 desc", 20);
+        Attribute attrSameName = new RangeAttribute("attr 2", "attr 2 desc new", 30);
+
+        assertThrows(Template.AttributeAlreadyExistException.class, () -> templateService.add(new Template("template", "desc", Set.of(attr1, attr2, attrSameName))));
+
+        Template receivedTemplate1 = templateService.add(new Template("template1", "desc", Set.of(attr1, attr2)));
+        Template receivedTemplate2 = templateService.add(new Template("template2", "desc", Set.of(attr1, attrSameName)));
+        assertEquals(2, receivedTemplate1.getAttributes().size());
+        assertEquals(2, receivedTemplate2.getAttributes().size());
+
+        templateService.deleteById(receivedTemplate1.getId());
+        templateService.deleteById(receivedTemplate2.getId());
+    }
+
+    @Test
+    void shouldThrowNotBelongExceptionWhenPerformingOperationOnAttributeOfAnotherTemplate() throws Template.AttributeAlreadyExistException {
         Template receivedTemplate1 = templateService.add(repositoryTestUtils.createTemplate1());
         Template receivedTemplate2 = templateService.add(repositoryTestUtils.createTemplate2());
         Attribute attrOfTemplate2 = receivedTemplate2.getAttributes().stream().findFirst().get();
@@ -123,7 +141,7 @@ class TemplateServiceTest {
     }
 
     @Test
-    void shouldUpdateGeneralInfoAndAttributesWhenUpdatingTemplate() {
+    void shouldUpdateGeneralInfoAndAttributesWhenUpdatingTemplate() throws Template.AttributeAlreadyExistException {
         Attribute attr1 = new RangeAttribute("attr 1", "attr 1 desc", 10);
         Attribute attr2 = new RangeAttribute("attr 2", "attr 2 desc", 20);
         Attribute attr3 = new RangeAttribute("attr 3", "attr 3 desc", 30);
@@ -160,7 +178,7 @@ class TemplateServiceTest {
     }
 
     @Test
-    void shouldUpdateGeneralInfoWhenUpdatingTemplateWithoutAttributesInfo() {
+    void shouldUpdateGeneralInfoWhenUpdatingTemplateWithoutAttributesInfo() throws Template.AttributeAlreadyExistException {
         Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate1());
         assertEquals(2, receivedTemplate.getAttributes().size());
 
@@ -174,7 +192,7 @@ class TemplateServiceTest {
     }
 
     @Test
-    void shouldUpdateGeneralInfoAndEraseAttributesWhenUpdatingTemplateWithEmptyAttributesList() {
+    void shouldUpdateGeneralInfoAndEraseAttributesWhenUpdatingTemplateWithEmptyAttributesList() throws Template.AttributeAlreadyExistException {
         Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate1());
         assertEquals(2, receivedTemplate.getAttributes().size());
 

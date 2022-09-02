@@ -29,14 +29,14 @@ public class TemplateService implements EntityService<Template> {
 
 
     @Override
-    public Template add(Template template) {
+    public Template add(Template template) throws Template.AttributeAlreadyExistException {
         Long id = template.getId();
         if (id != null && templateRepository.existsById(id)) {
             throw new EntityAlreadyExists("Template with Id '" + id + "' already exists.");
         }
+        Template newTemplate = new Template(template.getName(), template.getDescription(), template.getAttributes());
 
-        template.clearGroups();
-        return templateRepository.save(template);
+        return templateRepository.save(newTemplate);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class TemplateService implements EntityService<Template> {
     @Override
     @Transactional
     // its updates attrs with id, add attrs without id and delete attrs that not in the new template
-    public Template updateById(Long id, Template newTemplate) {
+    public Template updateById(Long id, Template newTemplate) throws Template.AttributeAlreadyExistException {
         Template template = getOr404(id);
 
         if(newTemplate.getAttributes() != null){
@@ -108,13 +108,13 @@ public class TemplateService implements EntityService<Template> {
         attributeRepository.delete(attribute);
     }
 
-    public Template updateAttributeForTemplate(Template template, Attribute oldAttribute, Attribute newAttribute) throws Template.AttributeNotBelongException {
+    public Template updateAttributeForTemplate(Template template, Attribute oldAttribute, Attribute newAttribute) throws Template.AttributeNotBelongException, Template.AttributeAlreadyExistException {
         template.verifyAttributeBelongsToTemplate(oldAttribute.getId());
         template.updateAttribute(oldAttribute.getId(), newAttribute);
         return templateRepository.save(template);
     }
 
-    public Template addAttributeForTemplate(Template template, Attribute newAttribute){
+    public Template addAttributeForTemplate(Template template, Attribute newAttribute) throws Template.AttributeAlreadyExistException {
         template.addAttribute(newAttribute);
         return templateRepository.save(template);
     }
