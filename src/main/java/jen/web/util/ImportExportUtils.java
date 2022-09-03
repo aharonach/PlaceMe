@@ -2,6 +2,7 @@ package jen.web.util;
 
 import jen.web.entity.*;
 import jen.web.repository.PupilRepository;
+import jen.web.service.GroupService;
 import jen.web.service.PupilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ public class ImportExportUtils {
 
     private final PupilRepository pupilRepository;
     private final PupilService pupilService;
+    private final GroupService groupService;
 
 
     static {
@@ -275,9 +277,10 @@ public class ImportExportUtils {
                     if( selected == null){
                         throw new CantFindPupilException(selectedGivenId);
                     }
-                    group.addOrUpdatePreference(selector, selected, WantToBeTogether);
+                    groupService.addPupilPreference(group, new Preference(selector, selected, WantToBeTogether));
                 } catch (Preference.SamePupilException | Pupil.GivenIdContainsProhibitedCharsException |
-                         Pupil.GivenIdIsNotValidException | CantFindPupilException e) {
+                         Pupil.GivenIdIsNotValidException | CantFindPupilException |
+                         Group.PupilNotBelongException e) {
                     errors.add("Line " + lineNumber + ". Preferences error: " + e.getMessage());
                 }
             }
