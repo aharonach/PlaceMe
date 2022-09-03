@@ -221,9 +221,14 @@ class PlacementServiceTest {
         pupilService.deleteById(receivedPupil2.getId());
     }
 
-    // @Todo: Test update method
+    // @Todo: add import export tests
+//    @Test
+//    @Transactional
+//    void testImport(){
+//
+//    }
 
-    // Tests
+    // @Todo: Test update method
 
     @Test
     void shouldThrowNotFoundExceptionOnGetPlacementWhenPlacementNotExist() {

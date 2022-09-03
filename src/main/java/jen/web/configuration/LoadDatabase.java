@@ -119,7 +119,7 @@ public class LoadDatabase {
         logger.info("Preloading " + group1);
     }
 
-    private void createPlacements() throws FileNotFoundException, CsvUtils.CsvContent.CsvNotValidException {
+    private void createPlacements() throws FileNotFoundException, CsvUtils.CsvContent.CsvNotValidException, PlacementService.PlacementWithoutTemplateInGroupException, PlacementService.PlacementWithoutGroupException {
         Group group = groupService.getOr404(1L);
         String content = getFileContent("placement1.csv");
 
