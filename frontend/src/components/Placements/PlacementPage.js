@@ -1,61 +1,38 @@
-import React, {useEffect, useState} from 'react';
-import {useNavigate, useParams} from "react-router-dom";
-import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
+import {Outlet, useNavigate, useParams} from "react-router-dom";
 import Loading from "../Loading";
-import {Alert, Button} from "react-bootstrap";
-import EditPlacement from './EditPlacement';
-import PlacementData from "./PlacementData";
+import {Alert, Button, ButtonGroup} from "react-bootstrap";
 import {LinkContainer} from "react-router-bootstrap";
+import useFetchRecord from "../../hooks/useFetchRecord";
 
-export default function PlacementPage({edit=false}){
+export default function PlacementPage(){
     let { placementId } = useParams();
-    const [placement, error, loading, axiosFetch] = useAxios();
-    const [count, setCount] = useState(1);
+    const [placement, error, loading, axiosFetch, getPlacement] = useFetchRecord({
+        fetchUrl: `/placements/${placementId}`,
+        displayFields: [ 'name' ]
+    });
 
     let navigate = useNavigate();
 
-    const getPlacement = () => {
-        axiosFetch({
-            axiosInstance: Api,
-            method: 'get',
-            url: `/placements/${placementId}`,
-        });
-    }
-
     const handleDelete = () => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'delete',
             url: `/placements/${placement.id}`,
         }).then(() => navigate('/placements', {replace: true}));
     }
 
-    useEffect(() => {
-        getPlacement();
-    }, [count]);
-
     return (
         <>
-            {loading && <Loading />}
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && placement &&
                 <article>
-                    <h2>{placement.name}</h2>
-
-                    { !edit &&
-                        <div>
-                            <p>
-                                <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
-                                <LinkContainer to="edit"><Button>Edit Placement</Button></LinkContainer>
-                            </p>
-                            <PlacementData placement={placement} />
-                        </div>
-                    }
-
-                    { edit &&
-                        <EditPlacement placement={placement} count={count} setCount={setCount} />
-                    }
+                    <h1>{placement.name}</h1>
+                    <ButtonGroup>
+                        <LinkContainer to={`/placements/${placement.id}/edit`}><Button>Edit Placement</Button></LinkContainer>
+                        <LinkContainer to={`/placements/${placement.id}/results`}><Button>Show All Optional Results</Button></LinkContainer>
+                        <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
+                    </ButtonGroup>
+                    <Outlet context={{ placement, error, loading, axiosFetch, getPlacement }} />
                 </article>
             }
         </>

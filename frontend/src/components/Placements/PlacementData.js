@@ -1,22 +1,35 @@
-import React from 'react';
-import PlacementResultsList from "./PlacementResultsList";
+import RecordDetails from "../RecordDetails";
+import {Link, useOutletContext} from "react-router-dom";
+import ResultData from "./Results/ResultData";
+import GenerateFirstResults from "./GenerateFirstResults";
 
+export default function PlacementData(){
+    const { placement } = useOutletContext();
+    const details = [
+        { label: "Number Of Classes", value: placement.numberOfClasses },
+        { label: "Group", value: placement.groupId
+                ? placement.group.name
+                : <Link to="edit">Assign to a group</Link>},
+        { label: "Created On", value: placement.createdTime },
+    ];
 
-export default function PlacementData({placement}){
+    console.log(placement?.selectedResult);
 
+    const selectedResult = <>
+        {placement?.selectedResult ? (
+            <>
+                <hr />
+                <h3>Selected Result</h3>
+                <ResultData externalResult={placement.selectedResult} />
+            </>
+        ) : <GenerateFirstResults hasResults />}
+    </>;
 
     return (
         <>
-            <p>
-                <div><strong>Created on:</strong> {placement.createdTime}</div>
-                <div><strong>Number Of Classes:</strong> {placement.numberOfClasses}</div>
-                <div><strong>Group:</strong> {placement.groupId ? placement.group.name : "No group"}</div>
-            </p>
-
-            <p>
-                <h3>Results:</h3>
-                <PlacementResultsList placement={placement} />
-            </p>
+            <RecordDetails details={details} />
+            {!placement?.numberOfResults
+                ? <GenerateFirstResults /> : selectedResult}
         </>
     );
 }

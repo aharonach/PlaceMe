@@ -1,48 +1,38 @@
-import React, {useEffect} from 'react';
-import {useParams, useNavigate} from "react-router-dom";
-import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
+import React from 'react';
+import {useParams, useNavigate, Outlet} from "react-router-dom";
 import Loading from "../Loading";
-import {Alert, Button} from "react-bootstrap";
-import EditTemplate from "./EditTemplate";
-import Attributes from "./Attributes";
+import {Alert, Button, ButtonGroup} from "react-bootstrap";
+import useFetchRecord from "../../hooks/useFetchRecord";
+import {LinkContainer} from 'react-router-bootstrap';
 
 export default function TemplatePage() {
     let { templateId } = useParams();
-    const [template, error, loading, axiosFetch] = useAxios();
-    let navigate = useNavigate();
+    const [template, error, loading, axiosFetch] = useFetchRecord({
+        fetchUrl: `/templates/${templateId}`,
+        displayFields: ['name']
+    });
 
-    const getGroup = () => {
-        axiosFetch({
-            axiosInstance: Api,
-            method: 'get',
-            url: `/templates/${templateId}`,
-        });
-    }
+    const navigate = useNavigate();
 
     const handleDelete = () => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'delete',
             url: `/templates/${templateId}`,
         }).then(() => navigate('/templates', { replace: true }));
     }
 
-    useEffect(() => {
-        getGroup();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     return (
         <>
-            {loading && <Loading />}
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && template &&
                 <article className="template">
-                    <h2>{template.name} (ID: {template.id})</h2>
-                    <Button variant="danger" onClick={handleDelete}>Delete Template</Button>
-                    <EditTemplate template={template} />
-                    <Attributes template={template} />
+                    <h1>{template.name} (ID: {template.id})</h1>
+                    <ButtonGroup>
+                        <LinkContainer to={`/templates/${template.id}/edit`}><Button>Edit</Button></LinkContainer>
+                        <Button variant="danger" onClick={handleDelete}>Delete Template</Button>
+                    </ButtonGroup>
+                    <Outlet context={{ template, error, loading, axiosFetch }} />
                 </article>
             }
         </>

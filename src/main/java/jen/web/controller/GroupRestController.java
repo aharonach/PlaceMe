@@ -2,23 +2,28 @@ package jen.web.controller;
 
 import jen.web.assembler.GroupModelAssembler;
 import jen.web.assembler.PupilModelAssembler;
-import jen.web.assembler.TemplateModelAssembler;
 import jen.web.entity.Group;
 import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
-import jen.web.entity.Template;
 import jen.web.exception.BadRequest;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
+import jen.web.util.FieldSortingMaps;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -33,17 +38,21 @@ public class GroupRestController extends BaseRestController<Group> {
     private final GroupService groupService;
     private final PupilService pupilService;
     private final GroupModelAssembler groupAssembler;
-    private final TemplateModelAssembler templateAssembler;
     private final PupilModelAssembler pupilAssembler;
+    private final PagesAndSortHandler pagesAndSortHandler;
+
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll() {
-        CollectionModel<EntityModel<Group>> allEntities = groupAssembler.toCollectionModel(groupService.all());
+    public ResponseEntity<?> getAll(@ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
+        try {
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.groupMap);
+            CollectionModel<EntityModel<Group>> pagesModel = groupAssembler.toPageCollection(groupService.all(pageRequest));
+            return ResponseEntity.ok().body(pagesModel);
 
-        return ResponseEntity
-                .ok()
-                .body(allEntities);
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
@@ -68,7 +77,8 @@ public class GroupRestController extends BaseRestController<Group> {
 
     @Override
     @PostMapping("/{groupId}")
-    public ResponseEntity<?> update(@PathVariable Long groupId, @RequestBody Group updatedRecord) {
+    public ResponseEntity<?> update(@PathVariable Long groupId,
+                                    @RequestBody Group updatedRecord) {
         EntityModel<Group> entity = groupAssembler.toModel(groupService.updateById(groupId, updatedRecord));
 
         return ResponseEntity
@@ -84,13 +94,19 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @GetMapping("/{groupId}/pupils")
-    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId){
-        CollectionModel<EntityModel<Pupil>> allEntities =
-                pupilAssembler.toCollectionModel(groupService.getOr404(groupId).getPupils());
+    public ResponseEntity<?> getPupilsOfGroup(@PathVariable Long groupId,
+                                              @ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo){
+        Group group = groupService.getOr404(groupId);
 
-        return ResponseEntity
-                .ok()
-                .body(allEntities);
+        try {
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.pupilMap);
+            Page<Pupil> pages = groupService.getPupilOfGroup(group, pageRequest);
+            CollectionModel<EntityModel<Pupil>> allEntities = pupilAssembler.toPageCollection(pages);
+            return ResponseEntity.ok().body(allEntities);
+
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @GetMapping("/{groupId}/preferences")
@@ -104,10 +120,11 @@ public class GroupRestController extends BaseRestController<Group> {
     }
 
     @GetMapping("/{groupId}/preferences/{pupilId}")
-    public ResponseEntity<?> getPreferencesForPupil(@PathVariable Long groupId, @PathVariable Long pupilId){
+    public ResponseEntity<?> getPreferencesForPupil(@PathVariable Long groupId,
+                                                    @PathVariable Long pupilId){
         Group group = groupService.getOr404(groupId);
         Pupil pupil = pupilService.getOr404(pupilId);
-        Set<Preference> preferences = groupService.getAllPreferencesForPupil(group, pupil);
+        List<Preference> preferences = groupService.getAllPreferencesForPupil(group, pupil);
         CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
 
         return ResponseEntity
@@ -117,12 +134,13 @@ public class GroupRestController extends BaseRestController<Group> {
 
     @PutMapping("/{groupId}/preferences")
     public ResponseEntity<?> addOrUpdatePreference(@PathVariable Long groupId,
-                                           @RequestBody Preference preference) {
+                                                   @RequestBody Preference preference) {
 
         try {
             Group group = groupService.getOr404(groupId);
-            groupService.addPupilPreference(group, preference);
-            return ResponseEntity.ok().build();
+            List<Preference> preferences = groupService.addPupilPreference(group, preference);
+            CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+            return ResponseEntity.ok().body(allEntities);
 
         } catch (Group.PupilNotBelongException | Preference.SamePupilException e) {
             throw new BadRequest(e.getMessage());
@@ -138,12 +156,12 @@ public class GroupRestController extends BaseRestController<Group> {
         Long selectorId = preference.getSelectorSelectedId().getSelectorId();
         Long selectedId = preference.getSelectorSelectedId().getSelectedId();
 
-        groupService.deletePupilPreferences(group, selectorId, selectedId);
-
-        return ResponseEntity.ok().build();
+        List<Preference> preferences = groupService.deletePupilPreferences(group, selectorId, selectedId);
+        CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+        return ResponseEntity.ok().body(allEntities);
     }
 
-    private CollectionModel<Preference> preferencesToModelCollection(Long groupId, Set<Preference> preferences){
+    private CollectionModel<Preference> preferencesToModelCollection(Long groupId, Iterable<Preference> preferences){
         return  CollectionModel.of(preferences,
                 linkTo(methodOn(this.getClass()).get(groupId)).withRel("group"),
                 linkTo(methodOn(this.getClass()).getPreferences(groupId)).withSelfRel()

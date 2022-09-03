@@ -28,14 +28,12 @@ export default function AddPupil() {
             method: 'put',
             url: '/pupils',
             data: {...data}
-        }).then((pupil) => {
-            pupil && navigate(`/pupils/${pupil.id}`);
-        });
+        }).then(pupil => pupil && navigate(`/pupils/${pupil.id}`, { replace: true }));
     };
 
     return (
         <>
-            <h2>Add Pupil</h2>
+            <h1>Add Pupil</h1>
             {error && <Alert variant="danger">{error}</Alert>}
             <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading}></HtmlForm>
         </>

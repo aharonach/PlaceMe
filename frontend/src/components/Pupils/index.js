@@ -1,4 +1,6 @@
-export {default as PupilsList} from './PupilsList';
-export {default as Profile} from './PupilPage';
-export {default as AddPupil} from './AddPupil';
-export {default as EditPupil} from './EditPupil';
+export {default as Data} from './PupilData';
+export {default as List} from './PupilsList';
+export {default as Page} from './PupilPage';
+export {default as Add} from './AddPupil';
+export {default as Edit} from './EditPupil';
+export {default as Groups} from './EditGroups';

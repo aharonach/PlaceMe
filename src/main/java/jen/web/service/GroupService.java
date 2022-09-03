@@ -2,7 +2,6 @@ package jen.web.service;
 
 import jen.web.entity.*;
 import jen.web.exception.EntityAlreadyExists;
-import jen.web.exception.NotAcceptable;
 import jen.web.exception.NotFound;
 import jen.web.repository.GroupRepository;
 import jen.web.repository.PreferenceRepository;
@@ -11,13 +10,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,8 +54,13 @@ public class GroupService implements EntityService<Group> {
     }
 
     @Override
-    public List<Group> all() {
+    public List<Group> allWithoutPages() {
         return groupRepository.findAll();
+    }
+
+    @Override
+    public Page<Group> all(PageRequest pageRequest) {
+        return groupRepository.findAll(pageRequest);
     }
 
     @Override
@@ -68,16 +71,9 @@ public class GroupService implements EntityService<Group> {
         group.setName(newGroup.getName());
         group.setDescription(newGroup.getDescription());
 
-        if(newGroup.getTemplate() != null){
+        if(newGroup.getTemplate() != null && !group.getTemplate().equals(newGroup.getTemplate())){
             Template newTemplate = templateService.getOr404(newGroup.getTemplate().getId());
-
-            Set<Long> newGroupIds = newTemplate.getGroupIds();
-            if(group.getTemplate() != null){
-                newGroupIds.remove(group.getTemplate().getId());
-            }
-
             group.setTemplate(newTemplate);
-            newTemplate.setGroups(groupRepository.getAllByIdIn(newGroupIds));
         }
 
         return groupRepository.save(group);
@@ -102,14 +98,17 @@ public class GroupService implements EntityService<Group> {
         groupRepository.delete(group);
     }
 
-    public Set<Group> getByIds(Set<Long> ids) {
-        Set<Group> groups = new HashSet<>(ids.size());
-        for(Long id : ids){
-            groups.add(getOr404(id));
-        }
-        return groups;
-        // @todo: decide what to do, this line gets the same result but its not throwing exception for non existing ids
-        //return groupRepository.getAllByIdIn(ids);
+    public List<Group> getByIdsWithoutPages(Set<Long> ids) {
+        return groupRepository.getAllByIdInOrderById(ids);
+    }
+
+    public Page<Group> getByIds(Set<Long> ids, PageRequest pageRequest) {
+        return groupRepository.getAllByIdIn(ids, pageRequest);
+    }
+
+    public Page<Pupil> getPupilOfGroup(Group group, PageRequest pageRequest) {
+        Set<Long> pupilIds = group.getPupils().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        return pupilRepository.getAllByIdIn(pupilIds, pageRequest);
     }
 
     public void linkPupilToGroup(Group group, Pupil pupil){
@@ -117,19 +116,21 @@ public class GroupService implements EntityService<Group> {
         pupilRepository.save(pupil);
     }
 
-    public void unlinkPupilToGroup(Group group, Pupil pupil){
+    public void unlinkPupilFromGroup(Group group, Pupil pupil){
         group.removePupil(pupil);
+        deletePupilPreferences(group, pupil);
         pupilRepository.save(pupil);
     }
 
     @Transactional
     public void unlinkAllPupilsFromGroup(Group group){
         new ArrayList<>(group.getPupils()).forEach(pupil -> pupil.removeFromGroup(group));
+        deleteAllPreferencesFromGroup(group);
         group.clearPupils();
     }
 
     @Transactional
-    public void addPupilPreference(Group group, Preference preference) throws Group.PupilNotBelongException, Preference.SamePupilException {
+    public List<Preference> addPupilPreference(Group group, Preference preference) throws Group.PupilNotBelongException, Preference.SamePupilException {
         Pupil selector = group.getPupilById(preference.getSelectorSelectedId().getSelectorId());
         Pupil selected = group.getPupilById(preference.getSelectorSelectedId().getSelectedId());
 
@@ -137,10 +138,14 @@ public class GroupService implements EntityService<Group> {
 
         preferenceRepository.saveAllAndFlush(group.getPreferences());
         groupRepository.save(group);
+
+        return group.getPreferences().stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public void deletePupilPreferences(Group group, Long selectorId, Long selectedId) {
+    public List<Preference> deletePupilPreferences(Group group, Long selectorId, Long selectedId) {
 
         Set<SelectorSelectedId> selectorSelectedIds = group.getPreferenceForPupils(selectorId, selectedId)
                 .stream()
@@ -148,6 +153,10 @@ public class GroupService implements EntityService<Group> {
                 .collect(Collectors.toSet());
         group.getPreferenceForPupils(selectorId, selectedId).ifPresent(group::deletePreference);
         preferenceRepository.deleteAllById(selectorSelectedIds);
+
+        return group.getPreferences().stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -169,7 +178,9 @@ public class GroupService implements EntityService<Group> {
         preferenceRepository.deleteAllBySelectorSelectedIdInAndGroupId(selectorSelectedIds, group.getId());
     }
 
-    public Set<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
-        return group.getAllPreferencesForPupil(pupil.getId());
+    public List<Preference> getAllPreferencesForPupil(Group group, Pupil pupil){
+        return group.getAllPreferencesForPupil(pupil.getId()).stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 }

@@ -2,9 +2,11 @@ package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -58,6 +60,24 @@ public class PlacementResult extends BaseEntity {
         return Collections.unmodifiableSet(classes);
     }
 
+    public Set<Long> getClassesIds(){
+        return this.getClasses().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+    }
+
+    public int getTotalNumberOfMales(){
+        if(classes.stream().findFirst().isPresent()){
+            return classes.stream().findFirst().get().totalNumberOfMales;
+        }
+        return 0;
+    }
+
+    public int getTotalNumberOfFemales(){
+        if(classes.stream().findFirst().isPresent()){
+            return classes.stream().findFirst().get().totalNumberOfFemales;
+        }
+        return 0;
+    }
+
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getPlacementScore() {
 
@@ -89,10 +109,8 @@ public class PlacementResult extends BaseEntity {
     }
 
     private double getPercentageOfPupilsScores(){
-        double scoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumScoreOfPupils).sum();
-        double maxScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumMaxScoreOfPupils).sum();
-
-        return (scoreOfAllPupils / maxScoreOfAllPupils) * 100;
+        double sumRelativeScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getRelativeScoreOfPupils).sum();
+        return sumRelativeScoreOfAllPupils / classes.size();
     }
 
     private int getNumOfPupils(){
@@ -115,5 +133,18 @@ public class PlacementResult extends BaseEntity {
         public NotCompletedException() {
             super("Placement result is not completed.");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        PlacementResult that = (PlacementResult) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

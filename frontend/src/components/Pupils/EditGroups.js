@@ -1,46 +1,44 @@
-import React, {useEffect, useState} from 'react';
-import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
+import React, {useState} from 'react';
 import {Alert} from "react-bootstrap";
 import Loading from "../Loading";
 import Groups from "./Groups";
 import GroupsAttributes from "./GroupsAttributes";
+import {useOutletContext} from "react-router-dom";
+import useFetchList from "../../hooks/useFetchList";
 
-export default function EditGroups({ pupil }) {
-    const [groups, error, loading, axiosFetch] = useAxios();
-    const [updated, setUpdated] = useState(false);
+export default function EditGroups() {
+    const { pupil } = useOutletContext();
 
-    const getGroups = () => {
-        axiosFetch({
-            axiosInstance: Api,
-            method: 'get',
-            url: `/pupils/${pupil.id}/groups`,
-        });
-    }
+    const [pupilGroups, errorPupilGroups, loadingPupilGroups, axiosFetch] = useFetchList({
+        fetchUrl: `/pupils/${pupil.id}/groups`,
+        propertyName: "groupList",
+    });
+
+    // const [groups, errorGroups, loadingGroups] = useFetchList({
+    //     fetchUrl: '/groups',
+    //     propertyName: "groupList",
+    // });
+
+    const loading = loadingPupilGroups /*|| loadingGroups*/;
+    const error = errorPupilGroups /*|| errorGroups*/;
 
     const updateGroups = data => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'post',
             url: `/pupils/${pupil.id}/groups`,
             data: data.groups,
         });
-        setUpdated(true);
     }
-
-    useEffect(() => {
-        getGroups();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     return (
         <>
-            {loading && <Loading />}
+            <h2>Edit Groups</h2>
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && groups && (
+            {!loading && !error && pupilGroups && (
                 <>
-                    <Groups pupilGroups={groups} onSubmit={updateGroups} updated={updated} />
-                    <GroupsAttributes pupilGroups={groups} />
+                    <Groups pupilGroups={pupilGroups.map(group => group.id.toString())} onSubmit={updateGroups} />
+                    <GroupsAttributes groups={pupilGroups} />
                 </>
             )}
         </>

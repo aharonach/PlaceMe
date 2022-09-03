@@ -1,18 +1,20 @@
 package jen.web.service;
 
 import jen.web.entity.Pupil;
+import jen.web.entity.Template;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
-// @TODO Add a 'save' method without requesting an ID, only item object.
 public interface EntityService<T> {
-    T add(T item);
+    T add(T item) throws Template.AttributeAlreadyExistException;
 
     T getOr404(Long id);
+    List<T> allWithoutPages();
+    Page<T> all(PageRequest pageRequest);
 
-    List<T> all();
-
-    T updateById(Long id, T newItem) throws PlacementService.PlacementResultsInProgressException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException;
+    T updateById(Long id, T newItem) throws PlacementService.PlacementResultsInProgressException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException, Template.AttributeAlreadyExistException;
 
     void deleteById(Long id) throws PlacementService.PlacementResultsInProgressException;
 }

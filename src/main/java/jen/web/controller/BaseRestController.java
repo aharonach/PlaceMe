@@ -1,6 +1,13 @@
 package jen.web.controller;
 
+import jen.web.util.PagesAndSortHandler;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Optional;
 
 public abstract class BaseRestController<T> {
 
@@ -9,7 +16,8 @@ public abstract class BaseRestController<T> {
      *
      * @return List of records
      */
-    public abstract ResponseEntity<?> getAll();
+    @GetMapping()
+    public abstract ResponseEntity<?> getAll(@ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo);
 
     /**
      * Get one record by ID.

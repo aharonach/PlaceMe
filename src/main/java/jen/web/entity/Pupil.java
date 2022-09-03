@@ -2,6 +2,8 @@ package jen.web.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jen.web.util.ImportField;
+import jen.web.util.ImportConstructor;
 import jen.web.util.IsraeliIdValidator;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -9,12 +11,15 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.OnDelete;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static jen.web.util.IsraeliIdValidator.ID_LENGTH;
 
 @Entity
 @Getter
@@ -55,7 +60,12 @@ public class Pupil extends BaseEntity {
             joinColumns = @JoinColumn(name = "pupil_id", referencedColumnName = "id"))
     private Set<PlacementClassroom> classrooms = new LinkedHashSet<>();
 
-    public Pupil(String givenId, String firstName, String lastName, Gender gender, LocalDate birthDate)
+    @ImportConstructor
+    public Pupil(@ImportField(title = "Given ID", fieldName = "givenId") String givenId,
+                 @ImportField(title = "First Name", fieldName = "firstName") String firstName,
+                 @ImportField(title = "Last Name", fieldName = "lastName") String lastName,
+                 @ImportField(title = "Gender", fieldName = "gender") Gender gender,
+                 @ImportField(title = "Birth Date", fieldName = "birthDate") LocalDate birthDate)
             throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
         setGivenId(givenId);
         this.firstName = firstName;
@@ -70,21 +80,29 @@ public class Pupil extends BaseEntity {
 
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
 
-        if(!givenId.matches(DIGITS_REGEX)){
-            throw new GivenIdContainsProhibitedCharsException();
-        }
-        if(!IsraeliIdValidator.isValid(givenId)){
-            throw new GivenIdIsNotValidException();
-        }
+        validateGivenId(givenId);
 
         this.givenId = givenId;
+    }
+
+    public static void validateGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
+        if(!givenId.matches(DIGITS_REGEX)){
+            throw new GivenIdContainsProhibitedCharsException(givenId);
+        }
+        if(givenId.length() != ID_LENGTH){
+            throw new GivenIdIsNotValidException("Given id must contain " + ID_LENGTH + " digits: '" + givenId + "'.");
+        }
+        if(!IsraeliIdValidator.isValid(givenId)){
+            throw new GivenIdIsNotValidException("Given id is not valid: '" + givenId + "'.");
+        }
     }
 
     public void addAttributeValue(Group group, Long attributeId, Double value)
             throws Group.PupilNotBelongException, Template.AttributeNotBelongException, AttributeValue.ValueOutOfRangeException {
 
         verifyPupilInGroup(group);
-        Attribute attribute = group.getTemplate().getAttribute(attributeId);
+        group.getTemplate().verifyAttributeBelongsToTemplate(attributeId);
+        Attribute attribute = group.getTemplate().getAttribute(attributeId).get();
 
         // Find if the attribute is already has a value for pupil
         AttributeValue attributeValue = getAttributeValueOfUserByAttribute(attribute);
@@ -199,6 +217,19 @@ public class Pupil extends BaseEntity {
         return totalScore;
     }
 
+    @JsonIgnore
+    public double getPupilMaxScore() {
+        double totalScore = 0;
+        for(AttributeValue attributeValue : attributeValues){
+            totalScore += attributeValue.getMaxScore();
+        }
+        return totalScore;
+    }
+
+    public double getPupilRelativeScore() {
+        return (getPupilScore() / getPupilMaxScore()) * 100;
+    }
+
     private void verifyPupilInGroup(Group group) throws Group.PupilNotBelongException {
         if(!isInGroup(group)){
             throw new Group.PupilNotBelongException(getId(), group);
@@ -223,23 +254,15 @@ public class Pupil extends BaseEntity {
     }
 
     public static class GivenIdContainsProhibitedCharsException extends Exception {
-        public GivenIdContainsProhibitedCharsException(){
-            super("Given id must contain only digits.");
+        public GivenIdContainsProhibitedCharsException(String givenId){
+            super("Given id must contain only digits: '" + givenId + "'.");
         }
     }
 
     public static class GivenIdIsNotValidException extends Exception {
-        public GivenIdIsNotValidException(){
-            super("Given id is not valid.");
+        public GivenIdIsNotValidException(String message){
+            super(message);
         }
-    }
-
-    public double getPupilMaxScore() {
-        double totalScore = 0;
-        for(AttributeValue attributeValue : attributeValues){
-            totalScore += attributeValue.getMaxScore();
-        }
-        return totalScore;
     }
 
     public void addContact(Contact contact){
@@ -249,5 +272,4 @@ public class Pupil extends BaseEntity {
     public void removeContact(Contact contact){
         this.contacts.remove(contact.getId());
     }
-
 }

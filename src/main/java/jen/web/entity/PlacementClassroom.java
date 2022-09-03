@@ -3,6 +3,7 @@ package jen.web.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jen.web.dto.PupilsConnectionsDto;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.*;
@@ -10,7 +11,8 @@ import java.util.*;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+@ToString
+@RequiredArgsConstructor
 public class PlacementClassroom extends BaseEntity {
     private String name;
     @ManyToOne
@@ -25,6 +27,7 @@ public class PlacementClassroom extends BaseEntity {
     @Setter(value = AccessLevel.NONE)
     private transient List<Pupil> pupilsForAlgorithm;
 
+    @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "classrooms")
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
@@ -35,7 +38,9 @@ public class PlacementClassroom extends BaseEntity {
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
 
+    @JsonIgnore
     int totalNumberOfMales;
+    @JsonIgnore
     int totalNumberOfFemales;
 
     public PlacementClassroom(List<Pupil> pupilsForAlgorithm, PupilsConnectionsDto connectionsToInclude,
@@ -60,36 +65,56 @@ public class PlacementClassroom extends BaseEntity {
 
         return percentageOfWrongConnectionsToInclude * 0.15
                 + percentageOfWrongConnectionsToExclude * 0.15
-                + percentageOfMales * 0.24
-                + percentageOfFemales * 0.24
-                + percentageOfMalesAndFemales * 0.22;
+                + percentageOfMales * 0.23
+                + percentageOfFemales * 0.23
+                + percentageOfMalesAndFemales * 0.23;
     }
 
     private double percentageRelativeToPupilsNumber(double value){
-        return (value / pupils.size()) * 100;
+        return (value / (totalNumberOfFemales + totalNumberOfMales)) * 100;
+    }
+
+    public long getNumberOfMales(){
+        return getNumOfPupilsByGender(Pupil.Gender.MALE);
+    }
+
+    public long getNumberOfFemales(){
+        return getNumOfPupilsByGender(Pupil.Gender.FEMALE);
     }
 
     public long getDeltaBetweenMalesAndFemales(){
-        long numOfMales = getNumOfPupilsByGender(Pupil.Gender.MALE);
-        long numOfFemales = getNumOfPupilsByGender(Pupil.Gender.FEMALE);
+        long numOfMales = getNumberOfMales();
+        long numOfFemales = getNumberOfFemales();
 
         return Math.abs(numOfMales - numOfFemales);
     }
 
+    @JsonIgnore
     public long getDeltaBetweenMales(){
-        long numOfMalesInClass = getNumOfPupilsByGender(Pupil.Gender.MALE);
+        long numOfMalesInClass = getNumberOfMales();
 
         return Math.abs(numOfMalesInClass - totalNumberOfMales);
     }
 
+    @JsonIgnore
     public long getDeltaBetweenFemales(){
-        long numOfFemalesInClass = getNumOfPupilsByGender(Pupil.Gender.FEMALE);
+        long numOfFemalesInClass = getNumberOfFemales();
 
         return Math.abs(numOfFemalesInClass - totalNumberOfFemales);
     }
 
+    @JsonIgnore
     public double getSumScoreOfPupils(){
         return pupils.stream().mapToDouble(Pupil::getPupilScore).sum();
+    }
+
+    @JsonIgnore
+    public double getSumMaxScoreOfPupils(){
+        return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
+    }
+
+    public double getRelativeScoreOfPupils(){
+        return (getSumScoreOfPupils() / getSumMaxScoreOfPupils()) * 100;
     }
 
     public long getNumOfPupils(){
@@ -136,10 +161,6 @@ public class PlacementClassroom extends BaseEntity {
         return wrongConnections;
     }
 
-    public double getSumMaxScoreOfPupils(){
-        return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
-    }
-
     public void addPupilToClass(Pupil pupil){
         if(!pupils.contains(pupil)){
             pupils.add(pupil);
@@ -149,5 +170,18 @@ public class PlacementClassroom extends BaseEntity {
 
     public void removePupilFromClass(Pupil pupil){
         pupils.remove(pupil);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        PlacementClassroom that = (PlacementClassroom) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

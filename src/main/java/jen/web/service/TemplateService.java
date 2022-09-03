@@ -10,11 +10,12 @@ import jen.web.repository.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,15 +27,16 @@ public class TemplateService implements EntityService<Template> {
     private final AttributeRepository attributeRepository;
     private final AttributeValueRepository attributeValueRepository;
 
+
     @Override
-    public Template add(Template template) {
+    public Template add(Template template) throws Template.AttributeAlreadyExistException {
         Long id = template.getId();
         if (id != null && templateRepository.existsById(id)) {
             throw new EntityAlreadyExists("Template with Id '" + id + "' already exists.");
         }
+        Template newTemplate = new Template(template.getName(), template.getDescription(), template.getAttributes());
 
-        template.clearGroups();
-        return templateRepository.save(template);
+        return templateRepository.save(newTemplate);
     }
 
     @Override
@@ -42,32 +44,39 @@ public class TemplateService implements EntityService<Template> {
         return templateRepository.findById(id).orElseThrow(() -> new NotFound("Could not find template " + id));
     }
 
+    @Override
+    public List<Template> allWithoutPages() {
+        return templateRepository.findAll();
+    }
+
     public Attribute getAttributeOr404(Long id) {
         return attributeRepository.findById(id).orElseThrow(() -> new NotFound("Could not find attribute " + id));
     }
 
     @Override
-    public List<Template> all() {
-        return templateRepository.findAll();
+    public Page<Template> all(PageRequest pageRequest) {
+        return templateRepository.findAll(pageRequest);
     }
 
     @Override
     @Transactional
     // its updates attrs with id, add attrs without id and delete attrs that not in the new template
-    public Template updateById(Long id, Template newTemplate) {
+    public Template updateById(Long id, Template newTemplate) throws Template.AttributeAlreadyExistException {
         Template template = getOr404(id);
 
-        List<Long> newAttributeIds = newTemplate.getAttributes().stream().map(Attribute::getId).filter(Objects::nonNull).toList();
-        List<Attribute> attributesToDelete = template.getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
+        if(newTemplate.getAttributes() != null){
+            List<Long> newAttributeIds = newTemplate.getAttributes().stream().map(Attribute::getId).filter(Objects::nonNull).toList();
+            List<Attribute> attributesToDelete = template.getAttributes().stream().filter(attribute -> !newAttributeIds.contains(attribute.getId())).toList();
 
-        for(Attribute attribute : attributesToDelete){
-            try {
-                deleteAttributeForTemplateById(template, attribute);
-            } catch (Template.AttributeNotBelongException ignored) {
+            for(Attribute attribute : attributesToDelete){
+                try {
+                    deleteAttributeForTemplate(template, attribute);
+                } catch (Template.AttributeNotBelongException ignored) {
+                }
             }
+            template.updateAttributes(newTemplate.getAttributes());
         }
 
-        template.updateAttributes(newTemplate.getAttributes());
         template.setName(newTemplate.getName());
         template.setDescription(newTemplate.getDescription());
 
@@ -82,7 +91,7 @@ public class TemplateService implements EntityService<Template> {
         template.getAttributes().forEach(attribute -> {
             attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
         });
-        template.getGroups().forEach(group -> {
+        new HashSet<>(template.getGroups()).forEach(group -> {
             group.setTemplate(null);
         });
         template.clearGroups();
@@ -92,20 +101,20 @@ public class TemplateService implements EntityService<Template> {
     }
 
     @Transactional
-    public void deleteAttributeForTemplateById(Template template, Attribute attribute) throws Template.AttributeNotBelongException {
+    public void deleteAttributeForTemplate(Template template, Attribute attribute) throws Template.AttributeNotBelongException {
         template.verifyAttributeBelongsToTemplate(attribute.getId());
         attributeValueRepository.deleteAttributeValuesByAttributeId(attribute.getId());
         template.deleteAttribute(attribute.getId());
         attributeRepository.delete(attribute);
     }
 
-    public Template updateAttributeForTemplateById(Template template, Attribute oldAttribute, Attribute newAttribute) throws Template.AttributeNotBelongException {
+    public Template updateAttributeForTemplate(Template template, Attribute oldAttribute, Attribute newAttribute) throws Template.AttributeNotBelongException, Template.AttributeAlreadyExistException {
         template.verifyAttributeBelongsToTemplate(oldAttribute.getId());
         template.updateAttribute(oldAttribute.getId(), newAttribute);
         return templateRepository.save(template);
     }
 
-    public Template addAttributeForTemplateById(Template template, Attribute newAttribute){
+    public Template addAttributeForTemplate(Template template, Attribute newAttribute) throws Template.AttributeAlreadyExistException {
         template.addAttribute(newAttribute);
         return templateRepository.save(template);
     }

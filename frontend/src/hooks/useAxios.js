@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
+import Api from "../api";
 
-const useAxios = (afterSubmit = null) => {
-    const [response, setResponse] = useState();
+const useAxios = (afterSubmit = null, defaultState) => {
+    const [response, setResponse] = useState(defaultState);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [controller, setController] = useState();
 
     const axiosFetch = async (configObj) => {
         const {
-            axiosInstance,
+            axiosInstance = Api,
             method,
             url,
             data = null,

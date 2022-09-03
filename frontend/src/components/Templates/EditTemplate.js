@@ -1,32 +1,31 @@
 import React from 'react';
 import {useForm} from "react-hook-form";
 import HtmlForm from "../Forms/HtmlForm";
-import useAxios from "../../hooks/useAxios";
-import Api from '../../api';
 import { Alert } from 'react-bootstrap';
 import {getDefaultValuesByFields} from "../../utils";
 import FormFields from "./FormFields";
+import {useNavigate, useOutletContext} from "react-router-dom";
 
-export default function EditTemplate({ template }) {
-    const [response, error, loading, axiosFetch] = useAxios();
+export default function EditTemplate() {
+    const {template, error, loading, axiosFetch} = useOutletContext();
 
     let methods = useForm({
         defaultValues: { ...getDefaultValuesByFields(FormFields(), template) }
     });
 
+    const navigate = useNavigate();
+
     const onSubmit = data => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'post',
             url: `/templates/${template.id}`,
-            data: {...data}
-        });
+            data: {...data, attributes: null }
+        }).then( template => template && navigate(`/templates/${template.id}`, { replace: true }));
     };
 
     return (
         <>
             {error && <Alert variant="danger">{error}</Alert>}
-            {response && !error && <Alert variant="success">Template {template.id} updated</Alert>}
             <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading} submitLabel="Update" />
         </>
     );

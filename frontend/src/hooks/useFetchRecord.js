@@ -1,24 +1,24 @@
-import { useEffect } from 'react';
+import {useEffect} from 'react';
 import useAxios from "./useAxios";
-import Api from "../api";
 
-const useFetchRecord = (fetchUrl, thenCallback) => {
+const useFetchRecord = ({ fetchUrl, thenCallback, dependencies, displayFields}) => {
     const [response, error, loading, axiosFetch] = useAxios();
 
     const getRecord = () => {
         axiosFetch({
-            axiosInstance: Api,
             method: 'get',
             url: fetchUrl,
-        }).then(res => thenCallback && thenCallback(res));
+        }).then(res => {
+            thenCallback && thenCallback(res);
+        });
     }
 
     useEffect(() => {
         getRecord();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, dependencies ?? []);
 
-    return [response, error, loading, axiosFetch];
+    return [response, error, loading, axiosFetch, getRecord];
 }
 
 export default useFetchRecord;

@@ -5,15 +5,20 @@ import jen.web.entity.Attribute;
 import jen.web.entity.Template;
 import jen.web.exception.BadRequest;
 import jen.web.service.TemplateService;
+import jen.web.util.FieldSortingMaps;
+import jen.web.util.PagesAndSortHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.Attr;
+
+import java.util.Optional;
 
 
 @RestController
@@ -23,24 +28,28 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     private static final Logger logger = LoggerFactory.getLogger(TemplateRestController.class);
 
-    private final TemplateService service;
-    private final TemplateModelAssembler assembler;
-
+    private final TemplateService templateService;
+    private final TemplateModelAssembler templateAssembler;
+    private final PagesAndSortHandler pagesAndSortHandler;
 
     @Override
     @GetMapping()
-    public ResponseEntity<?> getAll() {
-        CollectionModel<EntityModel<Template>> allEntities = assembler.toCollectionModel(service.all());
+    public ResponseEntity<?> getAll(@ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
 
-        return ResponseEntity
-                .ok()
-                .body(allEntities);
+        try {
+            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.templateMap);
+            CollectionModel<EntityModel<Template>> pagesModel = templateAssembler.toPageCollection(templateService.all(pageRequest));
+            return ResponseEntity.ok().body(pagesModel);
+
+        } catch (PagesAndSortHandler.FieldNotSortableException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
     @GetMapping("/{templateId}")
     public ResponseEntity<?> get(@PathVariable Long templateId) {
-        EntityModel<Template> entity = assembler.toModel(service.getOr404(templateId));
+        EntityModel<Template> entity = templateAssembler.toModel(templateService.getOr404(templateId));
 
         return ResponseEntity
                 .ok()
@@ -50,39 +59,45 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Template newRecord) {
-        EntityModel<Template> entity = assembler.toModel(service.add(newRecord));
 
-        return ResponseEntity
-                .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entity);
+        try{
+            EntityModel<Template> entity = templateAssembler.toModel(templateService.add(newRecord));
+            return ResponseEntity.created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entity);
+        } catch (Template.AttributeAlreadyExistException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
     @PostMapping("/{templateId}")
-    public ResponseEntity<?> update(@PathVariable Long templateId, @RequestBody Template updatedRecord) {
-        Template updatedTemplate = service.updateById(templateId, updatedRecord);
-        EntityModel<Template> entity = assembler.toModel(updatedTemplate);
+    public ResponseEntity<?> update(@PathVariable Long templateId,
+                                    @RequestBody Template updatedRecord) {
+        try{
+            Template updatedTemplate = templateService.updateById(templateId, updatedRecord);
+            EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
+            return ResponseEntity.ok().body(entity);
 
-        return ResponseEntity
-                .ok()
-                .body(entity);
+        } catch (Template.AttributeAlreadyExistException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 
     @Override
     @DeleteMapping("/{templateId}")
     public ResponseEntity<?> delete(@PathVariable Long templateId) {
-        service.deleteById(templateId);
+        templateService.deleteById(templateId);
         return ResponseEntity.ok().build();
     }
 
     //Manage attributes
     @DeleteMapping("/{templateId}/attributes/{attributeId}")
-    public ResponseEntity<?> deleteAttributeForTemplate(@PathVariable Long templateId, @PathVariable Long attributeId) {
+    public ResponseEntity<?> deleteAttributeForTemplate(@PathVariable Long templateId,
+                                                        @PathVariable Long attributeId) {
 
-        Template template = service.getOr404(templateId);
-        Attribute attribute = service.getAttributeOr404(attributeId);
+        Template template = templateService.getOr404(templateId);
+        Attribute attribute = templateService.getAttributeOr404(attributeId);
         try {
-            service.deleteAttributeForTemplateById(template, attribute);
+            templateService.deleteAttributeForTemplate(template, attribute);
         } catch (Template.AttributeNotBelongException e) {
             throw new BadRequest(e.getMessage());
         }
@@ -92,30 +107,34 @@ public class TemplateRestController extends BaseRestController<Template> {
 
     @PostMapping("/{templateId}/attributes/{attributeId}")
     public ResponseEntity<?> updateAttributeForTemplate(@PathVariable Long templateId,
-                                        @PathVariable Long attributeId,
-                                        @RequestBody Attribute newAttribute) {
+                                                        @PathVariable Long attributeId,
+                                                        @RequestBody Attribute newAttribute) {
 
-        Template template = service.getOr404(templateId);
-        Attribute attribute = service.getAttributeOr404(attributeId);
+        Template template = templateService.getOr404(templateId);
+        Attribute attribute = templateService.getAttributeOr404(attributeId);
         try {
-            Template updatedTemplate = service.updateAttributeForTemplateById(template, attribute, newAttribute);
-            EntityModel<Template> entity = assembler.toModel(updatedTemplate);
+            Template updatedTemplate = templateService.updateAttributeForTemplate(template, attribute, newAttribute);
+            EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
             return ResponseEntity.ok().body(entity);
 
-        } catch (Template.AttributeNotBelongException e) {
+        } catch (Template.AttributeNotBelongException | Template.AttributeAlreadyExistException e) {
             throw new BadRequest(e.getMessage());
         }
     }
 
     @PutMapping("/{templateId}/attributes")
     public ResponseEntity<?> addAttributeForTemplate(@PathVariable Long templateId,
-                                     @RequestBody Attribute newAttribute) {
+                                                     @RequestBody Attribute newAttribute) {
 
-        Template template = service.getOr404(templateId);
-        EntityModel<Template> entity = assembler.toModel(service.addAttributeForTemplateById(template, newAttribute));
+        Template template = templateService.getOr404(templateId);
+        try{
+            Template updatedTemplate = templateService.addAttributeForTemplate(template, newAttribute);
+            EntityModel<Template> entity = templateAssembler.toModel(updatedTemplate);
 
-        return ResponseEntity
-                .created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entity);
+            return ResponseEntity.created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entity);
+
+        } catch (Template.AttributeAlreadyExistException e) {
+            throw new BadRequest(e.getMessage());
+        }
     }
 }

@@ -6,47 +6,34 @@ import {useForm} from "react-hook-form";
 import Loading from "../Loading";
 import {Alert} from "react-bootstrap";
 import {extractListFromAPI, prepareCheckboxGroup} from "../../utils";
+import useFetchList from "../../hooks/useFetchList";
 
-export default function Groups({ pupilGroups, onSubmit, updated }) {
-    const [groups, error, loading, axiosFetch] = useAxios();
-    const defaultGroups = useMemo(() => extractListFromAPI(pupilGroups, 'groupList', group => group.id.toString() ), [pupilGroups]);
-    const checkboxes = useMemo(() => extractListFromAPI(groups, 'groupList', prepareCheckboxGroup('id', 'name' )), [groups]);
+export default function Groups({ pupilGroups, onSubmit }) {
+    const [checkboxes, error, loading] = useFetchList({
+        fetchUrl: '/groups/',
+        propertyName: 'groupList',
+        mapCallback: prepareCheckboxGroup('id', 'name' ),
+    });
 
     let methods = useForm({
         defaultValues: {
-            groups: defaultGroups
+            groups: pupilGroups
         }
     });
 
-    const getGroups = () => {
-        axiosFetch({
-            axiosInstance: Api,
-            method: 'get',
-            url: '/groups',
-        });
-    };
-
-    const fields = [
-        {
-            id: 'groups',
-            type: 'checkbox',
-            options: checkboxes,
-        }
-    ];
-
-    useEffect(() => {
-        getGroups();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const fields = [{
+        id: 'groups',
+        type: 'checkbox',
+        options: checkboxes,
+    }];
 
     return (
         <>
-            {loading && <Loading />}
+            <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert> }
             {!loading && !error && (
                 <>
                     <h3>Groups</h3>
-                    {updated && <Alert variant="success">Groups updated</Alert>}
                     <HtmlForm formProps={methods} fields={fields} submitCallback={onSubmit} submitLabel={"Update Groups"} />
                 </>
             )}

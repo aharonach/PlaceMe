@@ -58,7 +58,13 @@ public class Group extends BaseEntity {
 
     @JsonProperty
     public void setTemplate(Template template) {
+        if(this.template != null){
+            this.template.removeGroup(this);
+        }
         this.template = template;
+        if(template != null){
+            template.addGroup(this);
+        }
     }
 
     public Integer getNumberOfPupils(){

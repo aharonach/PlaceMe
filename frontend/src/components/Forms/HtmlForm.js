@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Col, Form, Spinner} from "react-bootstrap";
+import {Button, Col, Form} from "react-bootstrap";
 import Select from "./Select";
 import Input from "./Input";
 import Checkbox from './Checkbox';
@@ -7,6 +7,7 @@ import Checkboxes from './Checkboxes';
 import Textarea from "./Textarea";
 import Label from "./Label";
 import FieldFeedback from "./FieldFeedback";
+import Loading from "../Loading";
 
 export default function HtmlForm({ fields, submitCallback, formProps, loading, submitLabel, vertical, children }) {
     const formFields = 'function' === typeof ( fields ) ? fields() : fields;
@@ -28,13 +29,7 @@ export default function HtmlForm({ fields, submitCallback, formProps, loading, s
             })}
             {children}
             <Button type="submit" variant="primary">
-                {loading && <Spinner
-                    as="span"
-                    animation="border"
-                    role="status"
-                    size="sm"
-                    aria-hidden="true"
-                />}
+                <Loading show={loading} size="sm" block={false} />
                 {submitLabel ? submitLabel : 'Submit'}
             </Button>
         </Form>

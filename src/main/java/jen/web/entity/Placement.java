@@ -8,6 +8,7 @@ import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -32,8 +33,17 @@ public class Placement extends BaseEntity {
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;
         this.numberOfClasses = numberOfClasses;
+        this.setGroup(group);
+    }
+
+    public void setGroup(Group group){
+        if(this.group != null){
+            this.group.removePlacement(this);
+        }
         this.group = group;
-        group.addPlacement(this); //@todo: check
+        if(group != null){
+            group.addPlacement(this);
+        }
     }
 
     public Long getGroupId(){
@@ -51,25 +61,16 @@ public class Placement extends BaseEntity {
         return Collections.unmodifiableSet(results);
     }
 
+    public Set<Long> getResultIds(){
+        return this.getResults().stream().map(BaseEntity::getId).collect(Collectors.toSet());
+    }
+
     public void addResult(PlacementResult placementResult){
         results.add(placementResult);
     }
 
     public void removeResult(PlacementResult placementResult){
         results.remove(placementResult);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Placement placement = (Placement) o;
-        return id != null && Objects.equals(id, placement.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
     }
 
     public PlacementResult getResultById(Long resultId) throws ResultNotExistsException {
@@ -103,6 +104,19 @@ public class Placement extends BaseEntity {
             getResults().forEach(existsResult -> existsResult.setSelected(false));
             result.setSelected(true);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Placement placement = (Placement) o;
+        return id != null && Objects.equals(id, placement.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     public static class ResultNotExistsException extends Exception {
