@@ -197,8 +197,8 @@ public class ImportExportUtils {
 
             try {
                 Pupil newPupil = createPupilFromRowMap(rowMap, lineNumber);
-                newPupil.addToGroup(group);
                 Pupil receivedPupil = pupilService.updateOrCreatePupilByGivenId(newPupil);
+                receivedPupil.addToGroup(group);
                 currentGivenId = receivedPupil.getGivenId();
                 givenIdToPupilMap.put(currentGivenId, receivedPupil);
             } catch (ImportExportUtils.ParseValueException | Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
