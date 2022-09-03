@@ -30,6 +30,12 @@ public class Placement extends BaseEntity {
     @ToString.Exclude
     private Set<PlacementResult> results = new LinkedHashSet<>();
 
+    public Placement(String name, int numberOfClasses){
+        this.name = name;
+        this.numberOfClasses = numberOfClasses;
+        this.setGroup(null);
+    }
+
     public Placement(String name, int numberOfClasses, Group group){
         this.name = name;
         this.numberOfClasses = numberOfClasses;
