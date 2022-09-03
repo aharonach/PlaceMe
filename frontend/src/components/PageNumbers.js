@@ -5,28 +5,30 @@ export default function PageNumbers({ pagination, setPage, arrows }) {
         return;
     }
 
-    let active = pagination.number + 1;
-    let items = [];
+    const totalElements = pagination.totalElements;
+    const totalPages = pagination.totalPages;
+    const totalItems = pagination.items;
+    const startsFrom = pagination.startsFrom;
+    const activeNumber = pagination.number + 1;
+    const items = [];
 
-    const showing = pagination.size >= pagination.totalElements ? pagination.totalElements : pagination.size;
-
-    for (let number = 1; number <= pagination.totalPages; number++) {
+    for (let number = 1; number <= totalPages; number++) {
         items.push(
-            <Pagination.Item key={number} active={number === active} onClick={() => setPage(number)}>
+            <Pagination.Item key={number} active={number === activeNumber} onClick={() => setPage(number)}>
                 {number}
             </Pagination.Item>,
         );
     }
 
     return (
-        <Stack direction="horizontal" className="align-items-baseline" gap={2}>
-            <Pagination>
-                {arrows && <Pagination.Prev onClick={() => setPage(active - 1)} disabled={active <= 1} />}
+        <Stack direction="horizontal" gap={2}>
+            {totalPages > 1 && <Pagination>
+                {arrows && <Pagination.Prev onClick={() => setPage(activeNumber - 1)} disabled={activeNumber <= 1}/>}
                 {items}
-                {arrows && <Pagination.Next onClick={() => setPage(active + 1)} disabled={active >= pagination.totalPages} />}
-            </Pagination>
-            <small className="text-muted">
-                Showing {showing} out of {pagination.totalElements}
+                {arrows && <Pagination.Next onClick={() => setPage(activeNumber + 1)} disabled={activeNumber >= totalPages}/>}
+            </Pagination>}
+            <small className="text-muted mb-3">
+                Displaying {startsFrom} to {totalItems + startsFrom - 1} (out of {totalElements})
             </small>
         </Stack>
     );

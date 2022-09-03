@@ -5,6 +5,7 @@ import React from "react";
 import Gender from "../../General/Gender";
 import Loading from "../../Loading";
 import {PeopleFill} from "react-bootstrap-icons";
+import {fixedNumber} from "../../../utils";
 
 export default function Classes({ result }) {
     const { placementId } = useParams();
@@ -27,7 +28,7 @@ export default function Classes({ result }) {
                             <Card.Header as={"h4"}>Class #{classNumber++}</Card.Header>
                             <Card.Body>
                                 <Stack gap={2} direction="horizontal" className="mb-2">
-                                    <><strong>Score:</strong> {classInfo.classScore.toFixed(2)}</>
+                                    <><strong>Score:</strong> {fixedNumber(classInfo.classScore)}</>
                                     <div className="vr" />
                                     <Gender gender={"MALE"} >{classInfo.numberOfMales}</Gender>
                                     <Gender gender={"FEMALE"} >{classInfo.numberOfFemales}</Gender>

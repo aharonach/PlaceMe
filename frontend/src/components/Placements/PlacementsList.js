@@ -10,5 +10,6 @@ export default function PlacementsList(){
         addButton="Add Placement"
         columns={columns}
         linkField="name"
+        sorting={['name', 'numberOfClasses', 'createdTime']}
     />
 }

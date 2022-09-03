@@ -3,7 +3,7 @@ import TableList from "../TableList";
 import AddAttribute from "./Attributes/AddAttribute";
 import DeleteAttribute from "./Attributes/DeleteAttribute";
 import EditAttribute from "./Attributes/EditAttribute";
-import {Button} from "react-bootstrap";
+import {Button, ButtonGroup} from "react-bootstrap";
 import {useOutletContext} from "react-router-dom";
 
 export default function Attributes({ addButton = true, actions = true }) {
@@ -38,7 +38,9 @@ export default function Attributes({ addButton = true, actions = true }) {
     return (
         <>
             <h2>Attributes</h2>
-            {addButton && <Button onClick={() => setMode('add')}>Add Attribute</Button>}
+            <ButtonGroup className="mb-3">
+                {addButton && <Button onClick={() => setMode('add')}>Add Attribute</Button>}
+            </ButtonGroup>
             <TableList columns={columns} items={attributeList} />
             <AddAttribute show={mode === 'add'} setMode={setMode} templateId={template.id} setAttributeList={setAttributeList} />
             {mode === 'edit' && editAttribute && <EditAttribute templateId={template.id} attribute={editAttribute} setAttribute={setEditAttribute} setAttributeList={setAttributeList} />}

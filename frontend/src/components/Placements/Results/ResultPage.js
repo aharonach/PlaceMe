@@ -1,16 +1,16 @@
-import {Outlet, useNavigate, useParams} from "react-router-dom";
+import {Outlet, useNavigate, useOutletContext, useParams} from "react-router-dom";
 import {Alert, Button, ButtonGroup} from 'react-bootstrap';
 import Loading from "../../Loading";
 import {LinkContainer} from "react-router-bootstrap";
 import useFetchRecord from "../../../hooks/useFetchRecord";
 
 export default function ResultPage(){
-    const { placementId } = useParams();
-    let { resultId } = useParams();
-    const baseUrl = `/placements/${placementId}/results/`;
+    const { resultId } = useParams();
+    const { placement, getPlacement } = useOutletContext();
+    const baseUrl = `/placements/${placement.id}/results/`;
     const [result, error, loading, axiosFetch] = useFetchRecord({
         fetchUrl: baseUrl + resultId,
-        displayFields: ['name'],
+        displayFields: ['name']
     });
     const navigate = useNavigate();
 
@@ -18,7 +18,7 @@ export default function ResultPage(){
         axiosFetch({
             method: 'delete',
             url: baseUrl + resultId
-        }).then( res => res && navigate(baseUrl, { replace: true }));
+        }).then( () => getPlacement(), navigate(baseUrl, { replace: true }));
     }
 
     const makeSelected = () => {
@@ -26,7 +26,7 @@ export default function ResultPage(){
            method: 'post',
            url: baseUrl + 'selected',
            data: resultId
-        });
+        }).then( res => res && getPlacement && getPlacement());
     }
 
     return (

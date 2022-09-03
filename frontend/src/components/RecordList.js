@@ -4,6 +4,7 @@ import {LinkContainer} from "react-router-bootstrap";
 import {Alert, Button, ButtonGroup, Stack} from "react-bootstrap";
 import TableList from "./TableList";
 import PageNumbers from "./PageNumbers";
+import HeroAddRecord from "./General/HeroAddRecord";
 
 export default function RecordList({
        fetchUrl = '',
@@ -18,7 +19,7 @@ export default function RecordList({
        mapCallback,
        showPagination = true,
        sorting,
-       totals,
+       hero,
        children
     }) {
     const [page, setPage] = useState(1);
@@ -33,37 +34,41 @@ export default function RecordList({
         setSort(null);
         setDirection('ASC');
     };
+
     useEffect(() => {
         getList();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [updated, page, sort, direction]);
 
     const addButtonRender = addButton && <LinkContainer to="add"><Button>{addButton}</Button></LinkContainer>;
-    const resetSortingButton = sort && <Button variant="link" onClick={resetSort}>Reset</Button>;
+    const resetSortingButton = sort && <Button size={"sm"} variant="link" onClick={resetSort} className="mb-3 p-0">Reset sorting</Button>;
     const pageNumbers = showPagination ? <PageNumbers pagination={pagination} setPage={setPage} arrows totals /> : null;
-    const topBottomRow = <Stack gap={2} direction="horizontal" className="align-items-start">{pageNumbers}{resetSortingButton}</Stack>;
+    const topBottomRow = <Stack gap={2} direction="horizontal">{pageNumbers}{resetSortingButton}</Stack>;
 
     return (
         <>
             {title}
             <ButtonGroup className="mb-3">
-                {addButtonRender}
+                {list?.length > 0 && addButtonRender}
                 {additionalButtons}
             </ButtonGroup>
             {error && <Alert variant="danger">{error}</Alert>}
-            {topBottomRow}
-            <>
-                {children}
-                <TableList
-                    linkTo={{field: linkField, basePath: basePath ?? fetchUrl}}
-                    items={list}
-                    numbering={{enabled: true, startFrom: pagination?.number * pagination?.size + 1}}
-                    columns={columns}
-                    sorting={ sorting ? {value: sort, set: setSort, fields: sorting } : null}
-                    direction={ sorting ? {value: direction, set: setDirection} : null}
-                />
-            </>
-            {topBottomRow}
+            {children}
+            {list?.length <= 0
+                ? (hero ? hero : <HeroAddRecord />)
+                : <>
+                    {topBottomRow}
+                    <TableList
+                        linkTo={{field: linkField, basePath: basePath ?? fetchUrl}}
+                        items={list}
+                        numbering={{enabled: true, startFrom: pagination?.startsFrom}}
+                        columns={columns}
+                        sorting={ sorting ? {value: sort, set: setSort, fields: sorting} : null}
+                        direction={ sorting ? {value: direction, set: setDirection} : null}
+                    />
+                    {topBottomRow}
+                </>
+            }
         </>
     )
 }

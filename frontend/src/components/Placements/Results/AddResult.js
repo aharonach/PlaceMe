@@ -17,14 +17,6 @@ export default function AddResult() {
         }
     });
 
-    const fields = [ ...FormFields(), {
-        id: 'amount',
-        label: 'Amount of results to generate',
-        type: 'number',
-        bsProps: { min: 1 },
-        rules: { min: 1 }
-    }];
-
     const [result, error, loading, axiosFetch] = useAxios();
 
     const generateResult = (data) => {
@@ -33,17 +25,20 @@ export default function AddResult() {
             url: `/placements/${placement.id}/results/generate` + (data.amount ? `?amountOfResults=${data.amount}` : ''),
             data: { name: data.name, description: data.description }
         })
-            .then( result =>
-                extractListFromAPI(result, 'placementResultList').length > 0
-                    ? navigate(`/placements/${placement.id}/results`, {replace: true}) : null
-            );
+            .then( result => {
+                const list = extractListFromAPI(result, 'placementResultList');
+
+                if (list.length > 0) {
+                    navigate(`/placements/${placement.id}/results`, {replace: true});
+                }
+            });
     }
 
     return (
         <>
             <h2>Generate Result</h2>
             {!loading && error && <Alert variant="danger">{error}</Alert> }
-            <HtmlForm formProps={methods} fields={fields} submitCallback={generateResult} loading={loading}></HtmlForm>
+            <HtmlForm formProps={methods} fields={FormFields()} submitCallback={generateResult} loading={loading}></HtmlForm>
         </>
     );
 }

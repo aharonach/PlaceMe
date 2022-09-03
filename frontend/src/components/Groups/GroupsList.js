@@ -10,5 +10,6 @@ export default function GroupsList() {
             addButton="Add Group"
             columns={columns}
             linkField="name"
+            sorting={['name', 'createdTime']}
         />;
 }
