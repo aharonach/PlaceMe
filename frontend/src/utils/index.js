@@ -68,3 +68,7 @@ export function humanizeTime(time, format = 'DD/MM/YYYY HH:mm') {
 
     return current.format(format);
 }
+
+export function toCapitalCase(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}

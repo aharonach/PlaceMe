@@ -6,7 +6,7 @@ export default function RecordDetails({ details, numOfColumns = 3, children }) {
     return (
         <>
             {children}
-            <Row>
+            <Row className="mt-3">
                 {details.map(detail => (
                     <Col key={detail.label} md={colSize} className="mb-3">
                         <strong className="d-block">{detail.label}</strong>

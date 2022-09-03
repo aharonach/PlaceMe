@@ -74,7 +74,7 @@ export default function PreferencesInGroup() {
                     </ToggleButtonGroup>
                     {selector ? <Button variant="link" onClick={reset}>Clear Selection</Button> : null}
                 </div>
-                <Button onClick={handleSave} disabled={!(selector && selected)}>Add Preference</Button>
+                <Button onClick={handleSave} disabled={!(selector && selected)} className="me-3">Add Preference</Button>
                 <Loading show={loadingFetch} block={false} size="sm" />
                 <hr />
                 <Preferences group={group} items={mapped} updatePreferences={getPreferences} />
@@ -87,25 +87,28 @@ const Instructions = ({ selector }) => {
     let message = '';
 
     if ( ! selector ) {
-        message = 'Click on a pupil name';
+        message = 'Step 1: Choose pupil';
     }
 
     if ( selector ) {
-        message = 'Choose his preference and click on another pupil';
+        message = 'Step 2: Choose his/her preference and then click save';
     }
 
-    return message && <Alert variant="info">{message}</Alert>
+    return message && <Alert variant="info">
+        <Alert.Heading as="h5">Instructions</Alert.Heading>
+        {message}
+    </Alert>
 }
 
 const Preferences = ({ group, items, updatePreferences }) => {
     return (
-        <Row xs={2} md={3} className="g-2">
+        <Row xs={2} md={3} lg={4} className="g-2">
             {Object.keys(items).map(selectorId => (
                 <Col key={selectorId}>
                     <Card className="h-100">
                         <Card.Body>
                             <Card.Subtitle className="border-bottom mb-1 pb-1">{`${items[selectorId].name} `}</Card.Subtitle>
-                            <Stack direction="horizontal" gap={2}>
+                            <Stack direction="vertical" gap={2}>
                                 {!objectIsEmpty(items[selectorId].yes) && (
                                     <Stack direction="vertical" gap={1}>
                                         <span>wants to be with:</span>
@@ -122,7 +125,6 @@ const Preferences = ({ group, items, updatePreferences }) => {
                                     </Stack>
                                 )}
                                 {/** Show separator **/}
-                                {!objectIsEmpty(items[selectorId].no) && !objectIsEmpty(items[selectorId].yes) && <div className="vr"></div>}
                                 {!objectIsEmpty(items[selectorId].no) && (
                                     <Stack direction="vertical" gap={1}>
                                         <span>doesn't want to be with:</span><br />
@@ -215,13 +217,13 @@ const mapPreferencesByPupils = (preferences) => {
         // initialize an array for selector pupil with his name and map of selected pupils.
         if ( ! map[selectorId] ) {
             map[selectorId] = {
-                name: preference.selectorFirstName,
+                name: `${preference.selectorFirstName} ${preference.selectorLastName}`,
                 yes:  {},
                 no:   {}
             };
         }
 
-        map[selectorId][wantsToBe ? 'yes' : 'no'][selectedId] = preference.selectedFirstName;
+        map[selectorId][wantsToBe ? 'yes' : 'no'][selectedId] = `${preference.selectedFirstName} ${preference.selectedLastName}`;
     });
 
     return map;
