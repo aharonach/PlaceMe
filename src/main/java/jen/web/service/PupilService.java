@@ -5,6 +5,7 @@ import jen.web.exception.BadRequest;
 import jen.web.exception.EntityAlreadyExists;
 import jen.web.exception.NotFound;
 import jen.web.repository.AttributeValueRepository;
+import jen.web.repository.ContactRepository;
 import jen.web.repository.PupilRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -24,6 +25,8 @@ public class PupilService implements EntityService<Pupil>{
     private final PupilRepository pupilRepository;
     private final AttributeValueRepository attributeValueRepository;
     private final GroupService groupService;
+
+    private final ContactRepository contactRepository;
 
     @Override
     @Transactional
@@ -147,5 +150,25 @@ public class PupilService implements EntityService<Pupil>{
         if(isPupilExists(givenId)){
             throw new BadRequest("pupil with given ID " + givenId + " already exists");
         }
+    }
+
+    public void creatContact(Pupil pupil, Contact contact){
+        pupil.addContact(contact);
+    }
+
+    public Contact addNewContact(Pupil pupil, Contact contact){
+
+        if(contactRepository.existsByGivenId(contact.getGivenId())){
+            throw new BadRequest("The contact already exist for this pupil");
+        }
+        pupil.addContact(contact);
+        //might need to save contact with contact repository
+        contactRepository.save(contact);
+        pupilRepository.save(pupil);
+        return contact;
+    }
+
+    public void removeContact(Pupil pupil, Contact contact){
+        pupil.removeContact(contact);
     }
 }

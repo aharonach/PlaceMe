@@ -2,11 +2,9 @@ package jen.web.controller;
 
 import jen.web.assembler.GroupModelAssembler;
 import jen.web.assembler.PupilModelAssembler;
-import jen.web.entity.AttributeValue;
-import jen.web.entity.Group;
-import jen.web.entity.Pupil;
-import jen.web.entity.Template;
+import jen.web.entity.*;
 import jen.web.exception.BadRequest;
+import jen.web.exception.NotFound;
 import jen.web.service.GroupService;
 import jen.web.service.PupilService;
 import lombok.RequiredArgsConstructor;
@@ -162,5 +160,45 @@ public class PupilRestController extends BaseRestController<Pupil> {
                 linkTo(methodOn(this.getClass()).getPupilGroups(groupId)).withRel("group"),
                 linkTo(methodOn(this.getClass()).getAttributeValues(pupilId, groupId)).withSelfRel()
         );
+    }
+
+    @GetMapping("/{pupilId}/contacts")
+    public ResponseEntity<?> getContacts(@PathVariable Long pupilId){
+
+        Pupil pupil = pupilService.getOr404(pupilId);
+        return ResponseEntity.ok(pupil.getContacts());
+    }
+
+    @GetMapping("/{pupilId}/contacts/{contactId}")
+    public ResponseEntity<?> getContact(@PathVariable Long pupilId, @PathVariable Long contactId){
+
+        Pupil pupil = pupilService.getOr404(pupilId);
+        Contact contact = pupil.getContacts().get(contactId);
+
+        if(contact == null)
+        {
+            throw new NotFound("Contact not found");
+        }
+
+        return ResponseEntity.ok(contact);
+    }
+
+    @PostMapping(path="/{pupilId}/contacts")
+    public ResponseEntity<?> addContact(@PathVariable Long pupilId, @RequestBody Contact contact){
+
+        Pupil pupil = pupilService.getOr404(pupilId);
+        contact.setPupil(pupil);
+        Contact contact1 = pupilService.addNewContact(pupil, contact);
+
+        return ResponseEntity.ok(contact1);
+    }
+
+    @DeleteMapping(path = "/{pupilId}/contacts/{contactId}")
+    public ResponseEntity<?> deleteContact(@PathVariable Long pupilId, @PathVariable Long contactId){
+        Pupil pupil = pupilService.getOr404(pupilId);
+        Contact contact1 = pupil.getContacts().get(contactId);
+        pupil.removeContact(contact1);
+
+        return ResponseEntity.ok().build();
     }
 }

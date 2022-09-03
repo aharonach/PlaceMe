@@ -8,6 +8,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.OnDelete;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -31,6 +32,9 @@ public class Pupil extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private LocalDate birthDate;
+    @OneToMany
+    @ToString.Exclude
+    private Map<Long, Contact> contacts;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "pupil")
     @JsonIgnore
@@ -237,4 +241,13 @@ public class Pupil extends BaseEntity {
         }
         return totalScore;
     }
+
+    public void addContact(Contact contact){
+        this.contacts.put(contact.getId(), contact);
+    }
+
+    public void removeContact(Contact contact){
+        this.contacts.remove(contact.getId());
+    }
+
 }
