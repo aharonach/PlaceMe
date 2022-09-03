@@ -52,3 +52,7 @@ export function idLinkList(linkTo, ids, delimiter = ', ') {
 export function boolToString(bool){
     return bool ? 'Yes' : 'No';
 }
+
+export function fixedNumber(num, toFixed = 2) {
+    return num === 'NaN' && isNaN(num) ? '' : num.toFixed(toFixed);
+}

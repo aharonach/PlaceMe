@@ -4,11 +4,11 @@ import {Alert, Button, ButtonGroup} from "react-bootstrap";
 import {LinkContainer} from "react-router-bootstrap";
 import useFetchRecord from "../../hooks/useFetchRecord";
 
-export default function PlacementPage({edit=false}){
+export default function PlacementPage(){
     let { placementId } = useParams();
-    const [placement, error, loading, axiosFetch] = useFetchRecord({
+    const [placement, error, loading, axiosFetch, getPlacement] = useFetchRecord({
         fetchUrl: `/placements/${placementId}`,
-        displayFields: [ 'name' ],
+        displayFields: [ 'name' ]
     });
 
     let navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function PlacementPage({edit=false}){
                         <LinkContainer to={`/placements/${placement.id}/results`}><Button>Show All Optional Results</Button></LinkContainer>
                         <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
                     </ButtonGroup>
-                    <Outlet context={{ placement, error, loading, axiosFetch }} />
+                    <Outlet context={{ placement, error, loading, axiosFetch, getPlacement }} />
                 </article>
             }
         </>

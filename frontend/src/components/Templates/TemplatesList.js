@@ -6,9 +6,10 @@ export default function TemplatesList() {
     return <RecordList
         fetchUrl="/templates"
         propertyName="templateList"
-        linkField="name"
-        columns={columns}
-        addButton="Add Template"
         title={<h1>Templates</h1>}
+        addButton="Add Template"
+        columns={columns}
+        linkField="name"
+        sorting={['name', 'createdTime']}
     />
 }

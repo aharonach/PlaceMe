@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 import useAxios from "./useAxios";
 
-const useFetchRecord = ({ fetchUrl, thenCallback, displayFields}) => {
+const useFetchRecord = ({ fetchUrl, thenCallback, dependencies, displayFields}) => {
     const [response, error, loading, axiosFetch] = useAxios();
 
     const getRecord = () => {
@@ -16,9 +16,9 @@ const useFetchRecord = ({ fetchUrl, thenCallback, displayFields}) => {
     useEffect(() => {
         getRecord();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, dependencies ?? []);
 
-    return [response, error, loading, axiosFetch];
+    return [response, error, loading, axiosFetch, getRecord];
 }
 
 export default useFetchRecord;

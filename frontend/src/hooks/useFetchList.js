@@ -17,10 +17,16 @@ const useFetchList = ({ fetchUrl, propertyName, thenCallback, mapCallback }) => 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const items = extractListFromAPI(response, propertyName, mapCallback);
     const pagination = response?.page;
 
+    if ( items && pagination ) {
+        pagination.items = items.length;
+        pagination.startsFrom = pagination?.number * pagination?.size + 1;
+    }
+
     return [
-        extractListFromAPI(response, propertyName, mapCallback),
+        items,
         error,
         loading,
         axiosFetch,

@@ -26,5 +26,6 @@ export default function PupilsList() {
             basePath="/pupils/"
             linkField="givenId"
             updated={updated}
+            sorting={['firstName', 'lastName', 'givenId', 'createdTime', 'gender', 'birthDate']}
         />;
 }
