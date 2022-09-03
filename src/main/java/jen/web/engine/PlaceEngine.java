@@ -34,7 +34,7 @@ public class PlaceEngine {
         pupils.forEach(System.out::println);
     }
 
-    private Set<SelectorSelectedId> getSelectorSelectedIds(Placement placement, boolean isWantToBeWithSelected){
+    public static Set<SelectorSelectedId> getSelectorSelectedIds(Placement placement, boolean isWantToBeWithSelected){
         return placement.getGroup().getPreferences().stream()
                 .filter(preference -> preference.getIsSelectorWantToBeWithSelected().equals(isWantToBeWithSelected))
                 .map(Preference::getSelectorSelectedId)

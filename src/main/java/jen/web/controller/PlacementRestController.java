@@ -3,6 +3,9 @@ package jen.web.controller;
 import jen.web.assembler.PlacementClassroomModelAssembler;
 import jen.web.assembler.PlacementModelAssembler;
 import jen.web.assembler.PlacementResultModelAssembler;
+import jen.web.dto.ClassroomInfoDto;
+import jen.web.dto.PupilsConnectionsDto;
+import jen.web.engine.PlaceEngine;
 import jen.web.entity.*;
 import jen.web.exception.BadRequest;
 import jen.web.exception.InternalError;
@@ -204,6 +207,20 @@ public class PlacementRestController extends BaseRestController<Placement> {
         } catch (Placement.ResultNotExistsException | PagesAndSortHandler.FieldNotSortableException e) {
             throw new BadRequest(e.getMessage());
         }
+    }
+
+    @GetMapping("/{placementId}/results/{resultId}/classes/info")
+    public ResponseEntity<?> getResultClassesInfo(@PathVariable Long placementId,
+                                              @PathVariable Long resultId) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            PlacementResult placementResult = placementService.getResultById(placement, resultId);
+            return ResponseEntity.ok().body(EntityModel.of(ClassroomInfoDto.fromPlacementResult(placementResult)));
+        } catch (Placement.ResultNotExistsException e) {
+            throw new BadRequest(e.getMessage());
+        }
+
     }
 
     @DeleteMapping("/{placementId}/results/{resultId}")
