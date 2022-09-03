@@ -13,6 +13,20 @@ public class CsvUtils {
         return new StringBuilder(String.join(SEPARATOR, values)).toString();
     }
 
+    private static String cleanTextLine(String text)
+    {
+        // strips off all non-ASCII characters
+        text = text.replaceAll("[^\\x00-\\x7F]", "");
+
+        // erases all the ASCII control characters
+        text = text.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+
+        // removes non-printable characters from Unicode
+        text = text.replaceAll("\\p{C}", "");
+
+        return text.trim();
+    }
+
     public static class CsvContent{
         @Getter private final List<String> columns;
         @Getter private final List<String> rows;
@@ -20,7 +34,7 @@ public class CsvUtils {
 
         public CsvContent(String input) throws CsvNotValidException {
             String[] lines = input.split(LINE_SEPARATOR);
-            this.columns = Arrays.stream(lines[0].split(SEPARATOR)).toList();
+            this.columns = Arrays.stream(cleanTextLine(lines[0]).split(SEPARATOR)).toList();
             this.rows = Arrays.stream(lines).toList().subList(1, lines.length);
             validateRows();
             this.data = createDataList(this.columns, this.rows);
@@ -73,7 +87,7 @@ public class CsvUtils {
                 }
 
                 Map<String, String> currentRow = new HashMap<>(columns.size());
-                String[] splittedRow = row.split(SEPARATOR);
+                String[] splittedRow = cleanTextLine(row).split(SEPARATOR);
                 for(String column : columns){
                     currentRow.put(column, splittedRow[columns.indexOf(column)]);
                 }

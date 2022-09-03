@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -33,6 +32,7 @@ class PlacementServiceTest {
     @Autowired RepositoryTestUtils repositoryTestUtils;
 
     private final static String EXPECTED_HEADER_LINE = "Given ID,First Name,Last Name,Gender,Birth Date,Prefer to be with,Prefer Not to be with,attr 1,attr 2";
+    private final static String EXPECTED_HEADER_LINE_WITH_ESCAPED_CHARS = "\uFEFFGiven ID,First Name,Last Name,Gender,Birth Date,Prefer to be with,Prefer Not to be with,attr 1,attr 2";
 
     @BeforeEach
     void setUp() {
@@ -260,7 +260,7 @@ class PlacementServiceTest {
         List<String> pupilsToImport = List.of(
                 pupilString1 + CsvUtils.SEPARATOR + "dammy data"
         );
-        String inputCsv = joinHeaderAndLinesToCsv(headerLine, pupilsToImport);
+        String inputCsv = joinHeaderAndLinesToCsv(EXPECTED_HEADER_LINE_WITH_ESCAPED_CHARS, pupilsToImport);
         assertThrows(CsvUtils.CsvContent.CsvNotValidException.class, () -> placementService.importDataFromCsv(receivedPlacement, inputCsv));
 
         templateService.deleteById(receivedTemplate.getId());
@@ -458,5 +458,4 @@ class PlacementServiceTest {
             return super.submit(task);
         }
     }
-
 }
