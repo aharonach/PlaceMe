@@ -64,6 +64,20 @@ public class PlacementResult extends BaseEntity {
         return this.getClasses().stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
 
+    public int getTotalNumberOfMales(){
+        if(classes.stream().findFirst().isPresent()){
+            return classes.stream().findFirst().get().totalNumberOfMales;
+        }
+        return 0;
+    }
+
+    public int getTotalNumberOfFemales(){
+        if(classes.stream().findFirst().isPresent()){
+            return classes.stream().findFirst().get().totalNumberOfFemales;
+        }
+        return 0;
+    }
+
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getPlacementScore() {
 
@@ -95,10 +109,8 @@ public class PlacementResult extends BaseEntity {
     }
 
     private double getPercentageOfPupilsScores(){
-        double scoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumScoreOfPupils).sum();
-        double maxScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getSumMaxScoreOfPupils).sum();
-
-        return (scoreOfAllPupils / maxScoreOfAllPupils) * 100;
+        double sumRelativeScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getRelativeScoreOfPupils).sum();
+        return sumRelativeScoreOfAllPupils / classes.size();
     }
 
     private int getNumOfPupils(){

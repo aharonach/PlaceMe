@@ -38,7 +38,9 @@ public class PlacementClassroom extends BaseEntity {
     @ToString.Exclude
     private transient PupilsConnectionsDto connectionsToExclude = new PupilsConnectionsDto(new HashMap<>());
 
+    @JsonIgnore
     int totalNumberOfMales;
+    @JsonIgnore
     int totalNumberOfFemales;
 
     public PlacementClassroom(List<Pupil> pupilsForAlgorithm, PupilsConnectionsDto connectionsToInclude,
@@ -63,13 +65,13 @@ public class PlacementClassroom extends BaseEntity {
 
         return percentageOfWrongConnectionsToInclude * 0.15
                 + percentageOfWrongConnectionsToExclude * 0.15
-                + percentageOfMales * 0.24
-                + percentageOfFemales * 0.24
-                + percentageOfMalesAndFemales * 0.22;
+                + percentageOfMales * 0.23
+                + percentageOfFemales * 0.23
+                + percentageOfMalesAndFemales * 0.23;
     }
 
     private double percentageRelativeToPupilsNumber(double value){
-        return (value / pupils.size()) * 100;
+        return (value / (totalNumberOfFemales + totalNumberOfMales)) * 100;
     }
 
     public long getNumberOfMales(){
@@ -87,20 +89,32 @@ public class PlacementClassroom extends BaseEntity {
         return Math.abs(numOfMales - numOfFemales);
     }
 
+    @JsonIgnore
     public long getDeltaBetweenMales(){
         long numOfMalesInClass = getNumberOfMales();
 
         return Math.abs(numOfMalesInClass - totalNumberOfMales);
     }
 
+    @JsonIgnore
     public long getDeltaBetweenFemales(){
         long numOfFemalesInClass = getNumberOfFemales();
 
         return Math.abs(numOfFemalesInClass - totalNumberOfFemales);
     }
 
+    @JsonIgnore
     public double getSumScoreOfPupils(){
         return pupils.stream().mapToDouble(Pupil::getPupilScore).sum();
+    }
+
+    @JsonIgnore
+    public double getSumMaxScoreOfPupils(){
+        return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
+    }
+
+    public double getRelativeScoreOfPupils(){
+        return (getSumScoreOfPupils() / getSumMaxScoreOfPupils()) * 100;
     }
 
     public long getNumOfPupils(){
@@ -145,10 +159,6 @@ public class PlacementClassroom extends BaseEntity {
             }
         }
         return wrongConnections;
-    }
-
-    public double getSumMaxScoreOfPupils(){
-        return pupils.stream().mapToDouble(Pupil::getPupilMaxScore).sum();
     }
 
     public void addPupilToClass(Pupil pupil){

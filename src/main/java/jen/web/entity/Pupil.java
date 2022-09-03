@@ -10,12 +10,15 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static jen.web.util.IsraeliIdValidator.ID_LENGTH;
 
 @Entity
 @Getter
@@ -82,8 +85,11 @@ public class Pupil extends BaseEntity {
         if(!givenId.matches(DIGITS_REGEX)){
             throw new GivenIdContainsProhibitedCharsException(givenId);
         }
+        if(givenId.length() != ID_LENGTH){
+            throw new GivenIdIsNotValidException("Given id must contain " + ID_LENGTH + " digits: '" + givenId + "'.");
+        }
         if(!IsraeliIdValidator.isValid(givenId)){
-            throw new GivenIdIsNotValidException(givenId);
+            throw new GivenIdIsNotValidException("Given id is not valid: '" + givenId + "'.");
         }
     }
 
@@ -207,12 +213,17 @@ public class Pupil extends BaseEntity {
         return totalScore;
     }
 
+    @JsonIgnore
     public double getPupilMaxScore() {
         double totalScore = 0;
         for(AttributeValue attributeValue : attributeValues){
             totalScore += attributeValue.getMaxScore();
         }
         return totalScore;
+    }
+
+    public double getPupilRelativeScore() {
+        return (getPupilScore() / getPupilMaxScore()) * 100;
     }
 
     private void verifyPupilInGroup(Group group) throws Group.PupilNotBelongException {
@@ -245,8 +256,8 @@ public class Pupil extends BaseEntity {
     }
 
     public static class GivenIdIsNotValidException extends Exception {
-        public GivenIdIsNotValidException(String givenId){
-            super("Given id is not valid: '" + givenId + "'.");
+        public GivenIdIsNotValidException(String message){
+            super(message);
         }
     }
 }
