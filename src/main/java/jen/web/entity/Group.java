@@ -41,13 +41,13 @@ public class Group extends BaseEntity {
     public Group(String name, String description){
         this.name = name;
         this.description = description;
-        setTemplate(null);
+        this.template = null;
     }
 
     public Group(String name, String description, Template template){
         this.name = name;
         this.description = description;
-        setTemplate(template);
+        this.template = template;
     }
 
     public Long getTemplateId(){
