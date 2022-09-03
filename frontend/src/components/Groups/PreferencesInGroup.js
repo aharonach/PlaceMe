@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
     Alert,
     Badge,
@@ -19,15 +19,17 @@ import { X } from 'react-bootstrap-icons';
 
 export default function PreferencesInGroup() {
     const {group} = useOutletContext();
-    const [pupils, loadingPupils, errorPupils] = useFetchList({ fetchUrl: `/groups/${group.id}/pupils`, propertyName: "pupilList" });
-    const [preferences, errorPreferences, loadingPreferences] = useFetchList({ fetchUrl: `/groups/${group.id}/preferences`, propertyName: "preferenceList" });
+    const [preferences, errorFetch, loadingFetch, axiosFetch, getPreferences] = useFetchList({
+        fetchUrl: `/groups/${group.id}/preferences`,
+        propertyName: "preferenceDtoList"
+    });
+    const [pupils, errorPupils, loadingPupils] = useFetchList({
+        fetchUrl: `/groups/${group.id}/pupils/all`,
+        propertyName: "pupilList"
+    });
     const [selector, setSelector] = useState(0);
     const [selected, setSelected] = useState(0);
     const [wantsToBe, setWantsToBe] = useState('yes');
-    const [updateList, setUpdateList] = useState(false);
-
-    const loadingFetch = loadingPupils || loadingPreferences;
-    const errorFetch = errorPupils || errorPreferences;
 
     const reset = () => {
         setSelector(0);
@@ -43,55 +45,40 @@ export default function PreferencesInGroup() {
         const response = await Api.put(`/groups/${group.id}/preferences`, prepareData(selector, selected, wantsToBe));
 
         if ( response.status === 200 ) {
-            // @todo refresh the component
+            getPreferences();
         }
     }
 
+    const mapped = useMemo(() => mapPreferencesByPupils(preferences), [preferences]);
+
     return (
         <>
-            <Loading show={loadingFetch} />
-            {!loadingFetch && errorFetch && <Alert variant="danger">{errorFetch}</Alert> }
-            {!loadingFetch && !errorFetch && pupils && preferences && (
-                <>
-                    <h3>Preferences</h3>
-                    <Instructions selector={selector} />
-                    <div className="mb-3">
-                        <ToggleButtonGroup type="radio" name="wantsToBeWith" value={wantsToBe} onChange={handleToggle}>
-                            <ToggleButton id="wantsToBeWith" value="yes" variant={buttonVariant(selector, wantsToBe, 'yes')} disabled={selector === 0}>Wants to be with</ToggleButton>
-                            <ToggleButton id="doesntWantToBeWith" value="no" variant={buttonVariant(selector, wantsToBe, 'no')} disabled={selector === 0}>Doesn't want to be with</ToggleButton>
-                        </ToggleButtonGroup>
-                        <Button variant="link" onClick={reset}>Clear Selection</Button>
-                    </div>
-                    <div className="mb-3">
-                        {pupils.map( pupil => (
-                            <span key={pupil.id} className="d-inline-block mb-1 me-1">
-                                {!selector
-                                    ? <ToggleButton
-                                        type="radio"
-                                        variant="outline-primary"
-                                        id={`selector-${pupil.id}`}
-                                        value={pupil.id}
-                                        onChange={(e) => setSelector(parseInt(e.target.value))}
-                                        disabled={selector && selector !== pupil.id}
-                                        checked={selector === pupil.id}
-                                    >{pupil.firstName} {pupil.lastName}</ToggleButton>
-                                    : <ToggleButton
-                                        type="radio"
-                                        variant={selector === pupil.id ? 'primary' : 'outline-primary'}
-                                        id={`selected-${pupil.id}`}
-                                        value={pupil.id}
-                                        onChange={(e) => setSelected(parseInt(e.target.value))}
-                                        disabled={selector === pupil.id}
-                                        checked={selected === pupil.id}
-                                    >{pupil.firstName} {pupil.lastName}</ToggleButton>}
-                            </span>
-                        ))}
-                    </div>
-                    <Button onClick={handleSave} disabled={!(selector && selected)}>Add Preference</Button>
-                    <hr />
-                    <Preferences group={group} items={mapPreferencesByPupils(pupils, preferences)} />
-                </>
-            )}
+            {errorFetch && <Alert variant="danger">{errorFetch}</Alert> }
+            <>
+                <h3>Preferences</h3>
+                <Instructions selector={selector} />
+                <div className="mb-3">
+                    <Loading show={loadingPupils} />
+                    {!errorPupils && pupils && <PupilButtons
+                        pupils={pupils}
+                        selector={selector}
+                        selected={selected}
+                        setSelected={setSelected}
+                        setSelector={setSelector}
+                    />}
+                </div>
+                <div className="mb-3">
+                    <ToggleButtonGroup type="radio" name="wantsToBeWith" value={wantsToBe} onChange={handleToggle}>
+                        <ToggleButton id="wantsToBeWith" value="yes" variant={buttonVariant(selector, wantsToBe, 'yes')} disabled={selector === 0}>Wants to be with</ToggleButton>
+                        <ToggleButton id="doesntWantToBeWith" value="no" variant={buttonVariant(selector, wantsToBe, 'no')} disabled={selector === 0}>Doesn't want to be with</ToggleButton>
+                    </ToggleButtonGroup>
+                    {selector ? <Button variant="link" onClick={reset}>Clear Selection</Button> : null}
+                </div>
+                <Button onClick={handleSave} disabled={!(selector && selected)}>Add Preference</Button>
+                <Loading show={loadingFetch} block={false} size="sm" />
+                <hr />
+                <Preferences group={group} items={mapped} updatePreferences={getPreferences} />
+            </>
         </>
     );
 };
@@ -110,9 +97,9 @@ const Instructions = ({ selector }) => {
     return message && <Alert variant="info">{message}</Alert>
 }
 
-const Preferences = ({ group, items }) => {
+const Preferences = ({ group, items, updatePreferences }) => {
     return (
-        <Row xs={2} md={3} lg={4} className="g-2">
+        <Row xs={2} md={3} className="g-2">
             {Object.keys(items).map(selectorId => (
                 <Col key={selectorId}>
                     <Card className="h-100">
@@ -120,32 +107,33 @@ const Preferences = ({ group, items }) => {
                             <Card.Subtitle className="border-bottom mb-1 pb-1">{`${items[selectorId].name} `}</Card.Subtitle>
                             <Stack direction="horizontal" gap={2}>
                                 {!objectIsEmpty(items[selectorId].yes) && (
-                                    <span>
-                                wants to be with:<br />
-                                        {Object.keys(items[selectorId].yes)
-                                            .map(selectedId => <Preference
+                                    <Stack direction="vertical" gap={1}>
+                                        <span>wants to be with:</span>
+                                        <span>
+                                            {Object.keys(items[selectorId].yes).map(selectedId => <Preference
                                                 key={selectedId}
                                                 groupId={group.id}
                                                 selectorId={selectorId}
                                                 selectedId={selectedId}
                                                 selectedName={items[selectorId].yes[selectedId]}
+                                                updatePreferences={updatePreferences}
                                             />)}
-                            </span>
+                                        </span>
+                                    </Stack>
                                 )}
                                 {/** Show separator **/}
                                 {!objectIsEmpty(items[selectorId].no) && !objectIsEmpty(items[selectorId].yes) && <div className="vr"></div>}
                                 {!objectIsEmpty(items[selectorId].no) && (
-                                    <span>
-                                doesn't want to be with:<br />
-                                        {Object.keys(items[selectorId].no)
-                                            .map(selectedId => <Preference
+                                    <Stack direction="vertical" gap={1}>
+                                        <span>doesn't want to be with:</span><br />
+                                        <span>{Object.keys(items[selectorId].no).map(selectedId => <Preference
                                                 key={selectedId}
                                                 groupId={group.id}
                                                 selectorId={selectorId}
                                                 selectedId={selectedId}
                                                 selectedName={items[selectorId].no[selectedId]}
-                                            />)}
-                            </span>
+                                            />)}</span>
+                                    </Stack>
                                 )}
                             </Stack>
                         </Card.Body>
@@ -156,9 +144,7 @@ const Preferences = ({ group, items }) => {
     );
 };
 
-const Preference = ({groupId, selectorId, selectedId, selectedName}) => {
-    const [deleted, setDeleted] = useState(false);
-
+const Preference = ({groupId, selectorId, selectedId, selectedName, updatePreferences}) => {
     const handleDelete = async (e) => {
         e.preventDefault();
 
@@ -167,25 +153,46 @@ const Preference = ({groupId, selectorId, selectedId, selectedName}) => {
             { data: prepareData(selectorId, selectedId) });
 
         if ( response.status === 200 ) {
-            setDeleted(true);
+            updatePreferences();
         }
     };
 
-    if ( deleted ) {
-        return null;
-    }
-
     return (
-        <Badge key={selectedId} className="me-1 mb-1" size="sm">
-            <a href="#" onClick={handleDelete}><X color="white" /></a>
+        <Badge key={selectedId} className="me-1 mb-1 d-inline-flex align-items-center" size="sm">
+            <a href="#" onClick={handleDelete}><X color="white" size={20} /></a>
             {selectedName}
         </Badge>
     )
 }
 
+const PupilButtons = ({ pupils, selector, setSelector, selected, setSelected }) => {
+    return pupils.map( pupil => (
+        <span key={pupil.id} className="d-inline-block mb-1 me-1">
+            {!selector
+                ? <ToggleButton
+                    type="radio"
+                    variant="outline-primary"
+                    id={`selector-${pupil.id}`}
+                    value={pupil.id}
+                    onChange={(e) => setSelector(parseInt(e.target.value))}
+                    disabled={selector && selector !== pupil.id}
+                    checked={selector === pupil.id}
+                >{pupil.firstName} {pupil.lastName}</ToggleButton>
+                : <ToggleButton
+                    type="radio"
+                    variant={selector === pupil.id ? 'primary' : 'outline-primary'}
+                    id={`selected-${pupil.id}`}
+                    value={pupil.id}
+                    onChange={(e) => setSelected(parseInt(e.target.value))}
+                    disabled={selector === pupil.id}
+                    checked={selected === pupil.id}
+                >{pupil.firstName} {pupil.lastName}</ToggleButton>}
+        </span>
+    ));
+}
+
 /**
  * Map the preferences by pupil selector ID
- * @param pupils
  * @param preferences
  * @returns object:
  *  {
@@ -197,10 +204,10 @@ const Preference = ({groupId, selectorId, selectedId, selectedName}) => {
  *      ...
  *  }
  */
-const mapPreferencesByPupils = (pupils, preferences) => {
+const mapPreferencesByPupils = (preferences) => {
     const map = {};
 
-    preferences.forEach( preference => {
+    preferences?.forEach( preference => {
         const selectorId = preference.selectorSelectedId.selectorId;
         const selectedId = preference.selectorSelectedId.selectedId;
         const wantsToBe  = preference.isSelectorWantToBeWithSelected;
@@ -208,20 +215,17 @@ const mapPreferencesByPupils = (pupils, preferences) => {
         // initialize an array for selector pupil with his name and map of selected pupils.
         if ( ! map[selectorId] ) {
             map[selectorId] = {
-                name: pupils.find(findPupil(selectorId)).firstName,
+                name: preference.selectorFirstName,
                 yes:  {},
                 no:   {}
             };
         }
 
-        const name = pupils.find(findPupil(selectedId))?.firstName;
-        if ( name ) map[selectorId][wantsToBe ? 'yes' : 'no'][selectedId] = name;
+        map[selectorId][wantsToBe ? 'yes' : 'no'][selectedId] = preference.selectedFirstName;
     });
 
     return map;
 };
-
-const findPupil = (pupilId) => (pupil) => pupilId === pupil.id;
 
 const buttonVariant = (selected, wantsToBe, equals) => {
     if ( selected && wantsToBe ) {

@@ -2,7 +2,7 @@ import {Badge} from "react-bootstrap";
 import {GenderFemale, GenderMale} from "react-bootstrap-icons";
 
 
-export default function Gender({ gender, pill, children }) {
+export default function Gender({ gender, pill, noIcon, children }) {
     let bg, icon;
 
     if ( gender === 'MALE' ) {
@@ -14,8 +14,8 @@ export default function Gender({ gender, pill, children }) {
     }
 
     return (
-        <Badge pill={pill} bg={""} style={{backgroundColor: bg}} text="dark">
-            {icon}{' '}
+        <Badge pill={pill} bg={""} style={{backgroundColor: bg}} text="dark" className={noIcon ? "p-2" : null}>
+            {!noIcon && icon}{' '}
             {children}
         </Badge>
     )

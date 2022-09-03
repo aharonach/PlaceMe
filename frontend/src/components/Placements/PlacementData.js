@@ -12,9 +12,7 @@ export default function PlacementData(){
                 : <Link to="edit">Assign to a group</Link>},
         { label: "Created On", value: placement.createdTime },
     ];
-
-    console.log(placement?.selectedResult);
-
+    
     const selectedResult = <>
         {placement?.selectedResult ? (
             <>
