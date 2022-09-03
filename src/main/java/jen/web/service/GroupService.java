@@ -183,4 +183,12 @@ public class GroupService implements EntityService<Group> {
                 .sorted()
                 .collect(Collectors.toList());
     }
+
+    public Map<Long, Pupil> getPupilByIdMapForGroup(Long groupId){
+        Group group = getOr404(groupId);
+
+        Map<Long, Pupil> pupilByIdMap = new HashMap<>(group.getPupils().size());
+        group.getPupils().forEach(pupil -> pupilByIdMap.put(pupil.getId(), pupil));
+        return pupilByIdMap;
+    }
 }
