@@ -297,6 +297,7 @@ public class PlacementService implements EntityService<Placement> {
         return engineConfigRepository.save(placeEngineConfig);
     }
 
+    @Transactional
     public String exportCsvHeadersByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
         verifyPlacementGroupContainTemplate(placement);
         List<String> columns = importExportUtils.getColumnNames(placement);
@@ -304,6 +305,7 @@ public class PlacementService implements EntityService<Placement> {
         return csvContent.getHeadersLine();
     }
 
+    @Transactional
     public String exportCsvDataByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
         verifyPlacementGroupContainTemplate(placement);
         List<String> columns = importExportUtils.getColumnNames(placement);
@@ -312,6 +314,7 @@ public class PlacementService implements EntityService<Placement> {
         return csvContent.getFullFileContent();
     }
 
+    @Transactional
     public OperationInfo importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
         verifyPlacementGroupContainTemplate(placement);
 

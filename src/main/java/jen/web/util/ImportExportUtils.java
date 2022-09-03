@@ -188,7 +188,7 @@ public class ImportExportUtils {
         Group group = placement.getGroup();
         Map<String, Attribute> attributeMap = getNameToAttributeMap(getAttributesForPlacement(placement));
 
-        Map<String, Pupil> givenIdToPupilMap = new HashMap<>(contentData.size());
+        Map<String, Pupil> givenIdToPupilMap = getGivenIdToPupilMap(operationInfo, contentData, group);
         int lineNumber = 2; // first line + headers
 
         for(Map<String, String> rowMap : contentData){
@@ -196,17 +196,13 @@ public class ImportExportUtils {
             String currentGivenId = null;
 
             try {
-                Pupil newPupil = createPupilFromRowMap(rowMap, lineNumber);
-                Pupil receivedPupil = pupilService.updateOrCreatePupilByGivenId(newPupil);
-                receivedPupil.addToGroup(group);
-                currentGivenId = receivedPupil.getGivenId();
-                givenIdToPupilMap.put(currentGivenId, receivedPupil);
-            } catch (ImportExportUtils.ParseValueException | Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
-                operationInfo.addError(e.getMessage());
+                currentGivenId = createPupilFromRowMap(rowMap, lineNumber).getGivenId();
+            } catch (ImportExportUtils.ParseValueException ignored) {
+                // parse error already added to operationInfo while building givenIdToPupilMap
+                continue;
             }
 
             Pupil currentPupil = givenIdToPupilMap.get(currentGivenId);
-
             if(currentGivenId != null && currentPupil != null){
                 // add preferences
                 errors = addPreferencesFromImportData(rowMap.get(PREFER_TO_BE_WITH), givenIdToPupilMap, group, currentPupil, true, lineNumber);
@@ -224,6 +220,28 @@ public class ImportExportUtils {
         }
 
         return operationInfo;
+    }
+
+    private Map<String, Pupil> getGivenIdToPupilMap(OperationInfo operationInfo, List<Map<String, String>> contentData, Group group){
+        Map<String, Pupil> givenIdToPupilMap = new HashMap<>(contentData.size());
+        int lineNumber = 2; // first line + headers
+
+        for(Map<String, String> rowMap : contentData){
+            List<String> errors;
+            String currentGivenId = null;
+
+            try {
+                Pupil newPupil = createPupilFromRowMap(rowMap, lineNumber);
+                Pupil receivedPupil = pupilService.updateOrCreatePupilByGivenId(newPupil);
+                receivedPupil.addToGroup(group);
+                currentGivenId = receivedPupil.getGivenId();
+                givenIdToPupilMap.put(currentGivenId, receivedPupil);
+            } catch (ImportExportUtils.ParseValueException | Pupil.GivenIdContainsProhibitedCharsException | Pupil.GivenIdIsNotValidException e) {
+                operationInfo.addError(e.getMessage());
+            }
+            lineNumber ++; // number for parse messages error message
+        }
+        return givenIdToPupilMap;
     }
 
     private List<String> addAttributeValuesForPupil(Pupil pupil, Group group, Map<String, Attribute> attributeMap,
