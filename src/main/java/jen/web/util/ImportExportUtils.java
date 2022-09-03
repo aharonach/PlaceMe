@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static jen.web.util.CsvUtils.createLineFromValues;
+
 @Component
 @RequiredArgsConstructor
 public class ImportExportUtils {
@@ -168,7 +170,7 @@ public class ImportExportUtils {
             for(String column : getColumnNames(placement)){
                 values.add(pupilDataMap.get(column));
             }
-            rows.add(CsvUtils.createLineFromValues(values));
+            rows.add(createLineFromValues(values));
         }
 
         return rows;
@@ -184,7 +186,11 @@ public class ImportExportUtils {
                 .collect(Collectors.joining(";"));
     }
 
-    public OperationInfo parseAndAddDataFromFile(CsvUtils.CsvContent csvContent, Placement placement){
+    public OperationInfo parseAndAddDataFromFile(CsvUtils.CsvContent csvContent, Placement placement) throws CsvUtils.CsvContent.CsvNotValidException {
+        if(!csvContent.getHeadersLine().equals(createLineFromValues(getColumnNames(placement)))){
+            throw new CsvUtils.CsvContent.CsvNotValidException("Attributes not match for this placement.");
+        }
+
         OperationInfo operationInfo = new OperationInfo();
         List<Map<String, String>> contentData = csvContent.getData();
         Group group = placement.getGroup();
