@@ -2,6 +2,7 @@ import React from 'react';
 import {Link} from "react-router-dom";
 import {Alert, Button, Table} from "react-bootstrap";
 import {CaretDownFill, CaretUpFill} from "react-bootstrap-icons";
+import {humanizeTime} from "../utils";
 
 function TableList({
     items,
@@ -76,6 +77,10 @@ function TableList({
 
                             if ( 'actions' === key ) {
                                 return <td key={key}>{columns[key].callbacks.map( callback => callback(item))}</td>
+                            }
+
+                            if ( 'createdTime' === key ) {
+                                return <td key={key}>{humanizeTime(item[key])}</td>;
                             }
 
                             if ( ['undefined', 'object'].includes( typeof( item[key] ) ) && ! React.isValidElement( item[key] ) ) {
