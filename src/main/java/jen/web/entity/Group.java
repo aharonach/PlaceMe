@@ -30,11 +30,11 @@ public class Group extends BaseEntity {
     @Fetch(FetchMode.JOIN)
     private Set<Pupil> pupils = new LinkedHashSet<>();
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "group")
+    @OneToMany(mappedBy = "group")
     @JsonIgnore
     private Set<Preference> preferences = new LinkedHashSet<>();
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "group")
+    @OneToMany(mappedBy = "group")
     @JsonIgnore
     private Set<Placement> placements = new LinkedHashSet<>();
 
@@ -76,6 +76,7 @@ public class Group extends BaseEntity {
         return pupils.size();
     }
 
+    @JsonIgnore
     public Set<Long> getPlacementIds(){
         return placements.stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
