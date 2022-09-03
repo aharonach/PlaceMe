@@ -11,7 +11,7 @@ export default function GenerateFirstResults({ hasResults }) {
 
     if ( hasResults ) {
         return <HeroAddRecord
-            title={<h2>Results generated!</h2>}
+            title={<h2>The placement has {placement.numberOfResults} Results</h2>}
             message={<p>No selected result, go to the results page to select one.</p>}
             button={<LinkContainer to={`/placements/${placement.id}/results`}><Button size="lg" variant="success">View the results</Button></LinkContainer>}
         />
@@ -31,6 +31,6 @@ export default function GenerateFirstResults({ hasResults }) {
             {error && <Alert variant="danger">{error}</Alert> }
             <p>Click on start to create the first 3 results</p>
         </>}
-        button={<Button size="lg" onClick={generateFirstResults}><Loading show={loading} block={false} /> Generate Now</Button>}
+        button={<Button size="lg" onClick={generateFirstResults}><Loading show={loading} block={false} /> Start Now</Button>}
     />;
 }

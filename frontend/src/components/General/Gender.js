@@ -1,7 +1,6 @@
 import {Badge} from "react-bootstrap";
 import {GenderFemale, GenderMale} from "react-bootstrap-icons";
 
-
 export default function Gender({ gender, pill, noIcon, children }) {
     let bg, icon;
 

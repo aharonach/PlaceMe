@@ -2,6 +2,7 @@ import RecordDetails from "../RecordDetails";
 import {Link, useOutletContext} from "react-router-dom";
 import ResultData from "./Results/ResultData";
 import GenerateFirstResults from "./GenerateFirstResults";
+import {humanizeTime} from "../../utils";
 
 export default function PlacementData(){
     const { placement } = useOutletContext();
@@ -10,9 +11,9 @@ export default function PlacementData(){
         { label: "Group", value: placement.groupId
                 ? placement.group.name
                 : <Link to="edit">Assign to a group</Link>},
-        { label: "Created On", value: placement.createdTime },
+        { label: "Created On", value: humanizeTime(placement.createdTime) },
     ];
-    
+
     const selectedResult = <>
         {placement?.selectedResult ? (
             <>

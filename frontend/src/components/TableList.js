@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from "react-router-dom";
-import {Alert, Button, Table} from "react-bootstrap";
+import {Alert, Button, ButtonGroup, Table} from "react-bootstrap";
 import {CaretDownFill, CaretUpFill} from "react-bootstrap-icons";
 import {humanizeTime} from "../utils";
 
@@ -76,7 +76,7 @@ function TableList({
                             }
 
                             if ( 'actions' === key ) {
-                                return <td key={key}>{columns[key].callbacks.map( callback => callback(item))}</td>
+                                return <td key={key}><ButtonGroup>{columns[key].callbacks.map( callback => callback(item))}</ButtonGroup></td>
                             }
 
                             if ( 'createdTime' === key ) {
