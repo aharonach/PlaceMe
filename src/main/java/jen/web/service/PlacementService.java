@@ -203,7 +203,7 @@ public class PlacementService implements EntityService<Placement> {
     }
 
     public PlacementResult generatePlacementResult(Placement placement, String name, String description) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
-        verifyPlacementContainsDataForGeneration(placement);
+        verifyPlacementGroupContainsPupils(placement);
 
         PlaceEngine placeEngine = new PlaceEngine(placement, getGlobalConfig());
 
@@ -240,18 +240,23 @@ public class PlacementService implements EntityService<Placement> {
         }
     }
 
-    private void verifyPlacementContainsDataForGeneration(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
+    private void verifyPlacementContainGroup(Placement placement) throws PlacementWithoutGroupException {
         if(placement.getGroup() == null){
             throw new PlacementWithoutGroupException();
         }
+    }
 
+    private void verifyPlacementGroupContainsPupils(Placement placement) throws PlacementWithoutPupilsInGroupException, PlacementWithoutGroupException {
+        verifyPlacementContainGroup(placement);
         if(placement.getGroup().getPupils().size() == 0){
             throw new PlacementWithoutPupilsInGroupException();
         }
+    }
 
-        // @todo: attr values will be empty. should we avoid starting a placement in this case?
+    private void verifyPlacementGroupContainTemplate(Placement placement) throws PlacementWithoutGroupException, PlacementWithoutTemplateInGroupException {
+        verifyPlacementContainGroup(placement);
         if(placement.getGroup().getTemplate() == null){
-            System.out.println("group not have template");
+            throw new PlacementWithoutTemplateInGroupException();
         }
     }
 
@@ -292,20 +297,27 @@ public class PlacementService implements EntityService<Placement> {
         return engineConfigRepository.save(placeEngineConfig);
     }
 
-    public String exportCsvHeadersByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException {
+    @Transactional
+    public String exportCsvHeadersByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
+        verifyPlacementGroupContainTemplate(placement);
         List<String> columns = importExportUtils.getColumnNames(placement);
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns);
         return csvContent.getHeadersLine();
     }
 
-    public String exportCsvDataByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException {
+    @Transactional
+    public String exportCsvDataByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
+        verifyPlacementGroupContainTemplate(placement);
         List<String> columns = importExportUtils.getColumnNames(placement);
         List<String> rows = importExportUtils.createRowDataForPupils(placement);
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns, rows);
         return csvContent.getFullFileContent();
     }
 
-    public OperationInfo importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException {
+    @Transactional
+    public OperationInfo importDataFromCsv(Placement placement, String input) throws CsvUtils.CsvContent.CsvNotValidException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
+        verifyPlacementGroupContainTemplate(placement);
+
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(input);
 
         // parse data and create pupils map
@@ -329,6 +341,12 @@ public class PlacementService implements EntityService<Placement> {
     public static class PlacementWithoutPupilsInGroupException extends Exception {
         public PlacementWithoutPupilsInGroupException(){
             super("Group have no pupils.");
+        }
+    }
+
+    public static class PlacementWithoutTemplateInGroupException extends Exception {
+        public PlacementWithoutTemplateInGroupException(){
+            super("Group have no template.");
         }
     }
 }

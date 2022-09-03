@@ -38,6 +38,11 @@ public class Group extends BaseEntity {
     @JsonIgnore
     private Set<Placement> placements = new LinkedHashSet<>();
 
+    public Group(String name, String description){
+        this.name = name;
+        this.description = description;
+        this.template = null;
+    }
 
     public Group(String name, String description, Template template){
         this.name = name;

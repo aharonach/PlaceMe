@@ -239,6 +239,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
             return ResponseEntity.ok().body(columnsString);
         } catch (CsvUtils.CsvContent.CsvNotValidException e) {
             throw new BadRequest(e.getMessage());
+        } catch (PlacementService.PlacementWithoutTemplateInGroupException | PlacementService.PlacementWithoutGroupException e) {
+            throw new PreconditionFailed(e.getMessage());
         }
     }
 
@@ -253,6 +255,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
             throw new BadRequest(e.getMessage());
         } catch (IllegalAccessException | NoSuchFieldException e) {
             throw new InternalError(e.getMessage());
+        } catch (PlacementService.PlacementWithoutTemplateInGroupException | PlacementService.PlacementWithoutGroupException e) {
+            throw new PreconditionFailed(e.getMessage());
         }
     }
 
@@ -266,6 +270,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
             return ResponseEntity.ok().body(operationInfo);
         } catch (CsvUtils.CsvContent.CsvNotValidException e) {
             throw new BadRequest(e.getMessage());
+        } catch (PlacementService.PlacementWithoutTemplateInGroupException | PlacementService.PlacementWithoutGroupException e) {
+            throw new PreconditionFailed(e.getMessage());
         }
 
     }

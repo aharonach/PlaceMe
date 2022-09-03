@@ -237,6 +237,7 @@ public class Pupil extends BaseEntity {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Pupil pupil = (Pupil) o;
+        // problematic for new pupils (or any entity) that not in DB yet
         return id != null && Objects.equals(id, pupil.id);
     }
 

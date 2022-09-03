@@ -2,6 +2,7 @@ package jen.web.controller;
 
 import jen.web.assembler.GroupModelAssembler;
 import jen.web.assembler.PupilModelAssembler;
+import jen.web.dto.PreferenceDto;
 import jen.web.entity.Group;
 import jen.web.entity.Preference;
 import jen.web.entity.Pupil;
@@ -22,9 +23,9 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -112,7 +113,7 @@ public class GroupRestController extends BaseRestController<Group> {
     @GetMapping("/{groupId}/preferences")
     public ResponseEntity<?> getPreferences(@PathVariable Long groupId){
         Set<Preference> preferences = groupService.getOr404(groupId).getPreferences();
-        CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+        CollectionModel<PreferenceDto> allEntities = preferencesToModelCollection(groupId, preferences);
 
         return ResponseEntity
                 .ok()
@@ -125,7 +126,7 @@ public class GroupRestController extends BaseRestController<Group> {
         Group group = groupService.getOr404(groupId);
         Pupil pupil = pupilService.getOr404(pupilId);
         List<Preference> preferences = groupService.getAllPreferencesForPupil(group, pupil);
-        CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+        CollectionModel<PreferenceDto> allEntities = preferencesToModelCollection(groupId, preferences);
 
         return ResponseEntity
                 .ok()
@@ -139,7 +140,7 @@ public class GroupRestController extends BaseRestController<Group> {
         try {
             Group group = groupService.getOr404(groupId);
             List<Preference> preferences = groupService.addPupilPreference(group, preference);
-            CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+            CollectionModel<PreferenceDto> allEntities = preferencesToModelCollection(groupId, preferences);
             return ResponseEntity.ok().body(allEntities);
 
         } catch (Group.PupilNotBelongException | Preference.SamePupilException e) {
@@ -157,12 +158,12 @@ public class GroupRestController extends BaseRestController<Group> {
         Long selectedId = preference.getSelectorSelectedId().getSelectedId();
 
         List<Preference> preferences = groupService.deletePupilPreferences(group, selectorId, selectedId);
-        CollectionModel<Preference> allEntities = preferencesToModelCollection(groupId, preferences);
+        CollectionModel<PreferenceDto> allEntities = preferencesToModelCollection(groupId, preferences);
         return ResponseEntity.ok().body(allEntities);
     }
 
-    private CollectionModel<Preference> preferencesToModelCollection(Long groupId, Iterable<Preference> preferences){
-        return  CollectionModel.of(preferences,
+    private CollectionModel<PreferenceDto> preferencesToModelCollection(Long groupId, Collection<Preference> preferences){
+        return  CollectionModel.of(preferences.stream().map(preference -> PreferenceDto.fromPreference(preference, groupService.getPupilByIdMapForGroup(groupId))).toList(),
                 linkTo(methodOn(this.getClass()).get(groupId)).withRel("group"),
                 linkTo(methodOn(this.getClass()).getPreferences(groupId)).withSelfRel()
         );
