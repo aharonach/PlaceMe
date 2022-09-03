@@ -53,7 +53,12 @@ public class LoadDatabase {
             createTemplates();
             createGroups();
             createPlacements(); // create placement and import data from csv
-            createPlacementResult();
+
+            // generate results
+            List<Placement> placements = placementService.allWithoutPages();
+            placementService.generatePlacementResult(placements.get(0), "name", "test 4 classes");
+//            placementService.generatePlacementResult(placements.get(1), "name", "test 6 classes");
+//            placementService.generatePlacementResult(placements.get(2), "name", "test 8 classes");
 
 //            // print
 //            System.out.println("Pupils:");
@@ -119,23 +124,16 @@ public class LoadDatabase {
         String content = getFileContent("placement1.csv");
 
         Placement placement1 = placementService.add(new Placement("placement 1", 4, group));
-        placementService.importDataFromCsv(placement1, content);
+        System.out.println(placementService.importDataFromCsv(placement1, content).getErrors());
         logger.info("Preloading " + placement1);
 
-        Placement placement2 = placementService.add(new Placement("placement 2", 6, group));
-        //placementService.importDataFromCsv(placement2, content);
-        logger.info("Preloading " + placement2);
-
-        Placement placement3 = placementService.add(new Placement("placement 3", 8, group));
-        //placementService.importDataFromCsv(placement3, content);
-        logger.info("Preloading " + placement3);
-    }
-
-    private void createPlacementResult() throws PlacementService.PlacementWithoutGroupException, PlacementService.PlacementWithoutPupilsInGroupException, PagesAndSortHandler.FieldNotSortableException {
-        List<Placement> placements = placementService.allWithoutPages();
-        placementService.generatePlacementResult(placements.get(0), "name", "test 4 classes");
-        placementService.generatePlacementResult(placements.get(1), "name", "test 6 classes");
-        placementService.generatePlacementResult(placements.get(2), "name", "test 8 classes");
+//        Placement placement2 = placementService.add(new Placement("placement 2", 6, group));
+//        System.out.println(placementService.importDataFromCsv(placement2, content).getErrors());
+//        logger.info("Preloading " + placement2);
+//
+//        Placement placement3 = placementService.add(new Placement("placement 3", 8, group));
+//        System.out.println(placementService.importDataFromCsv(placement3, content).getErrors());
+//        logger.info("Preloading " + placement3);
     }
 
     private String getFileContent(String fileName) throws FileNotFoundException {

@@ -213,12 +213,17 @@ public class Pupil extends BaseEntity {
         return totalScore;
     }
 
+    @JsonIgnore
     public double getPupilMaxScore() {
         double totalScore = 0;
         for(AttributeValue attributeValue : attributeValues){
             totalScore += attributeValue.getMaxScore();
         }
         return totalScore;
+    }
+
+    public double getPupilRelativeScore() {
+        return (getPupilScore() / getPupilMaxScore()) * 100;
     }
 
     private void verifyPupilInGroup(Group group) throws Group.PupilNotBelongException {
