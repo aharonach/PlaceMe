@@ -36,7 +36,9 @@ export default function Classes({ result }) {
                                     <PeopleFill /> {classInfo.numOfPupils}
                                 </Stack>
                                 {classInfo?.pupils.map(pupil => (
-                                    <div key={pupil.id}><Gender pill gender={pupil.gender} /> {pupil.firstName} {pupil.lastName}</div>
+                                    <Stack gap={2} direction={"horizontal"} key={pupil.id}>
+                                        <Gender pill gender={pupil.gender} noIcon /> {pupil.firstName} {pupil.lastName}
+                                    </Stack>
                                 ))}
                             </Card.Body>
                         </Card>

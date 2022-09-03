@@ -1,5 +1,6 @@
 import {Link} from "react-router-dom";
 import React from "react";
+import moment from "moment";
 
 export function extractListFromAPI(object, property, mapCallback = null ) {
     const embedded = object?._embedded;
@@ -55,4 +56,15 @@ export function boolToString(bool){
 
 export function fixedNumber(num, toFixed = 2) {
     return num === 'NaN' && isNaN(num) ? '' : num.toFixed(toFixed);
+}
+
+export function humanizeTime(time, format = 'DD/MM/YYYY HH:mm') {
+    const current = moment(time);
+    const now = moment();
+    const diff = now.diff(current, 'days');
+    if ( diff <= 0 ) {
+        return current.fromNow();
+    }
+
+    return current.format(format);
 }
