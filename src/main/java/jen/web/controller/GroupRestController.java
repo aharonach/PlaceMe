@@ -110,6 +110,16 @@ public class GroupRestController extends BaseRestController<Group> {
         }
     }
 
+    @GetMapping("/{groupId}/pupils/all")
+    public ResponseEntity<?> getAllPupilsOfGroup(@PathVariable Long groupId,
+                                              @ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo){
+        Group group = groupService.getOr404(groupId);
+
+        List<Pupil> pages = groupService.getAllPupilOfGroup(group);
+        CollectionModel<EntityModel<Pupil>> allEntities = pupilAssembler.toCollectionModelWithoutPages(pages);
+        return ResponseEntity.ok().body(allEntities);
+    }
+
     @GetMapping("/{groupId}/preferences")
     public ResponseEntity<?> getPreferences(@PathVariable Long groupId){
         Set<Preference> preferences = groupService.getOr404(groupId).getPreferences();
