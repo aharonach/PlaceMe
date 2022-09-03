@@ -76,7 +76,6 @@ public class Group extends BaseEntity {
         return pupils.size();
     }
 
-    @JsonIgnore
     public Set<Long> getPlacementIds(){
         return placements.stream().map(BaseEntity::getId).collect(Collectors.toSet());
     }
