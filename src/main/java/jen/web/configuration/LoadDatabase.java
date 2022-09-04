@@ -48,6 +48,7 @@ public class LoadDatabase {
 
             createTemplates();
             createGroups();
+            createPlacements();
         };
     }
 
@@ -74,7 +75,7 @@ public class LoadDatabase {
 
     private void createPlacements() throws FileNotFoundException, CsvUtils.CsvContent.CsvNotValidException, PlacementService.PlacementWithoutTemplateInGroupException, PlacementService.PlacementWithoutGroupException {
         Group group1 = groupService.getOr404(1L);
-        String content1 = getFileContent("placement1.csv");
+        String content1 = getFileContent("template1with166pupils.csv"); // placement1 // template1with166pupils
         Placement placement1 = placementService.add(new Placement("placement 1", 4, group1));
         System.out.println(placementService.importDataFromCsv(placement1, content1).getErrors());
         logger.info("Preloading " + placement1);
