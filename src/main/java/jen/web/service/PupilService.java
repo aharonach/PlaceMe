@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static jen.web.util.IsraeliIdValidator.padWithZerosAndTrim;
+
 @Service
 @RequiredArgsConstructor
 public class PupilService implements EntityService<Pupil>{
@@ -54,7 +56,8 @@ public class PupilService implements EntityService<Pupil>{
     }
 
     public Pupil getByGivenIdOr404(String givenId) {
-        return pupilRepository.getPupilByGivenId(givenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
+        String paddedGivenId = padWithZerosAndTrim(givenId);
+        return pupilRepository.getPupilByGivenId(paddedGivenId).orElseThrow(() -> new NotFound("Could not find pupil with given ID " + givenId));
     }
 
     public Pupil updateOrCreatePupilByGivenId(Pupil newPupil) throws Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {

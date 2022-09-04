@@ -10,6 +10,18 @@ public class IsraeliIdValidator {
 
     public static final int ID_LENGTH = 9;
 
+    public static final String DIGITS_REGEX = "\\d+";
+
+    public static String padWithZerosAndTrim(String givenId){
+        String result = givenId.trim();
+
+        if(result.length() < ID_LENGTH && result.matches(DIGITS_REGEX)){
+            result = String.format("%09d", Integer.valueOf(result));
+        }
+
+        return result;
+    }
+
     public static boolean isValid(String israeliId){
         if(validateId){
             if (israeliId.length() != ID_LENGTH)

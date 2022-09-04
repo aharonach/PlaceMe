@@ -212,7 +212,7 @@ class PlacementServiceTest {
     }
 
     @Test
-    void shouldImportAlSuccessfullyWhenImportingCsvFileWithValidDataAndPreferences() throws Template.AttributeAlreadyExistException, PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutTemplateInGroupException, CsvUtils.CsvContent.CsvNotValidException, PlacementService.PlacementWithoutGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+    void shouldImportAllSuccessfullyWhenImportingCsvFileWithValidDataAndPreferences() throws Template.AttributeAlreadyExistException, PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutTemplateInGroupException, CsvUtils.CsvContent.CsvNotValidException, PlacementService.PlacementWithoutGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
         Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
@@ -252,6 +252,51 @@ class PlacementServiceTest {
         assertEquals(3, groupService.getAllPreferencesForPupil(receivedGroup, receivedPupil3).size());
 
         assertEquals(0, operationInfo.getErrorsCount());
+
+        pupilService.deleteById(receivedPupil1.getId());
+        pupilService.deleteById(receivedPupil2.getId());
+        pupilService.deleteById(receivedPupil3.getId());
+        templateService.deleteById(receivedTemplate.getId());
+        placementService.deleteById(receivedPlacement.getId());
+        groupService.deleteById(receivedGroup.getId());
+    }
+
+    @Test
+    void shouldImportAllSuccessfullyWhenGivenIdContainLessThanNineDigitsAndSpaces() throws Template.AttributeAlreadyExistException, PlacementService.PlacementResultsInProgressException, PlacementService.PlacementWithoutTemplateInGroupException, CsvUtils.CsvContent.CsvNotValidException, PlacementService.PlacementWithoutGroupException, Pupil.GivenIdContainsProhibitedCharsException, Pupil.GivenIdIsNotValidException {
+        Template receivedTemplate = templateService.add(repositoryTestUtils.createTemplate2());
+        Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", receivedTemplate));
+        Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
+
+        String headerLine = placementService.exportCsvHeadersByPlacement(receivedPlacement);
+        assertEquals(EXPECTED_HEADER_LINE, headerLine);
+
+        List<String> pupilsToImport = List.of(
+                buildPupilRow("1111", "pupil1", "lastname1", "male", "1/1/1991", "222222222; 333333333 ", "", "1", "1"),
+                buildPupilRow("222222222", "pupil2", "lastname2", "male", "2/2/1992", "", "1111", "2", "2"),
+                buildPupilRow("333333333", "pupil2", "lastname2", "male", "3/3/1993", "", "", "3", "3")
+        );
+
+        String inputCsv = joinHeaderAndLinesToCsv(headerLine, pupilsToImport);
+        OperationInfo operationInfo = placementService.importDataFromCsv(receivedPlacement, inputCsv);
+        System.out.println(operationInfo.getErrors());
+        assertEquals(0, operationInfo.getErrorsCount());
+
+        Group updatedGroup = groupService.getOr404(receivedGroup.getId());
+        Pupil receivedPupil1 = pupilService.getByGivenIdOr404("1111");
+        Pupil receivedPupil2 = pupilService.getByGivenIdOr404("222222222");
+        Pupil receivedPupil3 = pupilService.getByGivenIdOr404("333333333");
+
+        assertEquals(3, groupService.getAllPreferencesForPupil(receivedGroup, receivedPupil1).size());
+        assertEquals(2, groupService.getAllPreferencesForPupil(receivedGroup, receivedPupil2).size());
+        assertEquals(1, groupService.getAllPreferencesForPupil(receivedGroup, receivedPupil3).size());
+
+        assertEquals(3, updatedGroup.getPupils().size());
+        assertEquals("pupil1", receivedPupil1.getFirstName());
+        assertEquals("lastname1", receivedPupil1.getLastName());
+        assertEquals(Pupil.Gender.MALE, receivedPupil1.getGender());
+        assertEquals(1991, receivedPupil1.getBirthDate().getYear());
+        assertEquals(2, receivedPupil1.getAttributeValues().size());
+        assertTrue(receivedPupil1.isInGroup(receivedGroup));
 
         pupilService.deleteById(receivedPupil1.getId());
         pupilService.deleteById(receivedPupil2.getId());

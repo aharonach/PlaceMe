@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static jen.web.util.CsvUtils.createLineFromValues;
+import static jen.web.util.IsraeliIdValidator.padWithZerosAndTrim;
 
 @Component
 @RequiredArgsConstructor
@@ -278,10 +279,11 @@ public class ImportExportUtils {
         if(listString != null && !listString.isBlank()){
             for(String selectedGivenId : listString.split(";")){
                 try{
-                    Pupil.validateGivenId(selectedGivenId);
-                    Pupil selected = givenIdToPupilMap.get(selectedGivenId);
+                    String paddedGivenId = padWithZerosAndTrim(selectedGivenId);
+                    Pupil.validateGivenId(paddedGivenId);
+                    Pupil selected = givenIdToPupilMap.get(paddedGivenId);
                     if( selected == null){
-                        throw new CantFindPupilException(selectedGivenId);
+                        throw new CantFindPupilException(paddedGivenId);
                     }
                     groupService.addPupilPreference(group, new Preference(selector, selected, WantToBeTogether));
                 } catch (Preference.SamePupilException | Pupil.GivenIdContainsProhibitedCharsException |

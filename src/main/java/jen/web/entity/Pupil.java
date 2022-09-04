@@ -18,7 +18,7 @@ import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static jen.web.util.IsraeliIdValidator.ID_LENGTH;
+import static jen.web.util.IsraeliIdValidator.*;
 
 @Entity
 @Getter
@@ -27,8 +27,6 @@ import static jen.web.util.IsraeliIdValidator.ID_LENGTH;
 @NoArgsConstructor
 @Table(name = "pupils")
 public class Pupil extends BaseEntity {
-    public static final String DIGITS_REGEX = "\\d+";
-
     @NaturalId(mutable=true)
     private String givenId;
     private String firstName;
@@ -75,10 +73,10 @@ public class Pupil extends BaseEntity {
     }
 
     public void setGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
+        String paddedGivenId = padWithZerosAndTrim(givenId);
+        validateGivenId(paddedGivenId);
 
-        validateGivenId(givenId);
-
-        this.givenId = givenId;
+        this.givenId = paddedGivenId;
     }
 
     public static void validateGivenId(String givenId) throws GivenIdContainsProhibitedCharsException, GivenIdIsNotValidException {
