@@ -82,7 +82,7 @@ public class LoadDatabase {
     }
 
     private String getFileContent(String fileName) throws FileNotFoundException {
-        File placementCsv1 = Paths.get("src", "main", "java", "jen", "web", "configuration", "csv", fileName).toFile();
+        File placementCsv1 = Paths.get("src", "main", "java", "web", "configuration", "csv", fileName).toFile();
 
         try(Scanner myReader = new Scanner(placementCsv1)){
             StringBuilder fileContent = new StringBuilder();
