@@ -3,7 +3,6 @@ package web.engine;
 import io.jenetics.BitChromosome;
 import io.jenetics.BitGene;
 import io.jenetics.Genotype;
-import jen.example.placePupils.PlaceEngine;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,35 +33,35 @@ class PlaceEngineTest {
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 1)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(pupilPlacedMoreThanOnce));
+        assertFalse(PlaceEngine.isValid(pupilPlacedMoreThanOnce));
 
         Genotype<BitGene> pupilPlacedMoreThanOnceInFewClasses = Genotype.of(
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 1)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(pupilPlacedMoreThanOnceInFewClasses));
+        assertFalse(PlaceEngine.isValid(pupilPlacedMoreThanOnceInFewClasses));
 
 
         Genotype<BitGene> notAllPupilsPlaced = Genotype.of(
                 BitChromosome.of(numOfPupils, 0),
                 BitChromosome.of(numOfPupils, 0)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(notAllPupilsPlaced));
+        assertFalse(PlaceEngine.isValid(notAllPupilsPlaced));
 
         Genotype<BitGene> notAllPupilsPlacedInFewClasses = Genotype.of(
                 BitChromosome.of(numOfPupils, 0),
                 BitChromosome.of(numOfPupils, 0),
                 BitChromosome.of(numOfPupils, 0)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(notAllPupilsPlacedInFewClasses));
+        assertFalse(PlaceEngine.isValid(notAllPupilsPlacedInFewClasses));
 
 
         Genotype<BitGene> goodPlacement = Genotype.of(
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 0)
         );
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(goodPlacement));
+        assertTrue(PlaceEngine.isValid(goodPlacement));
     }
 
     private void validateRepair(int numOfPupils) {
@@ -70,32 +69,32 @@ class PlaceEngineTest {
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 1)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(pupilPlacedMoreThanOnce));
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(jen.example.placePupils.PlaceEngine.repair(pupilPlacedMoreThanOnce)));
+        assertFalse(PlaceEngine.isValid(pupilPlacedMoreThanOnce));
+        assertTrue(PlaceEngine.isValid(PlaceEngine.repair(pupilPlacedMoreThanOnce)));
 
         Genotype<BitGene> pupilPlacedMoreThanOnceInFewClasses = Genotype.of(
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 1)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(pupilPlacedMoreThanOnceInFewClasses));
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(jen.example.placePupils.PlaceEngine.repair(pupilPlacedMoreThanOnceInFewClasses)));
+        assertFalse(PlaceEngine.isValid(pupilPlacedMoreThanOnceInFewClasses));
+        assertTrue(PlaceEngine.isValid(PlaceEngine.repair(pupilPlacedMoreThanOnceInFewClasses)));
 
 
         Genotype<BitGene> notAllPupilsPlaced = Genotype.of(
                 BitChromosome.of(numOfPupils, 0),
                 BitChromosome.of(numOfPupils, 0)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(notAllPupilsPlaced));
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(jen.example.placePupils.PlaceEngine.repair(notAllPupilsPlaced)));
+        assertFalse(PlaceEngine.isValid(notAllPupilsPlaced));
+        assertTrue(PlaceEngine.isValid(PlaceEngine.repair(notAllPupilsPlaced)));
 
         Genotype<BitGene> notAllPupilsPlacedInFewClasses = Genotype.of(
                 BitChromosome.of(numOfPupils, 0),
                 BitChromosome.of(numOfPupils, 0),
                 BitChromosome.of(numOfPupils, 0)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(notAllPupilsPlacedInFewClasses));
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(jen.example.placePupils.PlaceEngine.repair(notAllPupilsPlacedInFewClasses)));
+        assertFalse(PlaceEngine.isValid(notAllPupilsPlacedInFewClasses));
+        assertTrue(PlaceEngine.isValid(PlaceEngine.repair(notAllPupilsPlacedInFewClasses)));
 
 
         Genotype<BitGene> pupilPlacedWithMixedClasses = Genotype.of(
@@ -103,15 +102,15 @@ class PlaceEngineTest {
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 0)
         );
-        assertFalse(jen.example.placePupils.PlaceEngine.isValid(pupilPlacedWithMixedClasses));
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(jen.example.placePupils.PlaceEngine.repair(pupilPlacedWithMixedClasses)));
+        assertFalse(PlaceEngine.isValid(pupilPlacedWithMixedClasses));
+        assertTrue(PlaceEngine.isValid(PlaceEngine.repair(pupilPlacedWithMixedClasses)));
 
 
         Genotype<BitGene> goodPlacement = Genotype.of(
                 BitChromosome.of(numOfPupils, 1),
                 BitChromosome.of(numOfPupils, 0)
         );
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(goodPlacement));
-        assertTrue(jen.example.placePupils.PlaceEngine.isValid(PlaceEngine.repair(goodPlacement)));
+        assertTrue(PlaceEngine.isValid(goodPlacement));
+        assertTrue(PlaceEngine.isValid(PlaceEngine.repair(goodPlacement)));
     }
 }
