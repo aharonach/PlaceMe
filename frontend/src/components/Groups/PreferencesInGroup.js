@@ -134,7 +134,8 @@ const Preferences = ({ group, items, updatePreferences }) => {
                                                 selectorId={selectorId}
                                                 selectedId={selectedId}
                                                 selectedName={items[selectorId].no[selectedId]}
-                                            />)}</span>
+                                                updatePreferences={updatePreferences}
+                                        />)}</span>
                                     </Stack>
                                 )}
                             </Stack>

@@ -21,7 +21,7 @@ export default function FormFields() {
         {
             id: "priority",
             label: "Priority",
-            type: "number",
+            type: "range",
             rules: {
                 valueAsNumber: true
             },

@@ -11,7 +11,7 @@ export default function Select({ field: settings, control, hasError }) {
             render={({ field }) => {
                 return (
                     <Form.Select {...field} {...settings?.bsProps} isInvalid={hasError}>
-                        {settings.options.map((option, index) => (
+                        {settings.options?.map((option, index) => (
                             <option
                                 key={option.value || `placeholder-${index}`}
                                 value={option.value}

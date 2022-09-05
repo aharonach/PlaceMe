@@ -3,12 +3,22 @@ import TableList from "../TableList";
 import AddAttribute from "./Attributes/AddAttribute";
 import DeleteAttribute from "./Attributes/DeleteAttribute";
 import EditAttribute from "./Attributes/EditAttribute";
-import {Button, ButtonGroup} from "react-bootstrap";
+import {Button, ButtonGroup, Stack} from "react-bootstrap";
 import {useOutletContext} from "react-router-dom";
+import FormRange from "react-bootstrap/FormRange";
+
+const mapAttributes = (attribute) => {
+    return { ...attribute,
+        priority: <Stack direction="horizontal" gap={2}>
+            <small>{attribute.priority}</small>
+            <FormRange disabled value={attribute.priority} />
+        </Stack>
+    };
+}
 
 export default function Attributes({ addButton = true, actions = true }) {
     const { template } = useOutletContext();
-    const [attributeList, setAttributeList] = useState(template.attributes);
+    const [attributeList, setAttributeList] = useState(template.attributes?.map(mapAttributes));
     const [editAttribute, setEditAttribute] = useState(null);
     const [mode, setMode] = useState('');
 

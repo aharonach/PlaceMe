@@ -15,7 +15,6 @@ export default function RecordList({
        columns = {},
        basePath = '',
        linkField = '',
-       updated,
        additionalButtons,
        mapCallback,
        showPagination = true,

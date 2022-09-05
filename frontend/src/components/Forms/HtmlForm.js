@@ -8,6 +8,8 @@ import Textarea from "./Textarea";
 import Label from "./Label";
 import FieldFeedback from "./FieldFeedback";
 import Loading from "../Loading";
+import Range from "./Range";
+import SelectMultiple from "./SelectMultiple";
 
 export default function HtmlForm({ fields, submitCallback, formProps, loading, submitLabel, vertical, children }) {
     const formFields = 'function' === typeof ( fields ) ? fields() : fields;
@@ -47,10 +49,17 @@ function outputField(field, props) {
             return <Checkbox {...props} />;
 
         case 'select':
+            if ( field.multiple ) {
+                return <SelectMultiple {...props} />;
+            }
+
             return <Select {...props} />;
 
         case 'textarea':
             return <Textarea {...props} />;
+
+        case 'range':
+            return <Range {...props} />;
 
         default:
             return <Input {...props} />;

@@ -3,6 +3,8 @@ import {useOutletContext} from "react-router-dom";
 import DeletePupilFromGroup from "./DeletePupilFromGroup";
 import columns from "../Pupils/columns";
 import RecordList from "../RecordList";
+import {mapPupils} from "../Pupils/PupilsList";
+import {Alert} from "react-bootstrap";
 
 export default function PupilsList() {
     const { group } = useOutletContext();
@@ -10,7 +12,7 @@ export default function PupilsList() {
 
     const pupilColumns = {
         ...columns,
-        'actions': {
+        actions: {
             label: "",
             callbacks: [
                 (pupil) => <DeletePupilFromGroup key={`delete-${pupil.id}`} pupilId={pupil.id} groupId={group.id} updated={updated} setUpdated={setUpdated}>Unlink</DeletePupilFromGroup>
@@ -26,6 +28,8 @@ export default function PupilsList() {
             basePath="/pupils/"
             linkField="givenId"
             updated={updated}
+            mapCallback={mapPupils}
+            hero={<Alert variant="info">No pupils in group.</Alert>}
             sorting={['firstName', 'lastName', 'givenId', 'createdTime', 'gender', 'birthDate']}
         />;
 }

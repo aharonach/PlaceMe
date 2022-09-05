@@ -1,4 +1,8 @@
+import useDynamicOptions from "../../hooks/useDynamicOptions";
+
 export default function FormFields() {
+    const groups = useDynamicOptions(`/groups`, 'groupList', false );
+
     return [
         {
             id: 'givenId',
@@ -42,6 +46,15 @@ export default function FormFields() {
             label: 'Birth Date',
             type: 'date',
             rules: { required: true },
+        },
+        {
+            id: 'groups',
+            label: 'Groups',
+            type: 'select',
+            multiple: true,
+            rules: { required: true },
+            options: groups,
+            bsProps: { closeMenuOnSelect: false }
         }
     ];
 }

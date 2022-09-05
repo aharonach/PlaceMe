@@ -12,7 +12,7 @@ const prepareFields = (template) => {
         fields.push({
             id: `attribute-${template.id}-${attribute.id}`,
             label: attribute.name,
-            type: 'number',
+            type: 'range',
             bsProps: { step: 0.1, min: 1, max: 5 },
             rules: { required: true, min: 1, max: 5 },
         });

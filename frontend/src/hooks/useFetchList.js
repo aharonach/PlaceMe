@@ -6,7 +6,6 @@ const useFetchList = ({ fetchUrl, propertyName, thenCallback, mapCallback }) => 
     const [response, error, loading, axiosFetch] = useAxios();
 
     const getList = () => {
-        console.log(fetchUrl);
         axiosFetch({
             method: 'get',
             url: fetchUrl,
