@@ -3,11 +3,12 @@ import RecordList from "../RecordList";
 import columns from "./columns";
 import {toCapitalCase} from "../../utils";
 import Gender from "../General/Gender";
+import PupilGender from "./PupilGender";
 
 export default function PupilsList() {
     const mapResults = ( pupil ) => {
         return { ...pupil,
-            gender: <Gender gender={pupil.gender} noIcon pill>{toCapitalCase(pupil.gender)}</Gender>
+            gender: <PupilGender pupil={pupil} />
         }
     };
 
