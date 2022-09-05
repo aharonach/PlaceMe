@@ -15,12 +15,12 @@ function TableList({
     direction
 }) {
 
-    if ( nothingToShow ) {
-        if ( ! items || items.length <= 0 ) {
-            return (
-                <Alert variant="info">Nothing to show.</Alert>
-            )
+    if ( ! items || items.length <= 0 ) {
+        if ( nothingToShow ) {
+            return <Alert variant="info">No {nothingToShow} yet.</Alert>;
         }
+
+        return null;
     }
 
     let currentNumber = numbering.startFrom ? Number(numbering.startFrom) : 1;

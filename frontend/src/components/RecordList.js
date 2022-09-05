@@ -5,6 +5,7 @@ import {Alert, Button, ButtonGroup, Stack} from "react-bootstrap";
 import TableList from "./TableList";
 import PageNumbers from "./PageNumbers";
 import HeroAddRecord from "./General/HeroAddRecord";
+import Loading from "./Loading";
 
 export default function RecordList({
        fetchUrl = '',
@@ -38,7 +39,7 @@ export default function RecordList({
     useEffect(() => {
         getList();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [updated, page, sort, direction]);
+    }, [page, sort, direction]);
 
     const addButtonRender = addButton && <LinkContainer to="add"><Button>{addButton}</Button></LinkContainer>;
     const resetSortingButton = sort && <Button size={"sm"} variant="link" onClick={resetSort} className="mb-3 p-0">Reset sorting</Button>;
@@ -54,20 +55,21 @@ export default function RecordList({
             </ButtonGroup>
             {error && <Alert variant="danger">{error}</Alert>}
             {children}
-            {list?.length <= 0
-                ? (hero ? hero : <HeroAddRecord />)
-                : <>
-                    {topBottomRow}
-                    <TableList
-                        linkTo={{field: linkField, basePath: basePath ?? fetchUrl}}
-                        items={list}
-                        numbering={{enabled: true, startFrom: pagination?.startsFrom}}
-                        columns={columns}
-                        sorting={ sorting ? {value: sort, set: setSort, fields: sorting} : null}
-                        direction={ sorting ? {value: direction, set: setDirection} : null}
-                    />
-                    {topBottomRow}
-                </>
+            {!list ? <Loading show={loading} />
+                : list.length <= 0
+                    ? (hero ? hero : <HeroAddRecord />)
+                    : <>
+                        {topBottomRow}
+                        <TableList
+                            linkTo={{field: linkField, basePath: basePath ?? fetchUrl}}
+                            items={list}
+                            numbering={{enabled: true, startFrom: pagination?.startsFrom}}
+                            columns={columns}
+                            sorting={ sorting ? {value: sort, set: setSort, fields: sorting} : null}
+                            direction={ sorting ? {value: direction, set: setDirection} : null}
+                        />
+                        {topBottomRow}
+                    </>
             }
         </>
     )

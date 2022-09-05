@@ -6,6 +6,7 @@ const useFetchList = ({ fetchUrl, propertyName, thenCallback, mapCallback }) => 
     const [response, error, loading, axiosFetch] = useAxios();
 
     const getList = () => {
+        console.log(fetchUrl);
         axiosFetch({
             method: 'get',
             url: fetchUrl,
@@ -17,7 +18,7 @@ const useFetchList = ({ fetchUrl, propertyName, thenCallback, mapCallback }) => 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const items = extractListFromAPI(response, propertyName, mapCallback);
+    const items = response ? extractListFromAPI(response, propertyName, mapCallback) : null;
     const pagination = response?.page;
 
     if ( items && pagination ) {

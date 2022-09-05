@@ -41,7 +41,7 @@ export default function Attributes({ addButton = true, actions = true }) {
             <ButtonGroup className="mb-3">
                 {addButton && <Button onClick={() => setMode('add')}>Add Attribute</Button>}
             </ButtonGroup>
-            <TableList columns={columns} items={attributeList} />
+            <TableList columns={columns} items={attributeList} nothingToShow={"attributes"} />
             <AddAttribute show={mode === 'add'} setMode={setMode} templateId={template.id} setAttributeList={setAttributeList} />
             {mode === 'edit' && editAttribute && <EditAttribute templateId={template.id} attribute={editAttribute} setAttribute={setEditAttribute} setAttributeList={setAttributeList} />}
         </>

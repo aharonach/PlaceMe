@@ -21,7 +21,7 @@ export default function Classes({ result }) {
             <h3>Classrooms</h3>
             <Loading show={loading} />
             {error && <Alert variant="danger">{error}</Alert> }
-            {!loading && !error && <Row>
+            {!loading && !error && classes && <Row>
                 {classes.map( classInfo => (
                     <Col key={classInfo.id} md={6} lg={3}>
                         <Card className="mb-2">
