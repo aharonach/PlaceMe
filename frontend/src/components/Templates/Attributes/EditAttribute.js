@@ -25,7 +25,7 @@ export default function EditAttribute({ templateId, attribute, setAttribute, set
         axiosFetch({
             url: `/templates/${templateId}/attributes/${attribute.id}`,
             method: 'post',
-            data: data,
+            data: { id: attribute.id, ...data },
         });
     }
 
@@ -35,7 +35,13 @@ export default function EditAttribute({ templateId, attribute, setAttribute, set
                 <Modal.Header closeButton onHide={onHide}><Modal.Title>Edit Attribute</Modal.Title></Modal.Header>
                 <Modal.Body>
                     {!loading && error && <Alert variant="danger">{error}</Alert> }
-                    <HtmlForm formProps={methods} fields={FormFields} submitCallback={onSubmit} loading={loading} submitLabel={"Update"}></HtmlForm>
+                    <HtmlForm
+                        formProps={methods}
+                        fields={FormFields}
+                        submitCallback={onSubmit}
+                        loading={loading}
+                        submitLabel="Update"
+                    />
                 </Modal.Body>
             </Modal>
         </>

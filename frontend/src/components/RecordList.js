@@ -20,6 +20,7 @@ export default function RecordList({
        showPagination = true,
        sorting,
        hero,
+       updated,
        children
     }) {
     const [page, setPage] = useState(1);
@@ -38,7 +39,7 @@ export default function RecordList({
     useEffect(() => {
         getList();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, sort, direction]);
+    }, [updated, page, sort, direction]);
 
     const addButtonRender = addButton && <LinkContainer to="add"><Button>{addButton}</Button></LinkContainer>;
     const resetSortingButton = sort && <Button size={"sm"} variant="link" onClick={resetSort} className="mb-3 p-0">Reset sorting</Button>;

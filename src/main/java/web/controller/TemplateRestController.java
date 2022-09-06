@@ -57,7 +57,6 @@ public class TemplateRestController extends BaseRestController<Template> {
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Template newRecord) {
-
         try{
             EntityModel<Template> entity = templateAssembler.toModel(templateService.add(newRecord));
             return ResponseEntity.created(entity.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entity);

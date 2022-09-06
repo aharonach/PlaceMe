@@ -9,7 +9,7 @@ import FormRange from "react-bootstrap/FormRange";
 
 const mapAttributes = (attribute) => {
     return { ...attribute,
-        priority: <Stack direction="horizontal" gap={2}>
+        priority_ui: <Stack direction="horizontal" gap={2}>
             <small>{attribute.priority}</small>
             <FormRange disabled value={attribute.priority} />
         </Stack>
@@ -18,7 +18,7 @@ const mapAttributes = (attribute) => {
 
 export default function Attributes({ addButton = true, actions = true }) {
     const { template } = useOutletContext();
-    const [attributeList, setAttributeList] = useState(template.attributes?.map(mapAttributes));
+    const [attributeList, setAttributeList] = useState(template.attributes);
     const [editAttribute, setEditAttribute] = useState(null);
     const [mode, setMode] = useState('');
 
@@ -26,7 +26,7 @@ export default function Attributes({ addButton = true, actions = true }) {
         name: "Name",
         description: "Description",
         type: "Type",
-        priority: "Priority",
+        priority_ui: "Priority",
         createdTime: "Created Time",
     };
 
@@ -51,7 +51,7 @@ export default function Attributes({ addButton = true, actions = true }) {
             <ButtonGroup className="mb-3">
                 {addButton && <Button onClick={() => setMode('add')}>Add Attribute</Button>}
             </ButtonGroup>
-            <TableList columns={columns} items={attributeList} nothingToShow={"attributes"} />
+            <TableList columns={columns} items={attributeList.map(mapAttributes)} nothingToShow={"attributes"} />
             <AddAttribute show={mode === 'add'} setMode={setMode} templateId={template.id} setAttributeList={setAttributeList} />
             {mode === 'edit' && editAttribute && <EditAttribute templateId={template.id} attribute={editAttribute} setAttribute={setEditAttribute} setAttributeList={setAttributeList} />}
         </>

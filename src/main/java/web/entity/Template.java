@@ -76,7 +76,7 @@ public class Template extends BaseEntity {
     }
 
     public void updateAttribute(Long attributeId, Attribute newAttribute) throws AttributeAlreadyExistException {
-        if(getAttribute(newAttribute.getName()).isPresent()){
+        if(newAttribute.getId() != attributeId && getAttribute(newAttribute.getName()).isPresent()){
             throw new AttributeAlreadyExistException(newAttribute.getName());
         }
         getAttribute(attributeId)
