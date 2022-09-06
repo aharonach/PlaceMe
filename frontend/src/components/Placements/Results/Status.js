@@ -1,47 +1,9 @@
-import {useParams} from "react-router-dom";
 import Checkmark from "../../General/Checkmark";
 import Loading from "../../Loading";
-import {useEffect, useState} from "react";
-import Api from "../../../api";
+import {isCompleted} from "./ResultsList";
 
-const isCompleted = (status) => {
-    return status === 'COMPLETED';
-}
-
-export default function Status({ placementResult, updateList }) {
-    const { placementId } = useParams();
-    const [status, setStatus] = useState(placementResult.status);
-
-    const getResult = async () => {
-        const res = await Api.get(`/placements/${placementId}/results/${placementResult.id}`);
-
-        if ( res.status === 200 ) {
-            return isCompleted(res.data.status);
-        }
-
-        return false;
-    }
-
-    useEffect(() => {
-        if ( isCompleted(status) ) {
-            return;
-        }
-
-        const interval = setInterval(() => {
-            getResult().then( res => {
-                if ( res ) {
-                    setStatus('COMPLETED');
-                    clearInterval(interval);
-                    updateList();
-                }
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    if ( isCompleted( status ) ) {
+export default function Status({ placementResult }) {
+    if ( isCompleted( placementResult.status ) ) {
         return <Checkmark checked={true} />;
     }
 

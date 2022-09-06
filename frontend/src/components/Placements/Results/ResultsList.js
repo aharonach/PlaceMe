@@ -4,8 +4,12 @@ import RecordList from "../../RecordList";
 import Checkmark from "../../General/Checkmark";
 import {useState} from "react";
 import Status from "./Status";
-import {fixedNumber} from "../../../utils";
+import {extractListFromAPI, fixedNumber} from "../../../utils";
 import GenerateFirstResults from "../GenerateFirstResults";
+
+export const isCompleted = (status) => {
+    return status === 'COMPLETED';
+}
 
 export default function ResultsList(){
     const { placement } = useOutletContext();
@@ -13,16 +17,25 @@ export default function ResultsList(){
 
     const updateList = () => {
         setUpdateList(updatedList + 1);
-    };
+    }
 
     const mapResults = ( result ) => {
         return { ...result,
-            name: result.status === 'COMPLETED' ? <Link to={`/placements/${placement.id}/results/${result.id}`}>{result.name}</Link> : result.name,
+            name: isCompleted(result.status) ? <Link to={`/placements/${placement.id}/results/${result.id}`}>{result.name}</Link> : result.name,
             placementScore: fixedNumber(result.placementScore),
-            status: <Status placementResult={result} updateList={updateList} />,
+            status: <Status placementResult={result} />,
             selected: <Checkmark checked={result.selected} />
         }
     };
+
+    const checkResultsStatus = (response) => {
+        const results = extractListFromAPI(response, 'placementResultList');
+        const inProgressResult = results.find( result => result.status === 'IN_PROGRESS' );
+
+        if ( inProgressResult ) {
+            setTimeout(() => updateList(), 1000);
+        }
+    }
 
     return (
         <>
@@ -33,6 +46,7 @@ export default function ResultsList(){
                 addButton="Generate Result"
                 columns={columns}
                 mapCallback={mapResults}
+                thenCallback={checkResultsStatus}
                 updated={updatedList}
                 hero={<GenerateFirstResults />}
             />

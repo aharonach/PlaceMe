@@ -27,7 +27,7 @@ function TableList({
 
     return (
         <div className="table-responsive">
-            <Table {...bsProps} style={{ tableLayout: "fixed" }}>
+            <Table {...bsProps}>
                 <thead className="table-light">
                 <tr>
                     {numbering.enabled && <th style={{ width: "50px" }}>#</th>}

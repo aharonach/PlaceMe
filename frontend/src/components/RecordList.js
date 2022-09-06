@@ -17,6 +17,7 @@ export default function RecordList({
        linkField = '',
        additionalButtons,
        mapCallback,
+       thenCallback,
        showPagination = true,
        sorting,
        hero,
@@ -30,6 +31,7 @@ export default function RecordList({
         fetchUrl: buildUrl(fetchUrl, { page: page - 1, sortField: sort, sortDirection: direction }),
         propertyName: propertyName,
         mapCallback: mapCallback,
+        thenCallback: thenCallback
     });
     const resetSort = () => {
         setSort(null);
