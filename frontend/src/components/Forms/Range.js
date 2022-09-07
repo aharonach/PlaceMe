@@ -10,7 +10,7 @@ export default function Range({ field: settings, control, hasError }) {
             render={({ field }) => (
                 <Stack direction="horizontal" gap={2}>
                     <small>{field.value}</small>
-                    <Form.Range {...field} value={field.value || settings.defaultValue || ''} {...settings?.bsProps} isInvalid={hasError} />
+                    <Form.Range {...field} value={field.value || settings.defaultValue || ''} {...settings?.bsProps} />
                 </Stack>
             )}
         />

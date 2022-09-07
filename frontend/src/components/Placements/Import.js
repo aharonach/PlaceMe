@@ -44,20 +44,20 @@ export default function Import({ placement }) {
                 <h5 className="mb-0">{!hasErrors ? "File imported successfully!" : `You have ${imported.errorsCount} errors in your file`}</h5>
                 {hasErrors ? <ul className="mt-2">{imported.errors.map( error => <li>{error}</li>)}</ul> : ''}
             </Alert>}
-            <h4>Step 1:</h4>
+            <h5>Step 1</h5>
             <p>Download the template for the import (or use an existing export as your template).</p>
             <p><a href={columnsDownloadUrl} download={CSV_CONTENT_TYPE}>Download Template</a></p>
             <hr />
-            <h4>Step 2:</h4>
+            <h5>Step 2</h5>
             <p>Prepare your import file.</p>
             <h6>Instructions:</h6>
             <ul>
-                <li>Attribute values should be between 1 and 5.</li>
-                <li>Preference is set by pupil's given ID.</li>
+                <li>Attribute values should be between 1 to 5.</li>
+                <li>Preferences are set by pupil's given ID.</li>
                 <li>Multiple preferences should be separated by semicolon.</li>
             </ul>
             <hr />
-            <h4>Step 3:</h4>
+            <h5>Step 3</h5>
             <p>Choose your file to upload and click "Import Now".</p>
             <HtmlForm formProps={form} fields={fields} submitLabel={"Import Now"} submitCallback={handleSubmit} loading={loading} />
         </>
