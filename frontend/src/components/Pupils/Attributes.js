@@ -13,6 +13,7 @@ const prepareFields = (template) => {
             id: `attribute-${template.id}-${attribute.id}`,
             label: attribute.name,
             type: 'range',
+            description: attribute.description,
             bsProps: { step: 0.1, min: 1, max: 5 },
             rules: { required: true, min: 1, max: 5 },
         });

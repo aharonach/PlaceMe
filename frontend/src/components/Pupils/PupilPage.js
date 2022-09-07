@@ -28,7 +28,7 @@ export default function PupilPage() {
                     <h1>{pupil.firstName} {pupil.lastName}</h1>
                     <ButtonGroup>
                         <LinkContainer to={`/pupils/${pupil.id}/edit`}><Button>Edit</Button></LinkContainer>
-                        <LinkContainer to={`/pupils/${pupil.id}/groups`}><Button>Groups</Button></LinkContainer>
+                        <LinkContainer to={`/pupils/${pupil.id}/groups`}><Button>Attribute Values</Button></LinkContainer>
                         <Button variant="danger" onClick={handleDelete}>Delete Pupil</Button>
                     </ButtonGroup>
                     <Outlet context={{ pupil, error, loading, axiosFetch }} />

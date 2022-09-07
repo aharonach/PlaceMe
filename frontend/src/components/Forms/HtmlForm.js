@@ -25,8 +25,8 @@ export default function HtmlForm({ fields, submitCallback, formProps, loading, s
                     <Form.Group key={field.id} as={vertical ? Col : "div"} controlId={field.id} className="mb-3">
                         <Label settings={field} />
                         {outputField(field, { field: field, control: formProps.control, hasError: hasError })}
-                        {<FieldFeedback hasError={hasError} error={error} />}
                         {field.description && <Form.Text muted>{field.description}</Form.Text>}
+                        {<FieldFeedback hasError={hasError} error={error} />}
                     </Form.Group>
                 )
             })}
