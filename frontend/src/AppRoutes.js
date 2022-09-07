@@ -7,6 +7,7 @@ import * as Template from "./components/Templates";
 import * as Placement from "./components/Placements";
 import ErrorPage from "./components/ErrorPage";
 import React from "react";
+import Config from "./components/Placements/Config";
 
 export default function AppRoutes() {
     return (
@@ -54,6 +55,7 @@ export default function AppRoutes() {
                     </Route>
                 </Route>
             </Route>
+            <Route path="/configs" element={<Config />}></Route>
             <Route path="*" element={<ErrorPage />}></Route>
         </Routes>
     );
