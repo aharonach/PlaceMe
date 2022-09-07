@@ -1,0 +1,18 @@
+@import "CustomColors";
+.menuItem.active{
+  font-weight: bold;
+  color: $primary;
+  background: $light;
+}
+
+.menuItem{
+  color: $dark;
+  background: $light;
+}
+.btn {
+  color: white;
+}
+
+.btn-link {
+  color: $primary
+}

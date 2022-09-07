@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, from 'react';
 import {
     CDBSidebar,
     CDBSidebarContent,
@@ -11,12 +11,16 @@ import {Container, Navbar} from "react-bootstrap";
 import {LinkContainer} from "react-router-bootstrap";
 import {CalendarCheckFill, ClipboardCheckFill, CollectionFill, PersonFill} from "react-bootstrap-icons";
 import logo from "../Logo.png"
+import {useLocation} from "react-router-dom";
 
 
 const Sidebar = () => {
+    const { location } = useLocation();
+    console.log(location);
+
     return (
         <div style={{ display: 'flex', height: '100vh', overflow: 'scroll initial' }}>
-            <CDBSidebar textColor="#363D3D" backgroundColor="#F4EFE9" style={{ width: '100%' }} minWidth={1}>
+            <CDBSidebar  backgroundColor="#F4EFE9" style={{ width: '100%' }} minWidth={1}>
                 <CDBSidebarHeader >
                     <Navbar>
                         <Container>
@@ -34,23 +38,23 @@ const Sidebar = () => {
 
                 <CDBSidebarContent className="sidebar-content">
                     <CDBSidebarMenu>
-                       <LinkContainer to="/pupils">
-                           <CDBSidebarMenuItem style={{display: 'flex'}}>
+                       <LinkContainer to="/pupils"  >
+                           <CDBSidebarMenuItem  style={{display: 'flex'}} className="menuItem" id="pupils">
                                <PersonFill className="me-2"/> Pupils
                            </CDBSidebarMenuItem>
                        </LinkContainer>
                         <LinkContainer to="/groups">
-                            <CDBSidebarMenuItem style={{display: 'flex'}}>
-                            <CollectionFill className="me-2"/> Groups
+                            <CDBSidebarMenuItem style={{display: 'flex'}} className="menuItem" id="groups">
+                            <CollectionFill id="groups" className="me-2"/> Groups
                             </CDBSidebarMenuItem>
                         </LinkContainer>
                         <LinkContainer to="/templates">
-                            <CDBSidebarMenuItem style={{display: 'flex'}}>
+                            <CDBSidebarMenuItem style={{display: 'flex'}} className="menuItem" id="templates">
                                 <ClipboardCheckFill className="me-2"/> Templates
                             </CDBSidebarMenuItem>
                         </LinkContainer>
                         <LinkContainer to="/placements">
-                            <CDBSidebarMenuItem style={{display: 'flex'}}>
+                            <CDBSidebarMenuItem style={{display: 'flex'}} className="menuItem" id="placements">
                                 <CalendarCheckFill className="me-2"/> Placements
                             </CDBSidebarMenuItem>
                         </LinkContainer>
