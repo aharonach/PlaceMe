@@ -27,12 +27,14 @@ export default function GroupPage() {
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && group &&
                 <article className="group">
-                    <h1>{group.name} (ID: {group.id})</h1>
-                    <ButtonGroup>
-                        <LinkContainer to={`/groups/${group.id}/edit`}><Button>Edit Group</Button></LinkContainer>
-                        <LinkContainer to={`/groups/${group.id}/preferences`}><Button>Preferences</Button></LinkContainer>
-                        <Button as="a" variant="danger" onClick={handleDelete}>Delete Group</Button>
-                    </ButtonGroup>
+                    <div className={"page-header"}>
+                        <h1>{group.name} (ID: {group.id})</h1>
+                        <ButtonGroup>
+                            <LinkContainer to={`/groups/${group.id}/edit`}><Button>Edit Group</Button></LinkContainer>
+                            <LinkContainer to={`/groups/${group.id}/preferences`}><Button>Preferences</Button></LinkContainer>
+                            <Button as="a" variant="danger" onClick={handleDelete}>Delete Group</Button>
+                        </ButtonGroup>
+                    </div>
                     <Outlet context={{group, error, loading, axiosFetch}} />
                 </article>
             }

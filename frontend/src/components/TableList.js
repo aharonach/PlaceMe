@@ -9,7 +9,7 @@ function TableList({
     columns,
     linkTo = {field: 'id', basePath: ''},
     numbering= {enabled: true, startFrom: 1},
-    bsProps = {bordered: true, hover: true},
+    bsProps = {bordered: false, hover: true},
     nothingToShow = false,
     sorting,
     direction

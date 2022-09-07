@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import FormFields from "./FormFields";
 
 export default function AddPlacement(){
-    const [placement, error, loading, axiosFetch] = useAxios();
+    const [error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
         defaultValues: {
@@ -31,7 +31,9 @@ export default function AddPlacement(){
 
     return (
         <>
-            <h1>Add Placement</h1>
+            <div className={"page-header"}>
+                <h1>Add Placement</h1>
+            </div>
             {error && <Alert variant="danger">{error}</Alert>}
             <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading}></HtmlForm>
         </>

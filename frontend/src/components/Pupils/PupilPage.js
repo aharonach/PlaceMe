@@ -25,12 +25,14 @@ export default function PupilPage() {
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && !error && pupil &&
                 <article className="pupil">
-                    <h1>{pupil.firstName} {pupil.lastName}</h1>
-                    <ButtonGroup>
-                        <LinkContainer to={`/pupils/${pupil.id}/edit`}><Button>Edit</Button></LinkContainer>
-                        <LinkContainer to={`/pupils/${pupil.id}/groups`}><Button>Attribute Values</Button></LinkContainer>
-                        <Button variant="danger" onClick={handleDelete}>Delete Pupil</Button>
-                    </ButtonGroup>
+                    <div className={"page-header"}>
+                        <h1>{pupil.firstName} {pupil.lastName}</h1>
+                        <ButtonGroup>
+                            <LinkContainer to={`/pupils/${pupil.id}/edit`}><Button>Edit</Button></LinkContainer>
+                            <LinkContainer to={`/pupils/${pupil.id}/groups`}><Button>Attribute Values</Button></LinkContainer>
+                            <Button variant="danger" onClick={handleDelete}>Delete Pupil</Button>
+                        </ButtonGroup>
+                    </div>
                     <Outlet context={{ pupil, error, loading, axiosFetch }} />
                 </article>
             }

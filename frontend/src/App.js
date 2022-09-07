@@ -1,5 +1,5 @@
-import React, {createContext, useState} from "react";
-import {Header, Footer, Page} from "./layouts";
+import React, {useState} from "react";
+import {Header, Footer} from "./layouts";
 import {Col, Container, Row} from "react-bootstrap";
 import RecordContext from "./context/RecordContext";
 import AppRoutes from "./AppRoutes";
@@ -11,8 +11,8 @@ function App() {
     return (
         <Container fluid className="App">
             <Row>
-                <Col md={3}><Header /></Col>
-                <Col md={9}>
+                <Col md={3} style={{paddingLeft:0}} ><Header /></Col>
+                <Col md={9} >
                     <RecordContext.Provider value={{ record: record, setRecord: setRecord }}>
                         <AppRoutes />
                     </RecordContext.Provider>

@@ -31,18 +31,20 @@ export default function PlacementPage(){
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && placement &&
                 <article>
-                    <h1>{placement.name}</h1>
-                    <Stack direction="horizontal" gap={2}>
-                        <ButtonGroup>
-                            <LinkContainer to={`/placements/${placement.id}/edit`}><Button>Edit Placement</Button></LinkContainer>
-                            <LinkContainer to={`/placements/${placement.id}/results`}><Button>Show All Optional Results</Button></LinkContainer>
-                            <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
-                        </ButtonGroup>
-                        <ButtonGroup>
-                            <Button variant="outline-primary" onClick={() => setShowImport(true)}>Import</Button>
-                            <Button as="a" variant="outline-primary" href={exportDownloadUrl} download={CSV_CONTENT_TYPE}>Export</Button>
-                        </ButtonGroup>
-                    </Stack>
+                    <div className={"page-header"}>
+                        <h1>{placement.name}</h1>
+                        <Stack direction="horizontal" gap={2}>
+                            <ButtonGroup>
+                                <LinkContainer to={`/placements/${placement.id}/edit`}><Button>Edit Placement</Button></LinkContainer>
+                                <LinkContainer to={`/placements/${placement.id}/results`}><Button>Show All Optional Results</Button></LinkContainer>
+                                <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
+                            </ButtonGroup>
+                            <ButtonGroup>
+                                <Button variant="outline-primary" onClick={() => setShowImport(true)}>Import</Button>
+                                <Button as="a" variant="outline-primary" href={exportDownloadUrl} download={CSV_CONTENT_TYPE}>Export</Button>
+                            </ButtonGroup>
+                        </Stack>
+                    </div>
                     <Outlet context={{ placement, error, loading, axiosFetch, getPlacement }} />
                     <Modal show={showImport}>
                         <Modal.Header closeButton onHide={() => setShowImport(false)}>

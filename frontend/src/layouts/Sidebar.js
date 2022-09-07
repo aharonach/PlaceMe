@@ -63,13 +63,13 @@ const Sidebar = () => {
                 </CDBSidebarContent>
 
                 <CDBSidebarFooter style={{ textAlign: 'left' }}>
-                    <div
-                        style={{
-                            padding: '20px 5px',
-                        }}
-                    >
-                        Log out
-                    </div>
+                    {/*<div*/}
+                    {/*    style={{*/}
+                    {/*        padding: '20px 5px',*/}
+                    {/*    }}*/}
+                    {/*>*/}
+                    {/*    Log out*/}
+                    {/*</div>*/}
                 </CDBSidebarFooter>
             </CDBSidebar>
         </div>
