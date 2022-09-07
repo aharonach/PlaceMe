@@ -3,6 +3,7 @@ import {Header, Footer, Page} from "./layouts";
 import {Col, Container, Row} from "react-bootstrap";
 import RecordContext from "./context/RecordContext";
 import AppRoutes from "./AppRoutes";
+import './index.scss';
 
 function App() {
     const [record, setRecord] = useState({ record: null, displayFields: [] });
