@@ -245,7 +245,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
         return ResponseEntity.ok(placementService.updateGlobalConfig(config));
     }
 
-    @GetMapping("/{placementId}/export/columns")
+    @GetMapping(value = "/{placementId}/export/columns", produces = "text/csv;charset=UTF-8")
     public ResponseEntity<?> exportCsvColumnsForPlacement(@PathVariable Long placementId) {
 
         Placement placement = placementService.getOr404(placementId);
@@ -259,7 +259,7 @@ public class PlacementRestController extends BaseRestController<Placement> {
         }
     }
 
-    @GetMapping("/{placementId}/export")
+    @GetMapping(value = "/{placementId}/export", produces = "text/csv;charset=UTF-8")
     public ResponseEntity<?> exportCsvDataForPlacement(@PathVariable Long placementId) {
 
         Placement placement = placementService.getOr404(placementId);
@@ -276,9 +276,8 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @PostMapping("/{placementId}/import")
-    public ResponseEntity<?> updateConfig(@PathVariable Long placementId,
-                                          @RequestBody String csvContent) {
-
+    public ResponseEntity<?> importPlacement(@PathVariable Long placementId,
+                                             @RequestBody String csvContent) {
         Placement placement = placementService.getOr404(placementId);
         try {
             OperationInfo operationInfo = placementService.importDataFromCsv(placement, csvContent);
@@ -288,7 +287,6 @@ public class PlacementRestController extends BaseRestController<Placement> {
         } catch (PlacementService.PlacementWithoutTemplateInGroupException | PlacementService.PlacementWithoutGroupException e) {
             throw new PreconditionFailed(e.getMessage());
         }
-
     }
 
     public class IllegalNumberOfResultsException extends BadRequest {

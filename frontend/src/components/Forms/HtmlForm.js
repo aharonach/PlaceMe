@@ -10,6 +10,7 @@ import FieldFeedback from "./FieldFeedback";
 import Loading from "../Loading";
 import Range from "./Range";
 import SelectMultiple from "./SelectMultiple";
+import File from "./File";
 
 export default function HtmlForm({ fields, submitCallback, formProps, loading, submitLabel, vertical, children }) {
     const formFields = 'function' === typeof ( fields ) ? fields() : fields;
@@ -60,6 +61,9 @@ function outputField(field, props) {
 
         case 'range':
             return <Range {...props} />;
+
+        case 'file':
+            return <File {...props} />;
 
         default:
             return <Input {...props} />;

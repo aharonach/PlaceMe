@@ -2,7 +2,7 @@ import React from 'react';
 import {Controller} from "react-hook-form";
 import {Form} from "react-bootstrap";
 
-const FIELD_TYPES = ['text', 'email', 'tel', 'date', 'number', 'hidden'];
+const FIELD_TYPES = ['text', 'email', 'tel', 'date', 'number', 'hidden', 'file'];
 
 export default function Input({ field: settings, control, hasError }) {
     return (

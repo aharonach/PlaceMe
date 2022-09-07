@@ -1,8 +1,11 @@
 import {Outlet, useNavigate, useParams} from "react-router-dom";
 import Loading from "../Loading";
-import {Alert, Button, ButtonGroup} from "react-bootstrap";
+import {Alert, Button, ButtonGroup, Modal, Stack} from "react-bootstrap";
 import {LinkContainer} from "react-router-bootstrap";
 import useFetchRecord from "../../hooks/useFetchRecord";
+import {useState} from "react";
+import Import from "./Import";
+import {BASE_URL, CSV_CONTENT_TYPE} from "../../api";
 
 export default function PlacementPage(){
     let { placementId } = useParams();
@@ -10,6 +13,8 @@ export default function PlacementPage(){
         fetchUrl: `/placements/${placementId}`,
         displayFields: [ 'name' ]
     });
+    const [showImport, setShowImport] = useState(false);
+    const exportDownloadUrl = `${BASE_URL}placements/${placementId}/export`;
 
     let navigate = useNavigate();
 
@@ -27,12 +32,26 @@ export default function PlacementPage(){
             {!loading && placement &&
                 <article>
                     <h1>{placement.name}</h1>
-                    <ButtonGroup>
-                        <LinkContainer to={`/placements/${placement.id}/edit`}><Button>Edit Placement</Button></LinkContainer>
-                        <LinkContainer to={`/placements/${placement.id}/results`}><Button>Show All Optional Results</Button></LinkContainer>
-                        <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
-                    </ButtonGroup>
+                    <Stack direction="horizontal" gap={2}>
+                        <ButtonGroup>
+                            <LinkContainer to={`/placements/${placement.id}/edit`}><Button>Edit Placement</Button></LinkContainer>
+                            <LinkContainer to={`/placements/${placement.id}/results`}><Button>Show All Optional Results</Button></LinkContainer>
+                            <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
+                        </ButtonGroup>
+                        <ButtonGroup>
+                            <Button variant="outline-primary" onClick={() => setShowImport(true)}>Import</Button>
+                            <Button as="a" variant="outline-primary" href={exportDownloadUrl} download={CSV_CONTENT_TYPE}>Export</Button>
+                        </ButtonGroup>
+                    </Stack>
                     <Outlet context={{ placement, error, loading, axiosFetch, getPlacement }} />
+                    <Modal show={showImport}>
+                        <Modal.Header closeButton onHide={() => setShowImport(false)}>
+                            <Modal.Title>Import</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Import placement={placement} />
+                        </Modal.Body>
+                    </Modal>
                 </article>
             }
         </>

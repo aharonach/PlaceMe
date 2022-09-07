@@ -202,7 +202,7 @@ public class ImportExportUtils {
 
         for(Map<String, String> rowMap : contentData){
             List<String> errors;
-            String currentGivenId = null;
+            String currentGivenId;
 
             try {
                 currentGivenId = createPupilFromRowMap(rowMap, lineNumber).getGivenId();
@@ -225,7 +225,7 @@ public class ImportExportUtils {
                 operationInfo.addErrors(errors);
             }
 
-            lineNumber ++; // number for parse messages error message
+            lineNumber++; // number for parse messages error message
         }
 
         return operationInfo;
@@ -236,8 +236,7 @@ public class ImportExportUtils {
         int lineNumber = 2; // first line + headers
 
         for(Map<String, String> rowMap : contentData){
-            List<String> errors;
-            String currentGivenId = null;
+            String currentGivenId;
 
             try {
                 Pupil newPupil = createPupilFromRowMap(rowMap, lineNumber);
@@ -250,6 +249,7 @@ public class ImportExportUtils {
             }
             lineNumber ++; // number for parse messages error message
         }
+
         return givenIdToPupilMap;
     }
 

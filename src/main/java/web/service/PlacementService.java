@@ -192,9 +192,7 @@ public class PlacementService implements EntityService<Placement> {
 
         placementResult.getClasses().forEach(placementClassroom -> {
             placementClassroom.setPlacementResult(null);
-            placementClassroom.getPupils().forEach(pupil -> {
-                pupil.removeFromClassrooms(placementClassroom);
-            });
+            placementClassroom.getPupils().forEach(pupil -> pupil.removeFromClassrooms(placementClassroom));
             placementClassroom.setPupils(new HashSet<>());
         });
 
@@ -321,9 +319,7 @@ public class PlacementService implements EntityService<Placement> {
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(input);
 
         // parse data and create pupils map
-        OperationInfo operationInfo = importExportUtils.parseAndAddDataFromFile(csvContent, placement);
-
-        return operationInfo;
+        return importExportUtils.parseAndAddDataFromFile(csvContent, placement);
     }
 
     public static class PlacementWithoutGroupException extends Exception {
