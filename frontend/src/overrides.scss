@@ -6,8 +6,9 @@
 }
 
 .menuItem{
-  color: $dark;
+  color: opacify(#BCAFA0, 1);
   background: $light;
+
 }
 .btn {
   color: white;
