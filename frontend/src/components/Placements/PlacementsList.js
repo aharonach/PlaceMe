@@ -6,8 +6,8 @@ import {Link} from "react-router-dom";
 const mapPlacements = (placement) => {
     return { ...placement,
         groupId: placement.groupId
-            ? <Link to={`/groups/${placement.groupId}`}>{placement.group.name}</Link>
-            : <Link to="edit">Assign to a group</Link>,
+            ? <><Link to={`/groups/${placement.groupId}`}>{placement.group.name}</Link> ({placement.group.numberOfPupils} pupils)</>
+            : <Link to={`${placement.id}/edit`}>Assign to a group</Link>,
         numberOfResults: <Link to={`/placements/${placement.id}/results`}>{placement.numberOfResults}</Link>
     }
 }

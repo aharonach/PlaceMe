@@ -1,3 +1,4 @@
+import React from 'react';
 import RecordDetails from "../../RecordDetails";
 import {useOutletContext} from "react-router-dom";
 import Classes from "./Classes";
@@ -13,7 +14,7 @@ export default function ResultData({ externalResult }){
         { label: "Description", value: result.description },
         { label: "Is Selected Result", value: <Checkmark checked={result.selected}>{boolToString(result.selected)}</Checkmark> },
         { label: "Number Of Classes", value: result.numberOfClasses },
-        { label: "Score", value: result.placementScore },
+        { label: "Score", value: result.placementScore?.toFixed(2) },
         { label: "Created Time", value: humanizeTime(result.createdTime) },
     ];
 

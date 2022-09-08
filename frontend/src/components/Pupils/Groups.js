@@ -1,11 +1,9 @@
-import React, {useEffect, useMemo} from "react";
-import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
+import React from "react";
 import HtmlForm from "../Forms/HtmlForm";
 import {useForm} from "react-hook-form";
 import Loading from "../Loading";
 import {Alert} from "react-bootstrap";
-import {extractListFromAPI, prepareCheckboxGroup} from "../../utils";
+import {prepareCheckboxGroup} from "../../utils";
 import useFetchList from "../../hooks/useFetchList";
 
 export default function Groups({ pupilGroups, onSubmit }) {
@@ -34,7 +32,13 @@ export default function Groups({ pupilGroups, onSubmit }) {
             {!loading && !error && (
                 <>
                     <h3>Groups</h3>
-                    <HtmlForm formProps={methods} fields={fields} submitCallback={onSubmit} submitLabel={"Update Groups"} />
+                    <HtmlForm
+                        formProps={methods}
+                        fields={fields}
+                        submitCallback={onSubmit}
+                        submitLabel={"Update Groups"}
+                        submitClass="w-100"
+                    />
                 </>
             )}
         </>

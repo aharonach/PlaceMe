@@ -1,0 +1,62 @@
+import HtmlForm from "../Forms/HtmlForm";
+import useFetchList from "../../hooks/useFetchList";
+import {Alert} from "react-bootstrap";
+import {useForm} from "react-hook-form";
+import {extractListFromAPI, setFormValues} from "../../utils";
+import {useEffect} from "react";
+import Loading from "../Loading";
+
+export default function AttributeValues({ pupil, group, rows }) {
+    const form = useForm();
+    const [values, error, loading, fetch, getValues] = useFetchList({
+        fetchUrl: `/pupils/${pupil.id}/groups/${group.id}/attributes`,
+        propertyName: 'attributeValueList',
+        thenCallback: (res) => {
+            console.log(res);
+            const mapped = {};
+            extractListFromAPI(res, 'attributeValueList', (attributeValue) => {
+                mapped[`attribute-${attributeValue.attribute.id}`] = attributeValue.value;
+            });
+            setFormValues(form, mapped);
+        }
+    });
+
+    console.log("pupil", pupil.firstName + " " + pupil.lastName);
+    console.log("group", group.id);
+
+    useEffect(() => {
+        getValues();
+    }, [pupil]);
+
+    return (
+        <>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Loading show={loading} />
+            <HtmlForm
+                formProps={form}
+                fields={prepareFields(values)}
+                disabled={true}
+                loading={loading}
+                rows={rows}
+            />
+        </>
+    )
+}
+
+const prepareFields = (values) => {
+    const fields = [];
+
+    values?.forEach( value => {
+        fields.push({
+            id: `attribute-${value.attribute.id}`,
+            label: value.attribute.name,
+            type: 'range',
+            value: value.value,
+            description: value.attribute.description,
+            bsProps: { step: 0.1, min: 1, max: 5 },
+            rules: { required: true, min: 1, max: 5 },
+        });
+    });
+
+    return fields;
+}

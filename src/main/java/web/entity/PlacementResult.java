@@ -38,6 +38,11 @@ public class PlacementResult extends BaseEntity {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "placementResult")
     private Set<PlacementClassroom> classes = new LinkedHashSet<>(); // Set is better for hibernate
 
+    @ManyToOne
+    @ToString.Exclude
+    @JoinColumn(name = "group_id")
+    private Group group;
+
     public PlacementResult(List<PlacementClassroom> classesForAlgorithm){
         this.classesForAlgorithm = classesForAlgorithm;
         this.classes = new HashSet<>(this.classesForAlgorithm);
@@ -120,6 +125,8 @@ public class PlacementResult extends BaseEntity {
     public boolean isCompleted() {
         return Status.COMPLETED.equals(getStatus());
     }
+
+    public Long getGroupId() { return placement.getGroupId(); }
 
     public int getNumberOfClasses(){
         return classes.size();

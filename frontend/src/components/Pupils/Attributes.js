@@ -29,7 +29,7 @@ export default function Attributes({ pupilId, group }) {
     const [updated, setUpdated] = useState(false);
     const [attributeValues, error, loading, fetch] = useAxios();
     const [template, errorTemplate, loadingTemplate] = useFetchRecord({
-        fetchUrl: group?._links?.group_template?.href,
+        fetchUrl: `/templates/${group.templateId}`,
         thenCallback: async (template) => {
             setFields(prepareFields(template));
             await getPupilAttributeValues();
@@ -70,7 +70,7 @@ export default function Attributes({ pupilId, group }) {
 
     return (
         <>
-            {!errorTemplate && template && (<>
+            {!errorTemplate && !error && template && (<>
                 {updated && <Alert variant="success">Attributes updated successfully</Alert> }
                 <HtmlForm
                     formProps={form}
@@ -78,6 +78,7 @@ export default function Attributes({ pupilId, group }) {
                     loading={loading || loadingTemplate}
                     submitCallback={updatePupilAttributeValues}
                     submitLabel="Update"
+                    submitClass="w-100"
                 />
             </>)}
         </>

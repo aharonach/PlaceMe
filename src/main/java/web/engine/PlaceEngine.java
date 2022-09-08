@@ -24,8 +24,8 @@ public class PlaceEngine {
         this.placement = placement;
         this.config = config;
         this.pupils = placement.getGroup().getPupils().stream().toList();
-        this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, true));
-        this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement, false));
+        this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement.getGroup(), true));
+        this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(getSelectorSelectedIds(placement.getGroup(), false));
 
         numOfMales = (int) pupils.stream().filter(p -> p.getGender()== Pupil.Gender.MALE).count();
         numOfFemales = (int) pupils.stream().filter(p -> p.getGender()== Pupil.Gender.FEMALE).count();
@@ -33,8 +33,8 @@ public class PlaceEngine {
         pupils.forEach(System.out::println);
     }
 
-    public static Set<SelectorSelectedId> getSelectorSelectedIds(Placement placement, boolean isWantToBeWithSelected){
-        return placement.getGroup().getPreferences().stream()
+    public static Set<SelectorSelectedId> getSelectorSelectedIds(Group group, boolean isWantToBeWithSelected){
+        return group.getPreferences().stream()
                 .filter(preference -> preference.getIsSelectorWantToBeWithSelected().equals(isWantToBeWithSelected))
                 .map(Preference::getSelectorSelectedId)
                 .collect(Collectors.toSet());
