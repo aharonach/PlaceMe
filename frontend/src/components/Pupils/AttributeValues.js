@@ -12,7 +12,6 @@ export default function AttributeValues({ pupil, group, rows }) {
         fetchUrl: `/pupils/${pupil.id}/groups/${group.id}/attributes`,
         propertyName: 'attributeValueList',
         thenCallback: (res) => {
-            console.log(res);
             const mapped = {};
             extractListFromAPI(res, 'attributeValueList', (attributeValue) => {
                 mapped[`attribute-${attributeValue.attribute.id}`] = attributeValue.value;
@@ -20,9 +19,6 @@ export default function AttributeValues({ pupil, group, rows }) {
             setFormValues(form, mapped);
         }
     });
-
-    console.log("pupil", pupil.firstName + " " + pupil.lastName);
-    console.log("group", group.id);
 
     useEffect(() => {
         getValues();

@@ -1,21 +1,18 @@
-import React, {useState} from "react";
+import React from "react";
 import {Header, Footer} from "./layouts";
 import {Col, Container, Row} from "react-bootstrap";
-import RecordContext from "./context/RecordContext";
 import AppRoutes from "./AppRoutes";
 import './index.scss';
 
 function App() {
-    const [record, setRecord] = useState({ record: null, displayFields: [] });
-
     return (
-        <Container fluid className="App">
-            <Row>
-                <Col md={3} style={{paddingLeft:0}} ><Header /></Col>
-                <Col md={9} >
-                    <RecordContext.Provider value={{ record: record, setRecord: setRecord }}>
-                        <AppRoutes />
-                    </RecordContext.Provider>
+        <Container fluid className="App px-4">
+            <Row className="gx-5">
+                <Col md={3} style={{paddingLeft:0}}>
+                    <Header />
+                </Col>
+                <Col md={9} id="main">
+                    <AppRoutes />
                     <Footer />
                 </Col>
             </Row>

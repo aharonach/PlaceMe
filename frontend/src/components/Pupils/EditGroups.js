@@ -26,13 +26,11 @@ export default function EditGroups() {
         <>
             <h2>Attribute Values</h2>
             <Loading show={loading} />
-            {!loading && error && <Alert variant="danger">{error}</Alert>}
-            {!loading && !error && pupilGroups && (
+            {error && <Alert variant="danger">{error}</Alert>}
+            {pupilGroups && (
                 <Row>
                     <Col md={4}>
-                        <div className="p-3 bg-light rounded-3">
-                            <Groups pupilGroups={pupilGroups.map(group => group.id.toString())} onSubmit={updateGroups} />
-                        </div>
+                        <Groups pupilGroups={pupilGroups.map(group => group.id.toString())} onSubmit={updateGroups} />
                     </Col>
                     <Col md={8}>
                         <GroupsAttributes groups={pupilGroups} />

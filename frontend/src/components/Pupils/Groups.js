@@ -32,13 +32,15 @@ export default function Groups({ pupilGroups, onSubmit }) {
             {!loading && !error && (
                 <>
                     <h3>Groups</h3>
-                    <HtmlForm
-                        formProps={methods}
-                        fields={fields}
-                        submitCallback={onSubmit}
-                        submitLabel={"Update Groups"}
-                        submitClass="w-100"
-                    />
+                    <div className="p-3 bg-light rounded-3">
+                        <HtmlForm
+                            formProps={methods}
+                            fields={fields}
+                            submitCallback={onSubmit}
+                            submitLabel={"Update Groups"}
+                            submitClass="w-100"
+                        />
+                    </div>
                 </>
             )}
         </>

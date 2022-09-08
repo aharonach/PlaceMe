@@ -13,8 +13,6 @@ export default function EditPupil() {
         defaultValues: { ...getDefaultValuesByFields(FormFields(), pupil) }
     });
 
-    console.log( { ...getDefaultValuesByFields(FormFields(), pupil) } );
-
     const onSubmit = data => {
         axiosFetch({
             method: 'post',

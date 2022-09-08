@@ -13,7 +13,7 @@ export default function GroupsAttributes({ groups }) {
 
     return (
         <>
-            <h3>Attribute Values</h3>
+            <h3>Values</h3>
             <Tab.Container id="pupil-attributes" defaultActiveKey={group?.id} onSelect={onSelect}>
                 <Row>
                     <Col sm={3}>

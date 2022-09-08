@@ -1,4 +1,17 @@
 @import "CustomColors";
+
+#main {
+  height: 100vh;
+  overflow: auto;
+}
+
+.menuItem .item-content {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  font-size: 1.25rem;
+}
+
 .menuItem.active{
   font-weight: bold;
   color: $primary;
@@ -8,9 +21,9 @@
 .menuItem{
   color: opacify(#BCAFA0, 1);
   background: $light;
-
 }
-.btn {
+
+.btn:not([class*="outline"]):not(.btn-link) {
   color: white;
 }
 
@@ -19,10 +32,8 @@
   opacity: 0.75;
 }
 
-.table{
+.table {
   color: $dark;
-  //opacity: 0.5;
-
 }
 
 thead th{
@@ -46,10 +57,5 @@ tbody th{
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
-
-//.table-bordered{
-//  color: $light;
-//  border-bottom-color: $primary;
-//  //opacity: 0.5;
-//}

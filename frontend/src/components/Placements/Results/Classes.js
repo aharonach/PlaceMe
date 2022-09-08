@@ -21,12 +21,20 @@ export default function Classes({ result }) {
         fetchUrl: `/placements/${placementId}/results/${result.id}/classes/info`,
     });
     const [selectedPupil, setSelectedPupil] = useState();
+    const [classView, setClassView] = useState('row');
+
+    const handleClassView = () => {
+        setClassView(classView === 'row' ? 'grid' : 'row');
+    }
 
     let classNumber = 1;
 
     return (
         <>
-            <h3>Classrooms</h3>
+            <h3>
+                Classrooms
+                <Button variant="link" onClick={handleClassView}>{classView === 'row' ? "View as scrollable row" : "View as grid"}</Button>
+            </h3>
             <Loading show={loading} />
             {error && <Alert variant="danger">{error}</Alert>}
             {<Alert variant="secondary">
@@ -36,13 +44,17 @@ export default function Classes({ result }) {
             </Alert>}
             {<Alert variant="info"><Legend /></Alert>}
             {!loading && !error && classrooms && (
-                <Row>
+                <Row
+                    lg={classView === 'grid' ? 3 : null}
+                    xl={classView === 'grid' ? 4 : null}
+                    className={classView === 'row' ? 'flex-nowrap overflow-auto' : ''}
+                >
                     {classrooms.map(classroom => (
-                        <Col key={classroom.id} md={6} lg={3}>
+                        <Col key={classroom.id}>
                             <Card className="mb-2">
                                 <Card.Header as={"h4"}>Class #{classNumber++}</Card.Header>
                                 <Card.Body>
-                                    <ClassData classInfo={classroom} />
+                                    <ClassData classInfo={classroom} view={classView} />
                                     <ClassPupils classroom={classroom} classInfo={classesInfo} selected={selectedPupil} setSelected={setSelectedPupil} />
                                 </Card.Body>
                             </Card>
@@ -54,9 +66,11 @@ export default function Classes({ result }) {
     )
 }
 
-const ClassData = ({classInfo}) => {
+const ClassData = ({classInfo, view}) => {
+    const viewClass = view === 'grid' ? 'flex-wrap' : "";
+
     return (
-        <Stack gap={2} direction="horizontal" className="mb-2">
+        <Stack gap={2} direction="horizontal" className={`mb-2 ${viewClass}`}>
             <><strong>Score:</strong> {fixedNumber(classInfo.classScore)}</>
             <div className="vr" />
             <Gender gender={"MALE"} >{classInfo.numberOfMales}</Gender>
@@ -95,7 +109,7 @@ const ClassPupils = ({classroom, classInfo, selected, setSelected}) => {
                     <Gender pill gender={pupil.gender} noIcon/>{' '}
                     <Button
                         variant="link"
-                        className={`p-0 text-decoration-none ${pupilSelectedClass} ${preferToBeClass} ${selectedIsNotWith} ${isAloneInClassroomClass}`}
+                        className={`p-0 pupil-in-class ${pupilSelectedClass} ${preferToBeClass} ${selectedIsNotWith} ${isAloneInClassroomClass}`}
                         onClick={() => selectPupil(pupil)}
                     >{pupil.firstName} {pupil.lastName}</Button>
                 </Stack>

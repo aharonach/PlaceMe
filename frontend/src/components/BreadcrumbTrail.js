@@ -1,25 +1,12 @@
-import React, {useContext} from 'react';
+import React from 'react';
 import {Breadcrumb} from "react-bootstrap";
 import {LinkContainer} from "react-router-bootstrap";
-import RecordContext from "../context/RecordContext";
 
-export default function BreadcrumbTrail({ breadCrumbs}) {
-    // const { record } = useContext(RecordContext);
-
+export default function BreadcrumbTrail({ breadCrumbs }) {
     return (
-        <Breadcrumb>
+        <Breadcrumb listProps={{ className: "mb-0" }} className="px-3 py-2 rounded-2 my-3 bg-white">
             {breadCrumbs.map(({ match, breadcrumb }) => {
-                let display = breadcrumb;
-                //
-                // if ( record.record ) {
-                //     if ( record.pathname === match.pathname ) {
-                //         display = '';
-                //         record.displayFields.forEach(displayField => display += record.record[displayField] + " ");
-                //         display.trimEnd();
-                //     }
-                // }
-
-                return <LinkContainer key={match.pathname} to={match.pathname}><Breadcrumb.Item>{display}</Breadcrumb.Item></LinkContainer>
+                return <LinkContainer key={match.pathname} to={match.pathname}><Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item></LinkContainer>
             })}
         </Breadcrumb>
     );
