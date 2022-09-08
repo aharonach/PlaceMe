@@ -1,0 +1,55 @@
+@import "CustomColors";
+.menuItem.active{
+  font-weight: bold;
+  color: $primary;
+  background: $light;
+}
+
+.menuItem{
+  color: opacify(#BCAFA0, 1);
+  background: $light;
+
+}
+.btn {
+  color: white;
+}
+
+.btn-link {
+  color: $dark;
+  opacity: 0.75;
+}
+
+.table{
+  color: $dark;
+  //opacity: 0.5;
+
+}
+
+thead th{
+  color: $dark;
+  opacity: 0.5;
+}
+
+.table > thead{
+  border-bottom-color: transparentize($primary, 0.25);
+  border-bottom-width: 2px;
+}
+
+tbody th{
+  color: $dark;
+  opacity: 0.5;
+}
+
+.page-header {
+  border-bottom: 2px solid $custom-blue;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+//.table-bordered{
+//  color: $light;
+//  border-bottom-color: $primary;
+//  //opacity: 0.5;
+//}

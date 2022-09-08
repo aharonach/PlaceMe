@@ -27,7 +27,7 @@ export default function RecordList({
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState(null);
     const [direction, setDirection] = useState('ASC');
-    const [list, error, loading, axiosFetch, getList, pagination] = useFetchList({
+    const [list, error, loading, getList, pagination] = useFetchList({
         fetchUrl: buildUrl(fetchUrl, { page: page - 1, sortField: sort, sortDirection: direction }),
         propertyName: propertyName,
         mapCallback: mapCallback,
@@ -50,11 +50,13 @@ export default function RecordList({
 
     return (
         <>
-            {title}
-            <ButtonGroup className="mb-3">
-                {list?.length > 0 && addButtonRender}
-                {additionalButtons}
-            </ButtonGroup>
+            <div className="page-header">
+                {title}
+                <ButtonGroup className="mb-3">
+                    {list?.length > 0 && addButtonRender}
+                    {additionalButtons}
+                </ButtonGroup>
+            </div>
             {error && <Alert variant="danger">{error}</Alert>}
             {children}
             {!list ? <Loading show={loading} />

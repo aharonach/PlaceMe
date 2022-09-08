@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import FormFields from "./FormFields";
 
 export default function AddGroup() {
-    const [group, error, loading, axiosFetch] = useAxios();
+    const [ error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
         defaultValues: {
@@ -29,7 +29,9 @@ export default function AddGroup() {
 
     return (
         <>
-            <h1>Add Group</h1>
+            <div className={"page-header"}>
+                <h1>Add Group</h1>
+            </div>
             {error && <Alert variant="danger">{error}</Alert>}
             <HtmlForm fields={FormFields} formProps={methods} submitCallback={onSubmit} loading={loading}></HtmlForm>
         </>
