@@ -1,9 +1,10 @@
-import React, {useEffect, useMemo} from 'react';
+import React, {useState} from 'react';
 import useAxios from "../../hooks/useAxios";
-import Api from "../../api";
 import HtmlForm from "../Forms/HtmlForm";
 import {useForm} from "react-hook-form";
 import {extractListFromAPI} from "../../utils";
+import useFetchRecord from "../../hooks/useFetchRecord";
+import {Alert} from "react-bootstrap";
 
 const prepareFields = (template) => {
     const fields = [];
@@ -23,38 +24,34 @@ const prepareFields = (template) => {
 }
 
 export default function Attributes({ pupilId, group }) {
-    const [template, errorTemplate, loadingTemplate, axiosFetchTemplate] = useAxios();
-    const [attributeValues, error, loading, axiosFetch] = useAxios();
-
-    const fields = useMemo( () => prepareFields(template), [template] );
-    const methods = useForm();
-
-    const getTemplate = () => {
-        const templateLink = group?._links?.group_template?.href;
-
-        if ( templateLink ) {
-            axiosFetchTemplate({
-                axiosInstance: Api,
-                method: 'get',
-                url: group._links.group_template.href
-            }).then(() => getPupilAttributeValues());
+    const form = useForm();
+    const [fields, setFields] = useState([]);
+    const [updated, setUpdated] = useState(false);
+    const [attributeValues, error, loading, fetch] = useAxios();
+    const [template, errorTemplate, loadingTemplate] = useFetchRecord({
+        fetchUrl: `/templates/${group.templateId}`,
+        thenCallback: async (template) => {
+            setFields(prepareFields(template));
+            await getPupilAttributeValues();
         }
-    }
+    });
 
-    const getPupilAttributeValues = () => {
-        axiosFetch({
-            axiosInstance: Api,
+    const getPupilAttributeValues = async () => {
+        const pupilAttributes = await fetch({
             method: 'get',
             url: `/pupils/${pupilId}/groups/${group.id}/attributes`
-        }).then((pupilAttributes) => {
-            extractListFromAPI( pupilAttributes, 'attributeValueList', value => {
-                methods.setValue(`attribute-${group.templateId}-${value.attribute.id}`, value.value);
-                return value;
-            });
+        });
+
+        // Set values again
+        extractListFromAPI( pupilAttributes, 'attributeValueList', value => {
+            form.setValue(`attribute-${group.templateId}-${value.attribute.id}`, value.value);
+            return value;
         });
     }
 
-    const updatePupilAttributeValues = (data) => {
+    const updatePupilAttributeValues = async (data) => {
+        setUpdated(false);
+
         // convert the data to be in ([attributeId]: value) structure
         data = Object.fromEntries(Object.entries(data).map(entry => {
            return [
@@ -63,30 +60,27 @@ export default function Attributes({ pupilId, group }) {
            ];
         }));
 
-        axiosFetch({
-            axiosInstance: Api,
+        await fetch({
             method: 'post',
             url: `/pupils/${pupilId}/groups/${group.id}/attributes`,
             data: { ...data },
         });
+        setUpdated(true);
     }
-
-    useEffect(() => {
-        getTemplate();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     return (
         <>
-            {!errorTemplate && template && (
+            {!errorTemplate && !error && template && (<>
+                {updated && <Alert variant="success">Attributes updated successfully</Alert> }
                 <HtmlForm
-                    formProps={methods}
+                    formProps={form}
                     fields={fields}
                     loading={loading || loadingTemplate}
                     submitCallback={updatePupilAttributeValues}
                     submitLabel="Update"
+                    submitClass="w-100"
                 />
-            )}
+            </>)}
         </>
     )
 }

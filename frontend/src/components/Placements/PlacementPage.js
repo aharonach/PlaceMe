@@ -40,8 +40,8 @@ export default function PlacementPage(){
                                 <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
                             </ButtonGroup>
                             <ButtonGroup>
-                                <Button variant="outline-primary" onClick={() => setShowImport(true)}>Import</Button>
-                                <Button as="a" variant="outline-primary" href={exportDownloadUrl} download={CSV_CONTENT_TYPE}>Export</Button>
+                                <Button variant="secondary" onClick={() => setShowImport(true)}>Import</Button>
+                                <Button as="a" variant="secondary" href={exportDownloadUrl} download={CSV_CONTENT_TYPE}>Export</Button>
                             </ButtonGroup>
                         </Stack>
                     </div>

@@ -48,7 +48,7 @@ export default function FormFields() {
             rules: { required: true },
         },
         {
-            id: 'groups',
+            id: 'groupIds',
             label: 'Groups',
             type: 'select',
             multiple: true,

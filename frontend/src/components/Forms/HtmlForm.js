@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Col, Form} from "react-bootstrap";
+import {Button, Col, Form, Row} from "react-bootstrap";
 import Select from "./Select";
 import Input from "./Input";
 import Checkbox from './Checkbox';
@@ -12,29 +12,52 @@ import Range from "./Range";
 import SelectMultiple from "./SelectMultiple";
 import File from "./File";
 
-export default function HtmlForm({ fields, submitCallback, formProps, loading, submitLabel, vertical, children }) {
+function outputFieldWrapper(field, vertical, formProps, hasError, error) {
+    return (
+        <Form.Group as={vertical ? Col : "div"} controlId={field.id} className="mb-3">
+            <Label settings={field}/>
+            {outputField(field, {field: field, control: formProps.control, hasError: hasError})}
+            {field.description && <Form.Text muted>{field.description}</Form.Text>}
+            {<FieldFeedback hasError={hasError} error={error}/>}
+        </Form.Group>
+    );
+}
+
+export default function HtmlForm(
+    {
+        fields,
+        submitCallback,
+        formProps,
+        loading,
+        submitLabel,
+        vertical,
+        disabled = false,
+        submitClass,
+        children,
+        rows = 1
+}) {
     const formFields = 'function' === typeof ( fields ) ? fields() : fields;
 
     return (
-        <Form onSubmit={formProps.handleSubmit(submitCallback)}>
-            {formFields.map( field => {
-                const error = formProps.formState.errors[field.id];
-                const hasError = !!error;
+        <Form onSubmit={!disabled ? formProps.handleSubmit(submitCallback) : () => {}}>
+            <Row md={rows}>
+                {formFields.map( field => {
+                    const error = formProps.formState.errors[field.id];
+                    const hasError = !!error;
 
-                return (
-                    <Form.Group key={field.id} as={vertical ? Col : "div"} controlId={field.id} className="mb-3">
-                        <Label settings={field} />
-                        {outputField(field, { field: field, control: formProps.control, hasError: hasError })}
-                        {field.description && <Form.Text muted>{field.description}</Form.Text>}
-                        {<FieldFeedback hasError={hasError} error={error} />}
-                    </Form.Group>
-                )
-            })}
+                    if ( disabled ) {
+                        field.bsProps.disabled = true;
+                    }
+
+                    return <Col key={field.id}>{outputFieldWrapper(field, vertical, formProps, hasError, error)}</Col>;
+                })}
+            </Row>
+
             {children}
-            <Button type="submit" variant="primary">
+            {!disabled && <Button type="submit" variant="primary" className={submitClass}>
                 <Loading show={loading} size="sm" block={false} />
                 {submitLabel ? submitLabel : 'Submit'}
-            </Button>
+            </Button>}
         </Form>
     );
 }

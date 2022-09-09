@@ -6,5 +6,10 @@ $dark: #363D3D;
 $light: #F4EFE9;
 $success: $custom-blue;
 $danger: #F55E3C;
-$body-bg:#F5F5F5;
-$table-border-color:transparentize($primary,0.75);
+$body-bg: #F5F5F5;
+$table-border-color: transparentize($primary,0.75);
+
+$input-bg: #fff;
+$input-border-radius: 10px;
+$input-border-width: 2px;
+$input-border-color: transparentize($dark, 0.9);

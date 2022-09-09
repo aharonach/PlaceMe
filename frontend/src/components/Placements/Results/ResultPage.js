@@ -35,12 +35,14 @@ export default function ResultPage(){
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && result &&
                 <article>
-                    <h2>{result.name}</h2>
-                    <ButtonGroup>
-                        <LinkContainer to={baseUrl + `${resultId}/edit`}><Button>Edit Result</Button></LinkContainer>
-                        {result.selected ? '' : <Button variant="success" onClick={makeSelected}>Select Result</Button>}
-                        <Button variant="danger" onClick={handleDelete}>Delete Result</Button>
-                    </ButtonGroup>
+                    <div className="page-header">
+                        <h2>{result.name}</h2>
+                        <ButtonGroup>
+                            <LinkContainer to={baseUrl + `${resultId}/edit`}><Button>Edit Result</Button></LinkContainer>
+                            {result.selected ? '' : <Button variant="success" onClick={makeSelected}>Select Result</Button>}
+                            <Button variant="danger" onClick={handleDelete}>Delete Result</Button>
+                        </ButtonGroup>
+                    </div>
                     <Outlet context={{ result, error, loading, axiosFetch }} />
                 </article>
             }

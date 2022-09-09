@@ -2,7 +2,6 @@ import React from 'react';
 import {useForm} from "react-hook-form";
 import HtmlForm from "../Forms/HtmlForm";
 import useAxios from "../../hooks/useAxios";
-import Api from '../../api';
 import { Alert } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import FormFields from "./FormFields";
@@ -23,12 +22,13 @@ export default function AddPupil() {
     let navigate = useNavigate();
 
     const onSubmit = (data) => {
-
         axiosFetch({
-            axiosInstance: Api,
             method: 'put',
             url: '/pupils',
-            data: {...data, groups: data.groups?.map( groupId => Object.assign({}, { id: groupId }))}
+            data: {
+                ...data,
+                groups: data.groupIds?.map( groupId => Object.assign({}, { id: groupId }))
+            }
         }).then(pupil => pupil && navigate(`/pupils/${pupil.id}`, { replace: true }));
     };
 

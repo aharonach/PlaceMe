@@ -11,7 +11,7 @@ export default function GenerateFirstResults({ hasResults }) {
 
     if ( hasResults ) {
         return <HeroAddRecord
-            title={<h2>The placement has {placement.numberOfResults} Results</h2>}
+            title={<h2>"{placement.name}" has {placement.numberOfResults} results</h2>}
             message={<p>No selected result, go to the results page to select one.</p>}
             button={<LinkContainer to={`/placements/${placement.id}/results`}><Button size="lg" variant="success">View the results</Button></LinkContainer>}
         />

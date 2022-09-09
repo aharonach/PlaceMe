@@ -2,7 +2,6 @@ package web.dto;
 
 import web.engine.PlaceEngine;
 import web.entity.BaseEntity;
-import web.entity.Placement;
 import web.entity.PlacementResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,12 +20,15 @@ public class ClassroomInfoDto {
     private Map<Long, Integer> numberOfFriendsInClass;
 
     public static ClassroomInfoDto fromPlacementResult(PlacementResult placementResult){
-        Placement placement = placementResult.getPlacement();
-        Map<Long, Set<Long>> preferToBeList = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placement, true)).getValues();
-        Map<Long, Set<Long>> preferNotToBeList = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placement, false)).getValues();
+        Map<Long, Set<Long>> preferToBeList = PupilsConnectionsDto
+                .fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getGroup(), true))
+                .getValues();
+        Map<Long, Set<Long>> preferNotToBeList = PupilsConnectionsDto
+                .fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getGroup(), false))
+                .getValues();
         Map<Long, Integer> numberOfFriendsInClass = new HashMap<>();
 
-        placementResult.getPlacement().getGroup().getPupils().forEach(pupil -> {
+        placementResult.getGroup().getPupils().forEach(pupil -> {
             if(!preferToBeList.containsKey(pupil.getId())){
                 preferToBeList.put(pupil.getId(), new HashSet<>());
             }

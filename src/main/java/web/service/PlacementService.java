@@ -208,6 +208,7 @@ public class PlacementService implements EntityService<Placement> {
         PlacementResult placementResult = new PlacementResult();
         if (name != null) placementResult.setName(name);
         if (description != null) placementResult.setDescription(description);
+        placementResult.setGroup(placement.getGroup());
 
         placementResult = savePlacementResult(placement, placementResult);
         Long resultId = placementResult.getId();
