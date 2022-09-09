@@ -40,6 +40,7 @@ export default function Configs() {
                 loading={loading}
                 submitCallback={handleSubmit}
                 submitLabel={"Update"}
+                rows={2}
             />
         </>
     )

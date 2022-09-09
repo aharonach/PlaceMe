@@ -55,8 +55,8 @@ export default function AppRoutes() {
                     </Route>
                 </Route>
             </Route>
-            <Route path="/configs" element={<Configs />}></Route>
-            <Route path="*" element={<ErrorPage />}></Route>
+            <Route path="/configs" element={<Page><Configs /></Page>}></Route>
+            <Route path="*" element={<Page><ErrorPage /></Page>}></Route>
         </Routes>
     );
 }

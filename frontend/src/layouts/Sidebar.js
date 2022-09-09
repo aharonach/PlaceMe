@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
     CDBSidebar,
     CDBSidebarContent,
@@ -7,9 +7,9 @@ import {
     CDBSidebarMenuItem,
 } from 'cdbreact';
 import {LinkContainer} from "react-router-bootstrap";
-import {CalendarCheckFill, ClipboardCheckFill, CollectionFill, PersonFill} from "react-bootstrap-icons";
+import {CalendarCheckFill, ClipboardCheckFill, CollectionFill, GearFill, PersonFill} from "react-bootstrap-icons";
 import logo from "../Logo.png"
-import {NavLink, useHref, useResolvedPath} from "react-router-dom";
+import {NavLink, useResolvedPath} from "react-router-dom";
 
 const menu = [
     {
@@ -32,6 +32,11 @@ const menu = [
         path: '/placements',
         icon: <CalendarCheckFill />
     },
+    {
+        label: "EA Configs",
+        path: '/configs',
+        icon: <GearFill />
+    }
 ];
 
 const pathIncludes = ( path, includes ) => {

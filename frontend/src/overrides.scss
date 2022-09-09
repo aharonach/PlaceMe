@@ -23,8 +23,12 @@
   background: $light;
 }
 
-.btn:not([class*="outline"]):not(.btn-link) {
+.btn:not([class*="outline"]):not(.btn-link):not(.btn-secondary) {
   color: white;
+}
+
+.btn.btn-secondary {
+  color: $dark
 }
 
 .btn-link {

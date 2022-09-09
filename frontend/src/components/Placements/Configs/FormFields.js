@@ -10,7 +10,7 @@ export default function FormFields() {
         {
             id: "offspringSelector",
             label: "Offspring Selector",
-            type: "select",
+            type: "radio",
             options: [
                 {value: 'TournamentSelector', label: 'Tournament Selector'},
                 {value: 'RouletteWheelSelector', label: 'Roulette Wheel Selector'}
@@ -20,7 +20,7 @@ export default function FormFields() {
         {
             id: "altererFirst",
             label: "First Alterer",
-            type: "select",
+            type: "radio",
             options: [
                 {value: 'SwapMutator', label: 'Swap Mutator'},
                 {value: 'SinglePointCrossover', label: 'Single Point Crossover'},
@@ -37,7 +37,7 @@ export default function FormFields() {
         {
             id: "altererSecond",
             label: "Second Alterer",
-            type: "select",
+            type: "radio",
             options: [
                 {value: 'SinglePointCrossover', label: 'Single Point Crossover'},
                 {value: 'SwapMutator', label: 'Swap Mutator'},
