@@ -4,7 +4,7 @@ import {
     Badge,
     Button,
     Card,
-    Col,
+    Col, FormControl,
     Row,
     Stack,
     ToggleButton,
@@ -31,6 +31,8 @@ export default function PreferencesInGroup() {
     const [selector, setSelector] = useState(0);
     const [selected, setSelected] = useState(0);
     const [wantsToBe, setWantsToBe] = useState('yes');
+    const [filterPupil, setFilterPupil] = useState('');
+    const [filterPreference, setFilterPreference] = useState('');
 
     const reset = () => {
         setSelector(0);
@@ -50,6 +52,8 @@ export default function PreferencesInGroup() {
         }
     }
 
+    const filterPupils = (e) => setFilterPupil(e.target.value.toLowerCase());
+    const filterPreferences = (e) => setFilterPreference(e.target.value.toLowerCase());
     const mapped = useMemo(() => mapPreferencesByPupils(preferences), [preferences]);
 
     return (
@@ -59,7 +63,7 @@ export default function PreferencesInGroup() {
                 <h3>Preferences</h3>
                 <Instructions selector={selector} />
                 <Row>
-                    <Col md={4}>
+                    <Col lg={4}>
                         <div className="mb-3">
                             <Button onClick={handleSave} disabled={!(selector && selected)}>Add Preference</Button>
                             <Loading show={loadingPupils} />
@@ -68,7 +72,8 @@ export default function PreferencesInGroup() {
                             <ToggleButtons selector={selector} handleToggle={handleToggle} reset={reset} wantsToBe={wantsToBe} />
                         </div>
                         <Loading show={loadingFetch} block={false} size="sm" />
-                        {!errorPupils && pupils && (
+                        {!errorPupils && pupils && <>
+                            <FormControl onChange={filterPupils} value={filterPupil} className="mb-2" placeholder="Filter..." />
                             <div className="d-flex flex-wrap">
                                 <PupilButtons
                                     pupils={pupils}
@@ -76,9 +81,10 @@ export default function PreferencesInGroup() {
                                     selected={selected}
                                     setSelected={setSelected}
                                     setSelector={setSelector}
+                                    filter={filterPupil}
                                 />
                             </div>
-                        )}
+                        </>}
                         <div className="mb-3">
                             <ToggleButtons selector={selector} handleToggle={handleToggle} reset={reset} wantsToBe={wantsToBe} />
                         </div>
@@ -87,8 +93,14 @@ export default function PreferencesInGroup() {
                             <Loading show={loadingPupils} />
                         </div>
                     </Col>
-                    <Col md={8}>
-                        <Preferences group={group} items={mapped} updatePreferences={getPreferences} />
+                    <Col lg={8}>
+                        <FormControl onChange={filterPreferences} value={filterPreference} className="mb-2" placeholder="Filter..." />
+                        <Preferences
+                            group={group}
+                            items={mapped}
+                            updatePreferences={getPreferences}
+                            filter={filterPreference}
+                        />
                     </Col>
                 </Row>
             </>
@@ -125,19 +137,27 @@ const Instructions = ({ selector }) => {
     </Alert>
 }
 
-const Preferences = ({ group, items, updatePreferences }) => {
+const Preferences = ({ group, items, updatePreferences, filter }) => {
     return (
         <Row xs={2} md={3} lg={4} className="g-2">
-            {Object.keys(items).map(selectorId => (
-                <Col key={selectorId}>
-                    <Card className="h-100">
-                        <Card.Body>
-                            <Card.Subtitle className="border-bottom mb-1 pb-1">{`${items[selectorId].name} `}</Card.Subtitle>
-                            <Stack direction="vertical" gap={2}>
-                                {!objectIsEmpty(items[selectorId].yes) && (
-                                    <Stack direction="vertical" gap={1}>
-                                        <span className="text-success">Prefers:</span>
-                                        <span>
+            {Object.keys(items).map(selectorId => {
+                const filtered = ! ( items[selectorId].name.toLowerCase().includes(filter) );
+
+                if ( filtered ) {
+                    return null;
+                }
+
+                return (
+                    <Col key={selectorId}>
+                        <Card className="h-100">
+                            <Card.Body>
+                                <Card.Subtitle
+                                    className="border-bottom mb-1 pb-1">{`${items[selectorId].name} `}</Card.Subtitle>
+                                <Stack direction="vertical" gap={2}>
+                                    {!objectIsEmpty(items[selectorId].yes) && (
+                                        <Stack direction="vertical" gap={1}>
+                                            <span className="text-success">Prefers:</span>
+                                            <span>
                                             {Object.keys(items[selectorId].yes).map(selectedId => <Preference
                                                 key={selectedId}
                                                 groupId={group.id}
@@ -147,27 +167,28 @@ const Preferences = ({ group, items, updatePreferences }) => {
                                                 updatePreferences={updatePreferences}
                                             />)}
                                         </span>
-                                    </Stack>
-                                )}
-                                {/** Show separator **/}
-                                {!objectIsEmpty(items[selectorId].no) && (
-                                    <Stack direction="vertical" gap={1}>
-                                        <span className="text-danger">Doesn't prefer:</span><br />
-                                        <span>{Object.keys(items[selectorId].no).map(selectedId => <Preference
+                                        </Stack>
+                                    )}
+                                    {/** Show separator **/}
+                                    {!objectIsEmpty(items[selectorId].no) && (
+                                        <Stack direction="vertical" gap={1}>
+                                            <span className="text-danger">Doesn't prefer:</span><br/>
+                                            <span>{Object.keys(items[selectorId].no).map(selectedId => <Preference
                                                 key={selectedId}
                                                 groupId={group.id}
                                                 selectorId={selectorId}
                                                 selectedId={selectedId}
                                                 selectedName={items[selectorId].no[selectedId]}
                                                 updatePreferences={updatePreferences}
-                                        />)}</span>
-                                    </Stack>
-                                )}
-                            </Stack>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            ))}
+                                            />)}</span>
+                                        </Stack>
+                                    )}
+                                </Stack>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                )
+            })}
         </Row>
     );
 };
@@ -194,9 +215,21 @@ const Preference = ({groupId, selectorId, selectedId, selectedName, updatePrefer
     )
 }
 
-const PupilButtons = ({ pupils, selector, setSelector, selected, setSelected }) => {
-    return pupils.map( pupil => (
-        <span key={pupil.id} className="d-inline-block mb-1 me-1">
+const PupilButtons = ({ pupils, selector, setSelector, selected, setSelected, filter }) => {
+    return pupils.map( pupil => {
+        const filtered =
+            ! (pupil.firstName.toLowerCase().includes(filter)
+            || pupil.lastName.toLowerCase().includes(filter)
+            || pupil.givenId.toLowerCase().includes(filter) );
+
+        if ( filtered ) {
+            return null;
+        }
+
+        return (
+            <span key={pupil.id}
+                  className="mb-1 me-1 d-inline-block"
+            >
             {!selector
                 ? <ToggleButton
                     size="sm"
@@ -219,7 +252,8 @@ const PupilButtons = ({ pupils, selector, setSelector, selected, setSelected }) 
                     checked={selected === pupil.id}
                 >{pupil.firstName} {pupil.lastName}</ToggleButton>}
         </span>
-    ));
+        )
+    });
 }
 
 /**

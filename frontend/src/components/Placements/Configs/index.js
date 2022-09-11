@@ -5,21 +5,20 @@ import HtmlForm from "../../Forms/HtmlForm";
 import {Alert, Button} from "react-bootstrap";
 import FormFields from "./FormFields";
 import {useState} from "react";
-import axios from "axios";
 
 export default function Configs() {
     const form = useForm();
     const url = '/placements/configs';
     // eslint-disable-next-line no-unused-vars
-    const [configs, error, loading, fetch, getConfigs] = useFetchRecord({
+    const [configs, error, loading, fetch] = useFetchRecord({
         fetchUrl: url,
-        thenCallback: (configs) => setFormValues(form, configs)
+        thenCallback: (configs) => setForm(configs)
     });
     const [updated, setUpdated] = useState('');
 
-    const handleSubmit = async (data) => {
-        setUpdated('');
+    const setForm = (response) => setFormValues(form, response);
 
+    const handleSubmit = async (data) => {
         const response = await fetch({
             method: 'post',
             url: url,
@@ -27,27 +26,28 @@ export default function Configs() {
         });
 
         if ( response ) {
+            setForm(response);
             setUpdated("Configs updated successfully");
         }
     }
 
     const handleReset = async () => {
-        setUpdated('');
-
         const response = await fetch({
             method: 'post',
             url: `${url}/reset`,
         });
 
         if ( response ) {
+            setForm(response);
             setUpdated("Configs reset successfully");
-            getConfigs();
         }
     }
 
     return (
         <>
-            <h1>Configure Placing Algorithm</h1>
+            <div className="page-header">
+                <h1>Configure Placing Algorithm</h1>
+            </div>
             {error && <Alert variant="danger">{error}</Alert>}
             {updated && <Alert variant="success">{updated}</Alert>}
             <HtmlForm
@@ -56,9 +56,10 @@ export default function Configs() {
                 loading={loading}
                 submitCallback={handleSubmit}
                 submitLabel={"Update"}
-                additionalButtons={<Button type="button" variant="secondary" onClick={handleReset}>Reset to default</Button>}
+                additionalButtons={<Button type="button" variant="secondary" onClick={handleReset}>Reset to
+                    default</Button>}
                 rows={2}
             />
         </>
-    )
+    );
 }
