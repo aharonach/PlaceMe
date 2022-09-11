@@ -1,12 +1,15 @@
-$custom-blue: #99D3D5;
+$custom-orange: #F48E77;
+$custom-blue: #8BCFD0;
+$custom-yellow: #F6C771;
+$light-orange: #F4EFE9;
 
 $body-color: #22375B;
-$primary: #F48E77;
-$secondary: $custom-blue;
+$primary: $custom-orange;
+$secondary: $custom-yellow;
 $dark: #363D3D;
 $light: #F4EFE9;
+$info: $custom-blue;
 $success: #60d394;
-$danger: #ee6055;
 $body-bg: #F5F5F5;
 $table-border-color: transparentize($primary,0.75);
 
@@ -15,5 +18,9 @@ $input-border-radius: 10px;
 $input-border-width: 2px;
 $input-border-color: transparentize($dark, 0.9);
 
-$breadcrumb-font-size: 0.85rem;
+$breadcrumb-font-size: 0.9rem;
 $breadcrumb-active-color: $dark;
+$breadcrumb-divider: ">";
+
+$hr-border-width: 2px;
+$hr-border-color: $custom-yellow;

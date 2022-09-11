@@ -3,65 +3,93 @@
 #main {
   height: 100vh;
   overflow: auto;
+  position: relative;
+
+  > main {
+    height: 100%;
+  }
 }
 
-.menuItem .item-content {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-  font-size: 1.35rem;
+#sidebar {
+  position: relative;
+  background-color: $light-orange;
+  max-width: 280px;
 }
 
-.menuItem.active{
-  font-weight: bold;
-  color: $primary;
-  background: $light;
+#footer {
+  position: absolute;
+  bottom: 0;
+  padding: 15px 0 30px 30px;
+  width: calc(100% - 30px);
+  font-size: 0.75rem;
 }
 
 .menuItem {
-  //color: opacify(#BCAFA0, 1);
   color: $dark;
   background: $light;
+
+  .item-content {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    font-size: 1.35rem;
+  }
+
+  &.active {
+    font-weight: bold;
+    color: $primary;
+    background: $light;
+  }
+
+  &:not(.active) {
+    svg {
+      color: opacify(#BCAFA0, 1);
+    }
+  }
 }
 
-.menuItem:not(.active) svg {
-  color: opacify(#BCAFA0, 1);
-}
+.btn {
+  &:not([class*="outline"]):not(.btn-link):not(.btn-secondary) {
+    color: white;
+  }
 
-.btn:not([class*="outline"]):not(.btn-link):not(.btn-secondary) {
-  color: white;
-}
+  &.btn-secondary {
+    color: $dark
+  }
 
-.btn.btn-secondary {
-  color: $dark
-}
-
-.btn-link {
-  color: $dark;
-  opacity: 0.75;
+  &-link {
+    color: $dark;
+    opacity: 0.75;
+  }
 }
 
 .table {
   color: $dark;
-}
 
-thead th{
-  color: $dark;
-  opacity: 0.5;
-}
+  thead {
+    border-bottom-color: transparentize($primary, 0.25);
+    border-bottom-width: 2px;
 
-.table > thead{
-  border-bottom-color: transparentize($primary, 0.25);
-  border-bottom-width: 2px;
-}
+    th {
+      color: $dark;
+      opacity: 0.5;
 
-tbody th{
-  color: $dark;
-  opacity: 0.5;
+      .btn-link {
+        font-weight: bold;
+      }
+    }
+  }
+
+  tbody {
+    th {
+      color: $dark;
+      opacity: 0.5;
+    }
+  }
 }
 
 .page-header {
-  border-bottom: 3px solid $secondary;
+  border-bottom: 3px solid $custom-blue;
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
@@ -69,11 +97,13 @@ tbody th{
   flex-wrap: wrap;
 }
 
-.gender-male {
-  background-color: $custom-blue;
-}
+.gender {
+  &-male {
+    background-color: $custom-blue;
+  }
 
-.gender-female {
-  background-color: #FFE59A;
-  color: $dark;
+  &-female {
+    background-color: #FFE59A;
+    color: $dark;
+  }
 }

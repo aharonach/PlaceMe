@@ -54,7 +54,7 @@ export default function Classes({ result }) {
                 >
                     {classrooms.map(classroom => (
                         <Col key={classroom.id}>
-                            <Card className="mb-2 shadow">
+                            <Card className="mb-2 shadow-sm">
                                 <Card.Header as={"h4"}>Class #{classNumber++}</Card.Header>
                                 <Card.Body>
                                     <ClassData classInfo={classroom} view={classView} />
@@ -78,7 +78,6 @@ const ClassData = ({classInfo, view}) => {
             <div className="vr" />
             <Gender gender={"MALE"} >{classInfo.numberOfMales}</Gender>
             <Gender gender={"FEMALE"} >{classInfo.numberOfFemales}</Gender>
-            <div className="vr" />
             <PeopleFill /> {classInfo.numOfPupils}
         </Stack>
     )

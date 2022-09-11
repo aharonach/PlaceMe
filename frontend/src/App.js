@@ -8,12 +8,12 @@ function App() {
     return (
         <Container fluid className="App px-4">
             <Row className="gx-5">
-                <Col md={3} style={{paddingLeft:0}}>
+                <Col style={{paddingLeft:0}} id="sidebar" className="shadow">
                     <Header />
-                </Col>
-                <Col md={9} id="main">
-                    <AppRoutes />
                     <Footer />
+                </Col>
+                <Col id="main">
+                    <AppRoutes />
                 </Col>
             </Row>
         </Container>

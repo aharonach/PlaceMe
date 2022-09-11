@@ -40,33 +40,31 @@ const menu = [
 ];
 
 const pathIncludes = ( path, includes ) => {
-    return window.location.pathname.includes(includes);
+    return window.location.pathname.startsWith(includes);
 };
 
 const Sidebar = () => {
     const href = useResolvedPath(window.location.pathname).pathname;
 
     return (
-        <div style={{ height: '100vh', overflow: 'scroll initial' }}>
-            <CDBSidebar backgroundColor="#F4EFE9" style={{ width: '100%', minWidth: '100px', maxWidth: '320px' }} className="shadow">
-                <CDBSidebarHeader style={{ border: 0 }}>
-                    <NavLink to="/">
-                        <img className="img-fluid" src={logo} alt="PlaceMe" />
-                    </NavLink>
-                </CDBSidebarHeader>
-                <CDBSidebarContent className="sidebar-content">
-                    <CDBSidebarMenu>
-                        {menu.map( menuItem => (
-                            <LinkContainer key={menuItem.path} to={menuItem.path} isActive={pathIncludes(href, menuItem.path)}>
-                                <CDBSidebarMenuItem className="menuItem" id={menuItem.label.toLowerCase().replace(' ','-')}>
-                                    {menuItem.icon} {menuItem.label}
-                                </CDBSidebarMenuItem>
-                            </LinkContainer>
-                        ))}
-                    </CDBSidebarMenu>
-                </CDBSidebarContent>
-            </CDBSidebar>
-        </div>
+        <CDBSidebar backgroundColor="#F4EFE9">
+            <CDBSidebarHeader style={{ border: 0 }}>
+                <NavLink to="/">
+                    <img className="img-fluid" src={logo} alt="PlaceMe" />
+                </NavLink>
+            </CDBSidebarHeader>
+            <CDBSidebarContent className="sidebar-content">
+                <CDBSidebarMenu>
+                    {menu.map( menuItem => (
+                        <LinkContainer key={menuItem.path} to={menuItem.path} isActive={pathIncludes(href, menuItem.path)}>
+                            <CDBSidebarMenuItem className="menuItem" id={menuItem.label.toLowerCase().replace(' ','-')}>
+                                {menuItem.icon} {menuItem.label}
+                            </CDBSidebarMenuItem>
+                        </LinkContainer>
+                    ))}
+                </CDBSidebarMenu>
+            </CDBSidebarContent>
+        </CDBSidebar>
     );
 };
 
