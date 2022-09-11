@@ -11,31 +11,32 @@ import {CalendarCheckFill, ClipboardCheckFill, CollectionFill, GearFill, PersonF
 import logo from "../Logo.png"
 import {NavLink, useResolvedPath} from "react-router-dom";
 
+
 const menu = [
     {
         label: 'Pupils',
         path: '/pupils',
-        icon: <PersonFill />
+        icon: <PersonFill className="menuIcon"/>
     },
     {
         label: 'Groups',
         path: '/groups',
-        icon: <CollectionFill />
+        icon: <CollectionFill className="menuIcon"/>
     },
     {
         label: 'Templates',
         path: '/templates',
-        icon: <ClipboardCheckFill />
+        icon: <ClipboardCheckFill className="menuIcon"/>
     },
     {
         label: 'Placements',
         path: '/placements',
-        icon: <CalendarCheckFill />
+        icon: <CalendarCheckFill className="menuIcon"/>
     },
     {
         label: "EA Configs",
         path: '/configs',
-        icon: <GearFill />
+        icon: <GearFill className="menuIcon"/>
     }
 ];
 

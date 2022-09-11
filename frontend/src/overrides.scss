@@ -16,10 +16,15 @@
   font-weight: bold;
   color: $primary;
   background: $light;
+  .menuIcon{
+    font-weight: bold;
+    color: $primary;
+    background: $light;
+  }
 }
 
 .menuItem{
-  color: opacify(#BCAFA0, 1);
+  color: $dark;
   background: $light;
 }
 
@@ -63,3 +68,8 @@ tbody th{
   align-items: center;
   flex-wrap: wrap;
 }
+
+.menuIcon{
+  color: #BCAFA0;
+}
+
