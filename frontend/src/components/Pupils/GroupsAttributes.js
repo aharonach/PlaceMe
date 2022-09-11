@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useState} from 'react';
 import {Col, Nav, Row, Tab} from "react-bootstrap";
 import Attributes from "./Attributes";
 import {useParams} from "react-router-dom";

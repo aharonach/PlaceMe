@@ -27,6 +27,7 @@ export default function RecordList({
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState(null);
     const [direction, setDirection] = useState('ASC');
+    // eslint-disable-next-line no-unused-vars
     const [list, error, loading, axiosFetch, getList, pagination] = useFetchList({
         fetchUrl: buildUrl(fetchUrl, { page: page - 1, sortField: sort, sortDirection: direction }),
         propertyName: propertyName,

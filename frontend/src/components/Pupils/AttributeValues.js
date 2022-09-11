@@ -8,6 +8,7 @@ import Loading from "../Loading";
 
 export default function AttributeValues({ pupil, group, rows }) {
     const form = useForm();
+    // eslint-disable-next-line no-unused-vars
     const [values, error, loading, fetch, getValues] = useFetchList({
         fetchUrl: `/pupils/${pupil.id}/groups/${group.id}/attributes`,
         propertyName: 'attributeValueList',
@@ -22,6 +23,7 @@ export default function AttributeValues({ pupil, group, rows }) {
 
     useEffect(() => {
         getValues();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pupil]);
 
     return (

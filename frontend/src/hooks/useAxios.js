@@ -5,7 +5,7 @@ const useAxios = (afterSubmit = null, defaultState) => {
     const [response, setResponse] = useState(defaultState);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [controller, setController] = useState();
+    const [controller, setController] = useState(null);
 
     const axiosFetch = async (configObj) => {
         const {

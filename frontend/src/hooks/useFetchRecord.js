@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 import useAxios from "./useAxios";
 
-const useFetchRecord = ({ fetchUrl, thenCallback, dependencies, displayFields}) => {
+const useFetchRecord = ({ fetchUrl, thenCallback, dependencies }) => {
     const [response, error, loading, axiosFetch] = useAxios();
 
     const getRecord = () => {

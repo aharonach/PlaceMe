@@ -1,3 +1,5 @@
+// noinspection JSUnresolvedVariable
+
 import {Link} from "react-router-dom";
 import React from "react";
 import moment from "moment";
@@ -18,11 +20,6 @@ export function extractListFromAPI(object, property, mapCallback = null ) {
 
 export function prepareCheckboxGroup(valueProperty, labelProperty) {
     return item => Object.assign({}, { value: item[valueProperty], label: item[labelProperty] });
-}
-
-export function camelCaseToWords( text ) {
-    const result = text.replace(/([A-Z])/g, " $1");
-    return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
 export function getFieldIds(fields) {

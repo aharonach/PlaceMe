@@ -17,6 +17,7 @@ const fields = [
 
 export default function Import({ placement }) {
     const form = useForm();
+    // eslint-disable-next-line no-unused-vars
     const [response, error, loading, fetch] = useAxios();
     const [imported, setImported] = useState();
     const hasErrors = imported?.errorsCount > 0 && imported?.errors.length > 0;

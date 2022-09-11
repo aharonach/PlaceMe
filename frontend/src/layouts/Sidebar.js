@@ -48,13 +48,11 @@ const Sidebar = () => {
 
     return (
         <div style={{ height: '100vh', overflow: 'scroll initial' }}>
-            <CDBSidebar backgroundColor="#F4EFE9" style={{ width: '100%', minWidth: '100px' }} className="shadow">
+            <CDBSidebar backgroundColor="#F4EFE9" style={{ width: '100%', minWidth: '100px', maxWidth: '320px' }} className="shadow">
                 <CDBSidebarHeader style={{ border: 0 }}>
-                    <NavLink to="/"><img
-                        className="img-fluid px-2"
-                        src={logo}
-                        alt="PlaceMe"
-                    /></NavLink>
+                    <NavLink to="/">
+                        <img className="img-fluid" src={logo} alt="PlaceMe" />
+                    </NavLink>
                 </CDBSidebarHeader>
                 <CDBSidebarContent className="sidebar-content">
                     <CDBSidebarMenu>

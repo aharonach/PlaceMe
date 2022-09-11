@@ -27,6 +27,7 @@ export default function Attributes({ pupilId, group }) {
     const form = useForm();
     const [fields, setFields] = useState([]);
     const [updated, setUpdated] = useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [attributeValues, error, loading, fetch] = useAxios();
     const [template, errorTemplate, loadingTemplate] = useFetchRecord({
         fetchUrl: `/templates/${group.templateId}`,

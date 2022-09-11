@@ -15,6 +15,7 @@ export default function AddAttribute({ show, setMode, templateId, setAttributeLi
         }
     });
 
+    // eslint-disable-next-line no-unused-vars
     const [template, error, loading, axiosFetch] = useAxios((response) => {
         methods.reset();
         setAttributeList(response.data.attributes);

@@ -4,7 +4,7 @@ import HtmlForm from "../Forms/HtmlForm";
 import { Alert } from 'react-bootstrap';
 import {getDefaultValuesByFields} from "../../utils";
 import FormFields from "./FormFields";
-import {useMatch, useNavigate, useOutletContext} from "react-router-dom";
+import {useNavigate, useOutletContext} from "react-router-dom";
 
 export default function EditGroup() {
     const {group, loading, error, axiosFetch} = useOutletContext();

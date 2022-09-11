@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   gap: 25px;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
 }
 
 .menuItem.active{
@@ -18,9 +18,14 @@
   background: $light;
 }
 
-.menuItem{
-  color: opacify(#BCAFA0, 1);
+.menuItem {
+  //color: opacify(#BCAFA0, 1);
+  color: $dark;
   background: $light;
+}
+
+.menuItem svg {
+  color: opacify(#BCAFA0, 1);
 }
 
 .btn:not([class*="outline"]):not(.btn-link):not(.btn-secondary) {
@@ -56,7 +61,7 @@ tbody th{
 }
 
 .page-header {
-  border-bottom: 2px solid $custom-blue;
+  border-bottom: 3px solid $secondary;
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;

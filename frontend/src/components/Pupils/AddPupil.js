@@ -1,3 +1,5 @@
+// noinspection JSUnresolvedVariable
+
 import React from 'react';
 import {useForm} from "react-hook-form";
 import HtmlForm from "../Forms/HtmlForm";
@@ -7,7 +9,8 @@ import { useNavigate } from "react-router-dom";
 import FormFields from "./FormFields";
 
 export default function AddPupil() {
-    const [error, loading, axiosFetch] = useAxios();
+    // eslint-disable-next-line no-unused-vars
+    const [pupil, error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
         defaultValues: {

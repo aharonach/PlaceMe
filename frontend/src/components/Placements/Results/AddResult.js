@@ -17,6 +17,7 @@ export default function AddResult() {
         }
     });
 
+    // eslint-disable-next-line no-unused-vars
     const [result, error, loading, axiosFetch] = useAxios();
 
     const generateResult = (data) => {

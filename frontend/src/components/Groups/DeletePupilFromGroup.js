@@ -4,6 +4,7 @@ import useAxios from "../../hooks/useAxios";
 import Api from "../../api";
 
 export default function DeletePupilFromGroup({ pupilId, groupId, updated, setUpdated, children }) {
+    // eslint-disable-next-line no-unused-vars
     const [response, error, loading, axiosFetch] = useAxios();
 
     const handleDelete = () => {

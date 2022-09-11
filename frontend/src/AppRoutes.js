@@ -31,6 +31,7 @@ export default function AppRoutes() {
                     <Route path="preferences" element={<Group.Preferences />} />
                 </Route>
             </Route>
+
             <Route path="/templates" element={<Page />}>
                 <Route index element={<Template.List />} />
                 <Route path="add" element={<Template.Add />} />

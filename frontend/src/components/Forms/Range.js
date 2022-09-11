@@ -1,7 +1,7 @@
 import {Controller} from "react-hook-form";
 import {Form, Stack} from "react-bootstrap";
 
-export default function Range({ field: settings, control, hasError }) {
+export default function Range({ field: settings, control }) {
     return (
         <Controller
             name={settings.id}

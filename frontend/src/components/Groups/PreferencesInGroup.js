@@ -19,6 +19,7 @@ import { X } from 'react-bootstrap-icons';
 
 export default function PreferencesInGroup() {
     const {group} = useOutletContext();
+    // eslint-disable-next-line no-unused-vars
     const [preferences, errorFetch, loadingFetch, axiosFetch, getPreferences] = useFetchList({
         fetchUrl: `/groups/${group.id}/preferences`,
         propertyName: "preferenceDtoList"
@@ -57,31 +58,55 @@ export default function PreferencesInGroup() {
             <>
                 <h3>Preferences</h3>
                 <Instructions selector={selector} />
-                <div className="mb-3">
-                    <Loading show={loadingPupils} />
-                    {!errorPupils && pupils && <PupilButtons
-                        pupils={pupils}
-                        selector={selector}
-                        selected={selected}
-                        setSelected={setSelected}
-                        setSelector={setSelector}
-                    />}
-                </div>
-                <div className="mb-3">
-                    <ToggleButtonGroup type="radio" name="wantsToBeWith" value={wantsToBe} onChange={handleToggle}>
-                        <ToggleButton id="wantsToBeWith" value="yes" variant={buttonVariant(selector, wantsToBe, 'yes')} disabled={selector === 0}>Wants to be with</ToggleButton>
-                        <ToggleButton id="doesntWantToBeWith" value="no" variant={buttonVariant(selector, wantsToBe, 'no')} disabled={selector === 0}>Doesn't want to be with</ToggleButton>
-                    </ToggleButtonGroup>
-                    {selector ? <Button variant="link" onClick={reset}>Clear Selection</Button> : null}
-                </div>
-                <Button onClick={handleSave} disabled={!(selector && selected)} className="me-3">Add Preference</Button>
-                <Loading show={loadingFetch} block={false} size="sm" />
-                <hr />
-                <Preferences group={group} items={mapped} updatePreferences={getPreferences} />
+                <Row>
+                    <Col md={4}>
+                        <div className="mb-3">
+                            <Button onClick={handleSave} disabled={!(selector && selected)}>Add Preference</Button>
+                            <Loading show={loadingPupils} />
+                        </div>
+                        <div className="mb-3">
+                            <ToggleButtons selector={selector} handleToggle={handleToggle} reset={reset} wantsToBe={wantsToBe} />
+                        </div>
+                        <Loading show={loadingFetch} block={false} size="sm" />
+                        {!errorPupils && pupils && (
+                            <div className="d-flex flex-wrap">
+                                <PupilButtons
+                                    pupils={pupils}
+                                    selector={selector}
+                                    selected={selected}
+                                    setSelected={setSelected}
+                                    setSelector={setSelector}
+                                />
+                            </div>
+                        )}
+                        <div className="mb-3">
+                            <ToggleButtons selector={selector} handleToggle={handleToggle} reset={reset} wantsToBe={wantsToBe} />
+                        </div>
+                        <div className="mb-3">
+                            <Button onClick={handleSave} disabled={!(selector && selected)}>Add Preference</Button>
+                            <Loading show={loadingPupils} />
+                        </div>
+                    </Col>
+                    <Col md={8}>
+                        <Preferences group={group} items={mapped} updatePreferences={getPreferences} />
+                    </Col>
+                </Row>
             </>
         </>
     );
 };
+
+const ToggleButtons = ({ wantsToBe, handleToggle, selector, reset}) => {
+    return (
+        <>
+            <ToggleButtonGroup type="radio" name="wantsToBeWith" value={wantsToBe} onChange={handleToggle}>
+                <ToggleButton id="wantsToBeWith" value="yes" variant={buttonVariant(selector, wantsToBe, 'yes')} disabled={selector === 0}>Prefers</ToggleButton>
+                <ToggleButton id="doesntWantToBeWith" value="no" variant={buttonVariant(selector, wantsToBe, 'no')} disabled={selector === 0}>Doesn't Prefer</ToggleButton>
+            </ToggleButtonGroup>
+            {selector ? <Button variant="link" onClick={reset}>Clear Selection</Button> : null}
+        </>
+    );
+}
 
 const Instructions = ({ selector }) => {
     let message = '';
@@ -111,7 +136,7 @@ const Preferences = ({ group, items, updatePreferences }) => {
                             <Stack direction="vertical" gap={2}>
                                 {!objectIsEmpty(items[selectorId].yes) && (
                                     <Stack direction="vertical" gap={1}>
-                                        <span>wants to be with:</span>
+                                        <span className="text-success">Prefers:</span>
                                         <span>
                                             {Object.keys(items[selectorId].yes).map(selectedId => <Preference
                                                 key={selectedId}
@@ -127,7 +152,7 @@ const Preferences = ({ group, items, updatePreferences }) => {
                                 {/** Show separator **/}
                                 {!objectIsEmpty(items[selectorId].no) && (
                                     <Stack direction="vertical" gap={1}>
-                                        <span>doesn't want to be with:</span><br />
+                                        <span className="text-danger">Doesn't prefer:</span><br />
                                         <span>{Object.keys(items[selectorId].no).map(selectedId => <Preference
                                                 key={selectedId}
                                                 groupId={group.id}
@@ -161,9 +186,10 @@ const Preference = ({groupId, selectorId, selectedId, selectedName, updatePrefer
     };
 
     return (
-        <Badge key={selectedId} className="me-1 mb-1 d-inline-flex align-items-center" size="sm">
-            <a href="#" onClick={handleDelete}><X color="white" size={20} /></a>
-            {selectedName}
+        <Badge key={selectedId} className="me-1 mb-1 d-inline-flex align-items-center text-wrap" size="sm">
+            <Button variant="link" onClick={handleDelete} title="Delete Preference" className="lh-1 p-0">
+                <X color="white" size={20} aria-hidden="true" />
+            </Button> {selectedName}
         </Badge>
     )
 }
@@ -173,6 +199,7 @@ const PupilButtons = ({ pupils, selector, setSelector, selected, setSelected }) 
         <span key={pupil.id} className="d-inline-block mb-1 me-1">
             {!selector
                 ? <ToggleButton
+                    size="sm"
                     type="radio"
                     variant="outline-primary"
                     id={`selector-${pupil.id}`}
@@ -182,6 +209,7 @@ const PupilButtons = ({ pupils, selector, setSelector, selected, setSelected }) 
                     checked={selector === pupil.id}
                 >{pupil.firstName} {pupil.lastName}</ToggleButton>
                 : <ToggleButton
+                    size="sm"
                     type="radio"
                     variant={selector === pupil.id ? 'primary' : 'outline-primary'}
                     id={`selected-${pupil.id}`}

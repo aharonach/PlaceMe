@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 import FormFields from "./FormFields";
 
 export default function AddPlacement(){
-    const [error, loading, axiosFetch] = useAxios();
+    // eslint-disable-next-line no-unused-vars
+    const [placement, error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
         defaultValues: {

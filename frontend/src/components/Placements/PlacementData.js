@@ -1,3 +1,5 @@
+// noinspection JSUnresolvedVariable
+
 import RecordDetails from "../RecordDetails";
 import {Link, useOutletContext} from "react-router-dom";
 import ResultData from "./Results/ResultData";

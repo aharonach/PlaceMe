@@ -1,11 +1,12 @@
-$custom-blue:#8BCFD0;
+$custom-blue: #8BCFD0;
 
+$body-color: #22375B;
 $primary: #F48E77;
-$secondary: #FFE59A;
+$secondary: $custom-blue;
 $dark: #363D3D;
 $light: #F4EFE9;
-$success: $custom-blue;
-$danger: #F55E3C;
+$success: #60d394;
+$danger: #ee6055;
 $body-bg: #F5F5F5;
 $table-border-color: transparentize($primary,0.75);
 

@@ -1,3 +1,5 @@
+// noinspection JSUnresolvedVariable
+
 import {Pagination, Stack} from "react-bootstrap";
 
 export default function PageNumbers({ pagination, setPage, arrows }) {

@@ -7,6 +7,7 @@ import useAxios from "../../hooks/useAxios";
 
 export default function GenerateFirstResults({ hasResults }) {
     const { placement, getPlacement } = useOutletContext();
+    // eslint-disable-next-line no-unused-vars
     const [results, error, loading, axiosFetch] = useAxios();
 
     if ( hasResults ) {

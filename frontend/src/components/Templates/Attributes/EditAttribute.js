@@ -11,6 +11,7 @@ export default function EditAttribute({ templateId, attribute, setAttribute, set
         defaultValues: getDefaultValuesByFields( FormFields(), attribute ),
     });
 
+    // eslint-disable-next-line no-unused-vars
     const [response, error, loading, axiosFetch] = useAxios((response) => {
         methods.reset();
         setAttributeList(response.data.attributes);

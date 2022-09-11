@@ -1,3 +1,5 @@
+// noinspection JSUnresolvedVariable
+
 import {useParams} from "react-router-dom";
 import useFetchList from "../../../hooks/useFetchList";
 import {Alert, Button, Card, Col, Offcanvas, Row, Stack} from "react-bootstrap";
@@ -17,7 +19,8 @@ export default function Classes({ result }) {
         propertyName: "placementClassroomList"
     });
 
-    const [classesInfo, errorInfo, loadingInfo] = useFetchRecord({
+    // eslint-disable-next-line no-unused-vars
+    const [classesInfo] = useFetchRecord({
         fetchUrl: `/placements/${placementId}/results/${result.id}/classes/info`,
     });
     const [selectedPupil, setSelectedPupil] = useState();

@@ -4,6 +4,7 @@ import useAxios from "../../../hooks/useAxios";
 import Api from "../../../api";
 
 export default function DeleteAttribute({ templateId, attributeId, attributeList, setAttributeList }) {
+    // eslint-disable-next-line no-unused-vars
     const [response, error, loading, axiosFetch] = useAxios(() => {
         setAttributeList(attributeList.filter( attribute => attribute.id !== attributeId ) );
     });

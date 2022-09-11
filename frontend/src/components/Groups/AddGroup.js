@@ -7,7 +7,8 @@ import { useNavigate } from "react-router-dom";
 import FormFields from "./FormFields";
 
 export default function AddGroup() {
-    const [ error, loading, axiosFetch] = useAxios();
+    // eslint-disable-next-line no-unused-vars
+    const [ group, error, loading, axiosFetch] = useAxios();
 
     let methods = useForm({
         defaultValues: {

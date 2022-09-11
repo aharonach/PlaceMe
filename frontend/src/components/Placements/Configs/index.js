@@ -9,6 +9,7 @@ import {useState} from "react";
 export default function Configs() {
     const form = useForm();
     const url = '/placements/configs';
+    // eslint-disable-next-line no-unused-vars
     const [configs, error, loading, fetch] = useFetchRecord({
         fetchUrl: url,
         thenCallback: (configs) => setFormValues(form, configs)
