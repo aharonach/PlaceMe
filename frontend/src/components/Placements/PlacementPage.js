@@ -36,7 +36,7 @@ export default function PlacementPage(){
                         <Stack direction="horizontal" gap={2}>
                             <ButtonGroup>
                                 <LinkContainer to={`/placements/${placement.id}/edit`}><Button>Edit Placement</Button></LinkContainer>
-                                <LinkContainer to={`/placements/${placement.id}/results`}><Button>Show All Optional Results</Button></LinkContainer>
+                                <LinkContainer to={`/placements/${placement.id}/results`}><Button>Optional Results</Button></LinkContainer>
                                 <Button variant="danger" onClick={handleDelete}>Delete Placement</Button>
                             </ButtonGroup>
                             <ButtonGroup>
