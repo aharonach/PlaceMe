@@ -22,6 +22,7 @@ export default function FormFields() {
             label: "First Alterer",
             type: "radio",
             options: [
+                {value: 'None', label: 'None'},
                 {value: 'SwapMutator', label: 'Swap Mutator'},
                 {value: 'SinglePointCrossover', label: 'Single Point Crossover'},
             ],
@@ -39,8 +40,9 @@ export default function FormFields() {
             label: "Second Alterer",
             type: "radio",
             options: [
-                {value: 'SinglePointCrossover', label: 'Single Point Crossover'},
+                {value: 'None', label: 'None'},
                 {value: 'SwapMutator', label: 'Swap Mutator'},
+                {value: 'SinglePointCrossover', label: 'Single Point Crossover'},
             ],
             rules: { required: true }
         },

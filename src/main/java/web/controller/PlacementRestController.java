@@ -245,6 +245,11 @@ public class PlacementRestController extends BaseRestController<Placement> {
         return ResponseEntity.ok(placementService.updateGlobalConfig(config));
     }
 
+    @PostMapping("/configs/reset")
+    public ResponseEntity<?> resetConfigs() {
+        return ResponseEntity.ok(placementService.resetGlobalConfig());
+    }
+
     @GetMapping(value = "/{placementId}/export/columns", produces = "text/csv;charset=UTF-8")
     public ResponseEntity<?> exportCsvColumnsForPlacement(@PathVariable Long placementId) {
 

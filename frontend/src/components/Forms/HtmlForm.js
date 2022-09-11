@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Col, Form, Row} from "react-bootstrap";
+import {Button, Col, Form, Row, Stack} from "react-bootstrap";
 import Select from "./Select";
 import Input from "./Input";
 import Checkbox from './Checkbox';
@@ -33,6 +33,7 @@ export default function HtmlForm(
         vertical,
         disabled = false,
         submitClass,
+        additionalButtons,
         children,
         rows = 1
 }) {
@@ -54,10 +55,16 @@ export default function HtmlForm(
             </Row>
 
             {children}
-            {!disabled && <Button type="submit" variant="primary" className={submitClass}>
-                <Loading show={loading} size="sm" block={false} />
-                {submitLabel ? submitLabel : 'Submit'}
-            </Button>}
+            {!disabled && (
+                <Stack direction="horizontal" gap={2} className="align-items-center flex-wrap">
+                    <Button type="submit" variant="primary" className={submitClass}>
+                        {!additionalButtons && <Loading show={loading} size="sm" block={false} />}
+                        {submitLabel ? submitLabel : 'Submit'}
+                    </Button>
+                    {additionalButtons}
+                    {additionalButtons && <Loading show={loading} size="sm" block={false} />}
+                </Stack>
+            )}
         </Form>
     );
 }

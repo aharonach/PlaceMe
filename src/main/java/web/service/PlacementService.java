@@ -296,6 +296,12 @@ public class PlacementService implements EntityService<Placement> {
         return engineConfigRepository.save(placeEngineConfig);
     }
 
+    public PlaceEngineConfig resetGlobalConfig() {
+        PlaceEngineConfig config = getGlobalConfig();
+        config.ResetToDefault();
+        return engineConfigRepository.save(config);
+    }
+
     @Transactional
     public String exportCsvHeadersByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
         verifyPlacementGroupContainTemplate(placement);

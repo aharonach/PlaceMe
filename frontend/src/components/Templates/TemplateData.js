@@ -6,7 +6,6 @@ import {Attributes} from "./index";
 export default function TemplateData() {
     const { template } = useOutletContext();
     const details = [
-        { label: "Name", value: template.name },
         { label: "Description", value: template.description },
         { label: "Number of Attributes", value: template.numberOfAttributes },
         { label: "Groups", value: objectLinkList('groups', template.groups, 'id') },
@@ -14,7 +13,7 @@ export default function TemplateData() {
     ];
 
     return <>
-        <RecordDetails details={details} numOfColumns={4} />
+        <RecordDetails details={details} numOfColumns={3} />
         <Attributes />
     </>
 }

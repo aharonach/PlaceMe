@@ -47,10 +47,12 @@ export default function Attributes({ addButton = true, actions = true }) {
 
     return (
         <>
-            <h2>Attributes</h2>
-            <ButtonGroup className="mb-3">
-                {addButton && <Button onClick={() => setMode('add')}>Add Attribute</Button>}
-            </ButtonGroup>
+            <div className="page-header">
+                <h2>Attributes</h2>
+                <ButtonGroup>
+                    {addButton && <Button onClick={() => setMode('add')}>Add Attribute</Button>}
+                </ButtonGroup>
+            </div>
             <TableList columns={columns} items={attributeList.map(mapAttributes)} nothingToShow={"attributes"} />
             <AddAttribute show={mode === 'add'} setMode={setMode} templateId={template.id} setAttributeList={setAttributeList} />
             {mode === 'edit' && editAttribute && <EditAttribute templateId={template.id} attribute={editAttribute} setAttribute={setEditAttribute} setAttributeList={setAttributeList} />}

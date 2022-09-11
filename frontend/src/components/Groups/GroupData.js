@@ -8,7 +8,6 @@ export default function GroupData() {
     const {group} = useOutletContext();
 
     const details = [
-        { label: "Name", value: group.name },
         { label: "Number of pupils", value: group.numberOfPupils },
         { label: "Description", value: group.description },
         { label: "Template ID", value: group.templateId && <Link to={`/templates/${group.templateId}`}>{group.templateId}</Link> },

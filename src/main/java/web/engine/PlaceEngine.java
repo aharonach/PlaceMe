@@ -41,6 +41,9 @@ public class PlaceEngine {
     }
 
     private Engine<BitGene, Double> getEngine(){
+        Alterer<BitGene, Double>
+                alterer1 = (Alterer<BitGene, Double>) config.createInstanceForAltererFirst(),
+                alterer2 = (Alterer<BitGene, Double>) config.createInstanceForAltererSecond();
 
         Codec<PlacementResult, BitGene> codec = Codec.of(
                 Genotype.of(BitChromosome.of(getNumOfPupils(), 0.5), placement.getNumberOfClasses()),
@@ -53,15 +56,21 @@ public class PlaceEngine {
                 (phenotype, gen) -> Phenotype.of(repair(phenotype.genotype()), gen)
         );
 
-        return Engine
+        Engine.Builder<BitGene, Double> builder = Engine
                 .builder(PlaceEngine::score, codec)
                 .populationSize(config.getPopulationSize())
                 .offspringSelector((Selector<BitGene, Double>) config.createInstanceForSelector()) //new RouletteWheelSelector<>(),
-                .minimizing()
-                .alterers(
-                        (Alterer<BitGene, Double>) config.createInstanceForAltererFirst(),
-                        (Alterer<BitGene, Double>) config.createInstanceForAltererSecond()
-                )
+                .minimizing();
+
+        if (alterer1 != null) {
+            builder.alterers(alterer1);
+        }
+
+        if (alterer2 != null) {
+            builder.alterers(alterer2);
+        }
+
+        return builder
                 .constraint(constraint)
                 .build();
     }

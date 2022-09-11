@@ -26,7 +26,7 @@ export default function PupilPage() {
             {!loading && !error && pupil &&
                 <article className="pupil">
                     <div className={"page-header"}>
-                        <h1>{pupil.firstName} {pupil.lastName}</h1>
+                        <h1>{pupil.firstName} {pupil.lastName} (ID: {pupil.givenId})</h1>
                         <ButtonGroup>
                             <LinkContainer to={`/pupils/${pupil.id}/edit`}><Button>Edit</Button></LinkContainer>
                             <LinkContainer to={`/pupils/${pupil.id}/groups`}><Button>Attribute Values</Button></LinkContainer>

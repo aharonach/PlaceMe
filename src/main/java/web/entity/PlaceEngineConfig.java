@@ -35,6 +35,17 @@ public class PlaceEngineConfig {
 
     int generationsLimit = 100;
 
+    public void ResetToDefault() {
+        populationSize = 100;
+        offspringSelector = SELECTOR.TournamentSelector;
+        altererFirst = ALTERER.SwapMutator;
+        altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+        altererSecond = ALTERER.SinglePointCrossover;
+        altererSecondProbability = 0.36;
+        limitBySteadyFitness = 7;
+        generationsLimit = 100;
+    }
+
     public Object createInstanceForSelector() {
         return createInstanceForSelector(this.getOffspringSelector());
     }
@@ -59,16 +70,17 @@ public class PlaceEngineConfig {
 
     public static Object createInstanceForAlterer(ALTERER alterer, double probability) {
         return switch (alterer) {
+            case None -> null;
             case SwapMutator -> new SwapMutator<>(probability);
             case SinglePointCrossover -> new SinglePointCrossover<>(probability);
         };
     }
 
     enum SELECTOR {
-        TournamentSelector, RouletteWheelSelector
+        None, TournamentSelector, RouletteWheelSelector
     }
 
     enum ALTERER {
-        SwapMutator, SinglePointCrossover
+        None, SwapMutator, SinglePointCrossover
     }
 }
