@@ -9,7 +9,7 @@ import useFetchList from "../../hooks/useFetchList";
 export default function EditGroups() {
     const { pupil } = useOutletContext();
 
-    const [pupilGroups, loading, error, axiosFetch] = useFetchList({
+    const [pupilGroups, error, loading, axiosFetch] = useFetchList({
         fetchUrl: `/pupils/${pupil.id}/groups`,
         propertyName: "groupList",
     });

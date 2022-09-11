@@ -2,18 +2,22 @@ import {Badge} from "react-bootstrap";
 import {GenderFemale, GenderMale} from "react-bootstrap-icons";
 
 export default function Gender({ gender, pill, noIcon, children }) {
-    let bg, icon;
+    let className = [], icon;
 
     if ( gender === 'MALE' ) {
         icon = <GenderMale />;
-        bg = 'lightblue';
+        className.push('gender-male');
     } else {
         icon = <GenderFemale />;
-        bg = 'lightpink';
+        className.push('gender-female');
+    }
+
+    if ( noIcon ) {
+        className.push("p-2");
     }
 
     return (
-        <Badge pill={pill} bg={""} style={{backgroundColor: bg}} text="dark" className={noIcon ? "p-2" : null}>
+        <Badge pill={pill} bg={""} text="dark" className={className.join(' ')}>
             {!noIcon && icon}{' '}
             {children}
         </Badge>

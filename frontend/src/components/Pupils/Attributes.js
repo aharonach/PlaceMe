@@ -73,6 +73,8 @@ export default function Attributes({ pupilId, group }) {
         <>
             {!errorTemplate && !error && template && (<>
                 {updated && <Alert variant="success">Attributes updated successfully</Alert> }
+                <h4>{template.name}</h4>
+                <p>{template.description}</p>
                 <HtmlForm
                     formProps={form}
                     fields={fields}

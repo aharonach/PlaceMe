@@ -24,7 +24,7 @@
   background: $light;
 }
 
-.menuItem svg {
+.menuItem:not(.active) svg {
   color: opacify(#BCAFA0, 1);
 }
 
@@ -67,4 +67,13 @@ tbody th{
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.gender-male {
+  background-color: $custom-blue;
+}
+
+.gender-female {
+  background-color: #FFE59A;
+  color: $dark;
 }

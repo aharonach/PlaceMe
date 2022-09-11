@@ -2,7 +2,7 @@
 
 import {useParams} from "react-router-dom";
 import useFetchList from "../../../hooks/useFetchList";
-import {Alert, Button, Card, Col, Offcanvas, Row, Stack} from "react-bootstrap";
+import {Alert, Button, Card, Col, Offcanvas, OverlayTrigger, Popover, Row, Stack} from "react-bootstrap";
 import React, {useState} from "react";
 import Gender from "../../General/Gender";
 import Loading from "../../Loading";
@@ -37,6 +37,7 @@ export default function Classes({ result }) {
             <h3>
                 Classrooms
                 <Button variant="link" onClick={handleClassView}>{classView === 'row' ? "View as scrollable row" : "View as grid"}</Button>
+                <Legend />
             </h3>
             <Loading show={loading} />
             {error && <Alert variant="danger">{error}</Alert>}
@@ -45,7 +46,6 @@ export default function Classes({ result }) {
                     ? <PupilData result={result} selected={selectedPupil} setSelected={setSelectedPupil} />
                     : <>Click on a pupil to view details</>}
             </Alert>}
-            {<Alert variant="info"><Legend /></Alert>}
             {!loading && !error && classrooms && (
                 <Row
                     lg={classView === 'grid' ? 3 : null}
@@ -54,7 +54,7 @@ export default function Classes({ result }) {
                 >
                     {classrooms.map(classroom => (
                         <Col key={classroom.id}>
-                            <Card className="mb-2">
+                            <Card className="mb-2 shadow">
                                 <Card.Header as={"h4"}>Class #{classNumber++}</Card.Header>
                                 <Card.Body>
                                     <ClassData classInfo={classroom} view={classView} />
@@ -153,15 +153,20 @@ const PupilData = ({ result, selected, setSelected }) => {
 }
 
 const Legend = () => {
+    const popover = (
+            <Popover>
+                <Popover.Header as="h3">Legend</Popover.Header>
+                <Popover.Body>
+                    <div className="prefer-to-be">Prefer to be with</div>
+                    <div className="prefer-not-to-be">Prefer not to be with</div>
+                    <div className="pupil-is-alone">Alone in class</div>
+                </Popover.Body>
+            </Popover>
+        );
+
     return (
-        <Stack direction="horizontal" gap={3}>
-            <InfoCircleFill />
-            <span>Legend:</span>
-            <span className="prefer-to-be">Prefer to be with</span>
-            <span className="vr"></span>
-            <span className="prefer-not-to-be">Prefer not to be with</span>
-            <span className="vr"></span>
-            <span className="pupil-is-alone">Alone in class</span>
-        </Stack>
+        <OverlayTrigger trigger="click" placement="top" overlay={popover}>
+            <Button variant="info" size="sm"><InfoCircleFill /> Legend</Button>
+        </OverlayTrigger>
     )
 }
