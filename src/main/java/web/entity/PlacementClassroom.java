@@ -63,8 +63,8 @@ public class PlacementClassroom extends BaseEntity {
         double percentageOfFemales = percentageRelativeToPupilsNumber(getDeltaBetweenFemales());
         double percentageOfMalesAndFemales = percentageRelativeToPupilsNumber(getDeltaBetweenMalesAndFemales());
 
-        return percentageOfWrongConnectionsToInclude * 0.15
-                + percentageOfWrongConnectionsToExclude * 0.15
+        return percentageOfWrongConnectionsToInclude * 0.18
+                + percentageOfWrongConnectionsToExclude * 0.13
                 + percentageOfMales * 0.23
                 + percentageOfFemales * 0.23
                 + percentageOfMalesAndFemales * 0.23;

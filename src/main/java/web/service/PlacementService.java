@@ -313,8 +313,20 @@ public class PlacementService implements EntityService<Placement> {
     @Transactional
     public String exportCsvDataByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
         verifyPlacementGroupContainTemplate(placement);
+        Group group = placement.getGroup();
         List<String> columns = importExportUtils.getColumnNames(placement);
-        List<String> rows = importExportUtils.createRowDataForPupils(placement);
+        List<String> rows = importExportUtils.createRowDataForPupils(group, columns);
+        CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns, rows);
+        return csvContent.getFullFileContent();
+    }
+
+    @Transactional
+    public String exportCsvDataByPlacementResult(PlacementResult placementResult) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
+        Placement placement = placementResult.getPlacement();
+        verifyPlacementGroupContainTemplate(placement);
+        Group group = placement.getGroup();
+        List<String> columns = importExportUtils.getColumnNamesWithClasses(placement);
+        List<String> rows = importExportUtils.getRowsForPupilsWithClasses(group, columns, placementResult);
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns, rows);
         return csvContent.getFullFileContent();
     }

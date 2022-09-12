@@ -28,6 +28,7 @@ public class ImportExportUtils {
             PREFER_TO_BE_WITH,
             PREFER_NOT_TO_BE_WITH
     );
+    public static final String CLASS_NUMBER = "Class number";
 
     private final PupilRepository pupilRepository;
     private final PupilService pupilService;
@@ -64,6 +65,15 @@ public class ImportExportUtils {
         columns.addAll(pupilColumns);
         columns.addAll(preferencesColumns);
         columns.addAll(getAttributesNames(placement));
+
+        return columns;
+    }
+
+    public List<String> getColumnNamesWithClasses(Placement placement){
+        List<String> columns = new ArrayList<>();
+
+        columns.add(CLASS_NUMBER);
+        columns.addAll(getColumnNames(placement));
 
         return columns;
     }
@@ -139,17 +149,16 @@ public class ImportExportUtils {
         return value;
     }
 
-    public List<String> createRowDataForPupils(Placement placement) throws Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException {
-        List<String> rows = new ArrayList<>(placement.getGroup().getNumberOfPupils());
+    public List<String> createRowDataForPupils(Group group, List<String> columns, Collection<Pupil> pupils, Map<String, String> additionalInfo) throws Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException {
+        List<String> rows = new ArrayList<>(group.getNumberOfPupils());
 
-        List<String> columns = getColumnNames(placement);
-        Group group = placement.getGroup();
         List<ImportField> importFields = Arrays.stream(pupilImportConstructor.getParameters())
                 .map(parameter -> parameter.getAnnotation(ImportField.class))
                 .toList();
 
-        for(Pupil pupil : group.getPupils()){
+        for(Pupil pupil : pupils){
             Map<String, String> pupilDataMap = new HashMap<>(columns.size());
+            pupilDataMap.putAll(additionalInfo);
 
             // add pupil data
             for(ImportField importField : importFields){
@@ -168,13 +177,17 @@ public class ImportExportUtils {
             }
 
             List<String> values = new ArrayList<>();
-            for(String column : getColumnNames(placement)){
+            for(String column : columns){
                 values.add(pupilDataMap.get(column));
             }
             rows.add(createLineFromValues(values));
         }
 
         return rows;
+    }
+
+    public List<String> createRowDataForPupils(Group group, List<String> columns) throws Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException {
+        return createRowDataForPupils(group, columns, group.getPupils(), new HashMap<>());
     }
 
     private String getGivenIds(Group group, Pupil pupil, boolean wantsToBeTogether){
@@ -295,6 +308,19 @@ public class ImportExportUtils {
             }
         }
         return errors;
+    }
+
+    public List<String> getRowsForPupilsWithClasses(Group group, List<String> columns, PlacementResult placementResult) throws Group.PupilNotBelongException, NoSuchFieldException, IllegalAccessException {
+        List<String> rows = new ArrayList<>(group.getNumberOfPupils());
+        int classNumber = 1;
+        for(PlacementClassroom placementClassroom : placementResult.getClasses()){
+            Map<String, String> additionalInfo = new HashMap<>();
+            additionalInfo.put(CLASS_NUMBER, String.valueOf(classNumber));
+            List<String> classRows = createRowDataForPupils(group, columns, placementClassroom.getPupils(), additionalInfo);
+            rows.addAll(classRows);
+            classNumber++;
+        }
+        return rows;
     }
 
     public static class CantFindImportConstructorException extends RuntimeException {
