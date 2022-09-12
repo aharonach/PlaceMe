@@ -53,27 +53,27 @@ public class PlaceEngineConfig {
             this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
             this.altererSecond = ALTERER.SinglePointCrossover;
             this.altererSecondProbability = 0.36;
-            this.limitBySteadyFitness = 7;
+            this.limitBySteadyFitness = 25;
             this.generationsLimit = 100;
         } else if (optionNumber == 2L) {
             this.name = "Option 2";
             this.populationSize = 100;
             this.offspringSelector = SELECTOR.RouletteWheelSelector;
             this.altererFirst = ALTERER.SwapMutator;
-            this.altererFirstProbability = 0.09;
+            this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
             this.altererSecond = ALTERER.SinglePointCrossover;
-            this.altererSecondProbability = 0.4;
-            this.limitBySteadyFitness = 7;
+            this.altererSecondProbability = 0.36;
+            this.limitBySteadyFitness = 25;
             this.generationsLimit = 100;
         } else {
             this.name = "Option 3";
-            this.populationSize = 120;
+            this.populationSize = 95;
             this.offspringSelector = SELECTOR.TournamentSelector;
             this.altererFirst = ALTERER.SwapMutator;
-            this.altererFirstProbability = 0.4;
+            this.altererFirstProbability = 0.3;
             this.altererSecond = ALTERER.SinglePointCrossover;
-            this.altererSecondProbability = 0.22;
-            this.limitBySteadyFitness = 15;
+            this.altererSecondProbability = 0.3;
+            this.limitBySteadyFitness = 20;
             this.generationsLimit = 100;
         }
     }
