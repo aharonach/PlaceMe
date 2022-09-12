@@ -64,6 +64,12 @@ public class PupilRestController extends BaseRestController<Pupil> {
         return ResponseEntity.ok().body(entity);
     }
 
+    @GetMapping("/givenId/{pupilGivenId}")
+    public ResponseEntity<?> getByGivenId(@PathVariable String pupilGivenId) {
+        EntityModel<Pupil> entity = pupilAssembler.toModel(pupilService.getByGivenIdOr404(pupilGivenId));
+        return ResponseEntity.ok().body(entity);
+    }
+
     @Override
     @PutMapping()
     public ResponseEntity<?> create(@RequestBody Pupil newRecord) {

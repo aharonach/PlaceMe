@@ -111,7 +111,7 @@ public class Pupil extends BaseEntity {
 
     private AttributeValue getAttributeValueOfUserByAttribute(Attribute attribute) {
         Optional<AttributeValue> optionalAttributeValue = attributeValues.stream()
-                .filter(attributeValue -> attributeValue.getAttribute().equals(attribute))
+                .filter(attributeValue -> attributeValue.getAttribute().getId().equals(attribute.getId()))
                 .findFirst();
         return optionalAttributeValue.orElse(null);
     }

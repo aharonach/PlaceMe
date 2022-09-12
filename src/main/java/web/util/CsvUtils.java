@@ -61,7 +61,8 @@ public class CsvUtils {
 
                 String[] splittedRow = row.split(SEPARATOR);
                 if(splittedRow.length != columns.size()){
-                    throw new CsvNotValidException("line " + (rows.indexOf(row) + 1) + " is not valid.");
+                    // offset is 2 - one for columns and one for starting in zero
+                    throw new CsvNotValidException("line " + (rows.indexOf(row) + 2) + " is not valid.");
                 }
             }
         }
