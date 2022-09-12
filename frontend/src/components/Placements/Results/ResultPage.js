@@ -1,8 +1,9 @@
 import {Outlet, useNavigate, useOutletContext, useParams} from "react-router-dom";
-import {Alert, Button, ButtonGroup} from 'react-bootstrap';
+import {Alert, Button, ButtonGroup, Stack} from 'react-bootstrap';
 import Loading from "../../Loading";
 import {LinkContainer} from "react-router-bootstrap";
 import useFetchRecord from "../../../hooks/useFetchRecord";
+import {BASE_URL, CSV_CONTENT_TYPE} from "../../../api";
 
 export default function ResultPage(){
     const { resultId } = useParams();
@@ -13,12 +14,16 @@ export default function ResultPage(){
         displayFields: ['name']
     });
     const navigate = useNavigate();
+    const exportDownloadUrl = `${BASE_URL}placements/${placement.id}/results/${resultId}/export`;
 
     const handleDelete = () => {
         axiosFetch({
             method: 'delete',
             url: baseUrl + resultId
-        }).then( () => getPlacement(), navigate(baseUrl, { replace: true }));
+        }).then( () => {
+            getPlacement();
+            navigate(baseUrl, {replace: true});
+        });
     }
 
     const makeSelected = () => {
@@ -37,11 +42,16 @@ export default function ResultPage(){
                 <article>
                     <div className="page-header">
                         <h2>{result.name}</h2>
-                        <ButtonGroup>
-                            <LinkContainer to={baseUrl + `${resultId}/edit`}><Button>Edit Result</Button></LinkContainer>
-                            {result.selected ? '' : <Button variant="success" onClick={makeSelected}>Select Result</Button>}
-                            <Button variant="danger" onClick={handleDelete}>Delete Result</Button>
-                        </ButtonGroup>
+                        <Stack direction="horizontal" gap={2}>
+                            <ButtonGroup>
+                                <LinkContainer to={baseUrl + `${resultId}/edit`}><Button>Edit Result</Button></LinkContainer>
+                                {result.selected ? '' : <Button variant="success" onClick={makeSelected}>Select Result</Button>}
+                                <Button variant="danger" onClick={handleDelete}>Delete Result</Button>
+                            </ButtonGroup>
+                            <ButtonGroup>
+                                <Button as="a" variant="secondary" href={exportDownloadUrl} download={`${CSV_CONTENT_TYPE}`}>Export Result Data</Button>
+                            </ButtonGroup>
+                        </Stack>
                     </div>
                     <Outlet context={{ result, error, loading, axiosFetch }} />
                 </article>

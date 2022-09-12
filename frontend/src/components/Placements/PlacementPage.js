@@ -46,7 +46,7 @@ export default function PlacementPage(){
                             </ButtonGroup>
                             <ButtonGroup>
                                 <Button variant="secondary" onClick={() => setShowImport(true)}>Import</Button>
-                                <Button as="a" variant="secondary" href={exportDownloadUrl} download={`${CSV_CONTENT_TYPE}`}>Export</Button>
+                                <Button as="a" variant="secondary" href={exportDownloadUrl} download={`${CSV_CONTENT_TYPE}`}>Export Placement Data</Button>
                             </ButtonGroup>
                         </Stack>
                     </div>

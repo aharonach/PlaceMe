@@ -26,8 +26,8 @@ export default function GenerateFirstResults({ hasResults }) {
             data: { name: "Initial Result" }
         }).then( res => {
             if ( res ) {
-                navigate(`/placements/${placement.id}/results`);
                 getPlacement();
+                navigate(`/placements/${placement.id}/results`, { replace: true });
             }
         });
     }

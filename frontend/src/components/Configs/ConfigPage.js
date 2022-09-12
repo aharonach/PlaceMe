@@ -1,6 +1,5 @@
-import useFetchRecord from "../../hooks/useFetchRecord";
 import {useForm} from "react-hook-form";
-import {extractListFromAPI, setFormValues} from "../../utils";
+import {setFormValues} from "../../utils";
 import HtmlForm from "../Forms/HtmlForm";
 import {Alert, Button} from "react-bootstrap";
 import FormFields from "./FormFields";
@@ -54,8 +53,7 @@ export default function ConfigPage({ configId }) {
                 loading={loading}
                 submitCallback={handleSubmit}
                 submitLabel={"Update"}
-                additionalButtons={<Button type="button" variant="secondary" onClick={handleReset}>Reset to
-                    default</Button>}
+                additionalButtons={<Button type="button" variant="secondary" onClick={handleReset}>Reset to default</Button>}
                 rows={2}
             />
         </>

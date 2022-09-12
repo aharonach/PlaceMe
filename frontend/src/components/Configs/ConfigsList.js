@@ -4,7 +4,7 @@ import Loading from "../Loading";
 import ConfigPage from "./ConfigPage";
 
 export default function ConfigsList() {
-    const [configs, error, loading, fetch, getConfigs] = useFetchList({
+    const [configs, error, loading] = useFetchList({
         fetchUrl: '/placements/configs',
         propertyName: 'placeEngineConfigList'
     });
@@ -12,7 +12,7 @@ export default function ConfigsList() {
     return (
         <>
             <div className="page-header">
-                <h1>Configure Placing Algorithm</h1>
+                <h1>Evolutionary Algorithm Configurations</h1>
             </div>
             <Loading show={loading} />
             {error && <Alert variant="danger">{error}</Alert>}
@@ -26,6 +26,5 @@ export default function ConfigsList() {
                 </Tabs>
             )}
         </>
-
     );
 }
