@@ -61,7 +61,7 @@ export default function PreferencesInGroup() {
             {errorFetch && <Alert variant="danger">{errorFetch}</Alert> }
             <>
                 <h3>Preferences</h3>
-                <Instructions selector={selector} />
+                <Instructions />
                 <Row>
                     <Col lg={4}>
                         <div className="mb-3">
@@ -73,7 +73,7 @@ export default function PreferencesInGroup() {
                         </div>
                         <Loading show={loadingFetch} block={false} size="sm" />
                         {!errorPupils && pupils && <>
-                            <FormControl onChange={filterPupils} value={filterPupil} className="mb-2" placeholder="Filter..." />
+                            <FormControl onChange={filterPupils} value={filterPupil} className="mb-2" placeholder="Search for a pupil by name or ID" />
                             <div className="d-flex flex-wrap">
                                 <PupilButtons
                                     pupils={pupils}
@@ -85,15 +85,9 @@ export default function PreferencesInGroup() {
                                 />
                             </div>
                         </>}
-                        <div className="mb-3">
-                            <ToggleButtons selector={selector} handleToggle={handleToggle} reset={reset} wantsToBe={wantsToBe} />
-                        </div>
-                        <div className="mb-3">
-                            <Button onClick={handleSave} disabled={!(selector && selected)}>Add Preference</Button>
-                            <Loading show={loadingPupils} />
-                        </div>
                     </Col>
                     <Col lg={8}>
+                        <h4>Final Preferences</h4>
                         <FormControl onChange={filterPreferences} value={filterPreference} className="mb-2" placeholder="Filter..." />
                         <Preferences
                             group={group}
@@ -120,21 +114,15 @@ const ToggleButtons = ({ wantsToBe, handleToggle, selector, reset}) => {
     );
 }
 
-const Instructions = ({ selector }) => {
-    let message = '';
-
-    if ( ! selector ) {
-        message = 'Step 1: Choose pupil';
-    }
-
-    if ( selector ) {
-        message = 'Step 2: Choose his/her preference and then click save';
-    }
-
-    return message && <Alert variant="info">
-        <Alert.Heading as="h5">Instructions</Alert.Heading>
-        {message}
-    </Alert>
+const Instructions = () => {
+    return (
+        <Alert variant="success">
+            <Alert.Heading as="h5">Instructions</Alert.Heading>
+            <p><strong>Step 1:</strong> Search pupil for selector</p>
+            <p><strong>Step 2:</strong> Choose the preference type (Prefers to be/Prefers not to be)</p>
+            <p><strong>Step 3:</strong> Choose another pupil for selector preference</p>
+        </Alert>
+    )
 }
 
 const Preferences = ({ group, items, updatePreferences, filter }) => {
@@ -217,12 +205,12 @@ const Preference = ({groupId, selectorId, selectedId, selectedName, updatePrefer
 
 const PupilButtons = ({ pupils, selector, setSelector, selected, setSelected, filter }) => {
     return pupils.map( pupil => {
-        const filtered =
-            ! (pupil.firstName.toLowerCase().includes(filter)
-            || pupil.lastName.toLowerCase().includes(filter)
-            || pupil.givenId.toLowerCase().includes(filter) );
+        const filtered = filter &&
+            (pupil.firstName.toLowerCase().includes(filter)
+                || pupil.lastName.toLowerCase().includes(filter)
+                || pupil.givenId.toLowerCase().includes(filter) );
 
-        if ( filtered ) {
+        if ( ! filtered ) {
             return null;
         }
 
