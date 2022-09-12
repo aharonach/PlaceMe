@@ -5,6 +5,7 @@ import {useForm} from "react-hook-form";
 import {extractListFromAPI} from "../../utils";
 import useFetchRecord from "../../hooks/useFetchRecord";
 import {Alert} from "react-bootstrap";
+import Loading from "../Loading";
 
 const prepareFields = (template) => {
     const fields = [];
@@ -15,8 +16,8 @@ const prepareFields = (template) => {
             label: attribute.name,
             type: 'range',
             description: attribute.description,
-            bsProps: { step: 0.1, min: 1, max: 5 },
-            rules: { required: true, min: 1, max: 5 },
+            bsProps: { step: 1, min: 0, max: 5 },
+            rules: { required: true, min: 0, max: 5 },
         });
     });
 
@@ -71,7 +72,8 @@ export default function Attributes({ pupilId, group }) {
 
     return (
         <>
-            {!errorTemplate && !error && template && (<>
+            <Loading show={loading || loadingTemplate} />
+            {!errorTemplate && !error && template && attributeValues && (<>
                 {updated && <Alert variant="success">Attributes updated successfully</Alert> }
                 <h4>{template.name}</h4>
                 <p>{template.description}</p>

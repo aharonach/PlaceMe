@@ -64,6 +64,14 @@ public class LoadDatabase {
                 new RangeAttribute("attr 3", "attr 3 for template", 10),
                 new RangeAttribute("attr 4", "attr 4 for template", 20)
         ))));
+
+        logger.info("Preloading " + templateService.add(new Template("Questionnaire", "Real use case", Set.of(
+                new RangeAttribute("Behavior", "", 50),
+                new RangeAttribute("Educational Index", "", 50),
+                new RangeAttribute("Emotional Index", "", 50),
+                new RangeAttribute("Sociability", "", 50),
+                new RangeAttribute("Disability Benefits", "", 50)
+        ))));
     }
 
     private void createGroups() {

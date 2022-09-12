@@ -51,8 +51,7 @@ const prepareFields = (values) => {
             type: 'range',
             value: value.value,
             description: value.attribute.description,
-            bsProps: { step: 0.1, min: 1, max: 5 },
-            rules: { required: true, min: 1, max: 5 },
+            bsProps: { step: 1, min: 0, max: 5 },
         });
     });
 
