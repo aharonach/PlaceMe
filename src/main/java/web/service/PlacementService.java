@@ -1,9 +1,8 @@
 package web.service;
 
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import web.engine.PlaceEngine;
 import web.entity.*;
+import web.exception.BadRequest;
 import web.exception.EntityAlreadyExists;
 import web.exception.NotFound;
 import web.repository.*;
@@ -350,6 +349,37 @@ public class PlacementService implements EntityService<Placement> {
 
         // parse data and create pupils map
         return importExportUtils.parseAndAddDataFromFile(csvContent, placement);
+    }
+
+    @Transactional
+    public List<PlacementClassroom> movePupilBetweenClassrooms(PlacementResult result, Long classroomFromId, Long classroomToId, Long pupilId) throws Group.PupilNotBelongException {
+        Pupil pupil = result.getGroup().getPupilById(pupilId);
+        PlacementClassroom classroomFrom = result.getClasses()
+                .stream()
+                .filter(classroom -> classroom.getId().equals(classroomFromId))
+                .findFirst()
+                .orElse(null);
+
+        if (classroomFrom == null) {
+            throw new BadRequest("Classroom " + classroomFromId + " is invalid");
+        }
+
+        PlacementClassroom classroomTo = result.getClasses()
+                .stream()
+                .filter(classroom -> classroom.getId().equals(classroomToId))
+                .findFirst()
+                .orElse(null);
+
+        if (classroomFrom == null) {
+            throw new BadRequest("Classroom " + classroomToId + " is invalid");
+        }
+
+        classroomFrom.removePupilFromClass(pupil);
+        classroomTo.addPupilToClass(pupil);
+        placementClassroomRepository.save(classroomFrom);
+        placementClassroomRepository.save(classroomTo);
+        placementResultRepository.save(result);
+        return getAllPlacementResultClasses(result);
     }
 
     public List<PlaceEngineConfig> allConfigs() {

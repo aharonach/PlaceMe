@@ -24,7 +24,7 @@ public class PupilDto {
     private Pupil.Gender gender;
     private LocalDate birthDate;
     private List<AttributeValue> attributeValues;
-    private Set<Long> groups ;
+    private Set<Long> groups;
 
     public PupilDto(Pupil pupil){
         this.id = pupil.getId();
