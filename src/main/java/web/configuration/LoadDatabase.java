@@ -75,10 +75,14 @@ public class LoadDatabase {
     }
 
     private void createGroups() {
-        Template template = templateService.getOr404(1L);
+        Template template1 = templateService.getOr404(1L);
+        Template template2 = templateService.getOr404(2L);
 
-        Group group1 = groupService.add(new Group("group 1", "group 1 desc", template));
+        Group group1 = groupService.add(new Group("group 1", "group 1 desc", template1));
         logger.info("Preloading " + group1);
+
+        Group group2 = groupService.add(new Group("group 2", "real based", template2));
+        logger.info("Preloading " + group2);
     }
 
     private void createPlacements() throws FileNotFoundException, CsvUtils.CsvContent.CsvNotValidException, PlacementService.PlacementWithoutTemplateInGroupException, PlacementService.PlacementWithoutGroupException {
@@ -87,6 +91,10 @@ public class LoadDatabase {
         Placement placement1 = placementService.add(new Placement("placement 1", 4, group1));
         System.out.println(placementService.importDataFromCsv(placement1, content1).getErrors());
         logger.info("Preloading " + placement1);
+
+        Group group2 = groupService.getOr404(2L);
+        Placement placement2 = placementService.add(new Placement("real based", 3, group2));
+        logger.info("Preloading " + placement2);
     }
 
     private String getFileContent(String fileName) throws FileNotFoundException {
