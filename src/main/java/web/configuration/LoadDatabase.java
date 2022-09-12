@@ -53,14 +53,9 @@ public class LoadDatabase {
     }
 
     private void createEngineConfig() {
-        PlaceEngineConfig placeEngineConfig = new PlaceEngineConfig(1L);
-        placementService.updateGlobalConfig(placeEngineConfig);
-
-        placeEngineConfig = new PlaceEngineConfig(2L);
-        placementService.updateGlobalConfig(placeEngineConfig);
-
-        placeEngineConfig = new PlaceEngineConfig(3L);
-        placementService.updateGlobalConfig(placeEngineConfig);
+        placementService.updateGlobalConfig(new PlaceEngineConfig(1L));
+        placementService.updateGlobalConfig(new PlaceEngineConfig(2L));
+        placementService.updateGlobalConfig(new PlaceEngineConfig(3L));
     }
 
     private void createTemplates() throws Template.AttributeAlreadyExistException {

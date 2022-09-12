@@ -58,22 +58,22 @@ public class PlaceEngineConfig {
         } else if (optionNumber == 2L) {
             this.name = "Option 2";
             this.populationSize = 100;
-            this.offspringSelector = SELECTOR.TournamentSelector;
+            this.offspringSelector = SELECTOR.RouletteWheelSelector;
             this.altererFirst = ALTERER.SwapMutator;
-            this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+            this.altererFirstProbability = 0.09;
             this.altererSecond = ALTERER.SinglePointCrossover;
-            this.altererSecondProbability = 0.36;
+            this.altererSecondProbability = 0.4;
             this.limitBySteadyFitness = 7;
             this.generationsLimit = 100;
         } else {
             this.name = "Option 3";
-            this.populationSize = 100;
+            this.populationSize = 120;
             this.offspringSelector = SELECTOR.TournamentSelector;
             this.altererFirst = ALTERER.SwapMutator;
-            this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+            this.altererFirstProbability = 0.4;
             this.altererSecond = ALTERER.SinglePointCrossover;
-            this.altererSecondProbability = 0.36;
-            this.limitBySteadyFitness = 7;
+            this.altererSecondProbability = 0.22;
+            this.limitBySteadyFitness = 15;
             this.generationsLimit = 100;
         }
     }
