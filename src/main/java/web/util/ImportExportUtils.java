@@ -310,10 +310,10 @@ public class ImportExportUtils {
         return errors;
     }
 
-    public List<String> getRowsForPupilsWithClasses(Group group, List<String> columns, PlacementResult placementResult) throws Group.PupilNotBelongException, NoSuchFieldException, IllegalAccessException {
+    public List<String> getRowsForPupilsWithClasses(Group group, List<String> columns, Collection<PlacementClassroom> placementClassrooms) throws Group.PupilNotBelongException, NoSuchFieldException, IllegalAccessException {
         List<String> rows = new ArrayList<>(group.getNumberOfPupils());
         int classNumber = 1;
-        for(PlacementClassroom placementClassroom : placementResult.getClasses()){
+        for(PlacementClassroom placementClassroom : placementClassrooms){
             Map<String, String> additionalInfo = new HashMap<>();
             additionalInfo.put(CLASS_NUMBER, String.valueOf(classNumber));
             List<String> classRows = createRowDataForPupils(group, columns, placementClassroom.getPupils(), additionalInfo);
