@@ -4,6 +4,7 @@ import web.assembler.PlacementClassroomModelAssembler;
 import web.assembler.PlacementModelAssembler;
 import web.assembler.PlacementResultModelAssembler;
 import web.dto.ClassroomInfoDto;
+import web.dto.MovePupilBetweenClassrooms;
 import web.entity.*;
 import web.exception.BadRequest;
 import web.exception.InternalError;
@@ -24,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -205,9 +207,21 @@ public class PlacementRestController extends BaseRestController<Placement> {
         }
     }
 
+    @PostMapping("/{placementId}/results/{resultId}/classes")
+    public ResponseEntity<?> movePupilBetweenClasses(@PathVariable Long placementId, @PathVariable Long resultId, @RequestBody MovePupilBetweenClassrooms details) {
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            PlacementResult result = placementService.getResultById(placement, resultId);
+            List<PlacementClassroom> classes = placementService.movePupilBetweenClassrooms(result, details.getClassroomFrom(), details.getClassroomTo(), details.getPupilId());
+            CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toCollectionModelWithoutPages(classes);
+            return ResponseEntity.ok().body(entities);
+        } catch (Placement.ResultNotExistsException | Group.PupilNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        }
+    }
+
     @GetMapping("/{placementId}/results/{resultId}/classes/info")
-    public ResponseEntity<?> getResultClassesInfo(@PathVariable Long placementId,
-                                              @PathVariable Long resultId) {
+    public ResponseEntity<?> getResultClassesInfo(@PathVariable Long placementId, @PathVariable Long resultId) {
 
         Placement placement = placementService.getOr404(placementId);
         try {

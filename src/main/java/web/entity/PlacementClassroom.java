@@ -183,6 +183,7 @@ public class PlacementClassroom extends BaseEntity {
 
     public void removePupilFromClass(Pupil pupil){
         pupils.remove(pupil);
+        pupil.removeFromClassrooms(this);
     }
 
     @Override
