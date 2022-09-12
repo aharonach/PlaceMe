@@ -46,7 +46,7 @@ export default function Attributes({ pupilId, group }) {
 
         // Set values again
         extractListFromAPI( pupilAttributes, 'attributeValueList', value => {
-            form.setValue(`attribute-${group.templateId}-${value.attribute.id}`, value.value);
+            form.setValue(`attribute-${group.templateId}-${value.attribute.id}`, value.value.toString());
             return value;
         });
     }
