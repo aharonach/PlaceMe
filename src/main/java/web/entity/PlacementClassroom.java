@@ -131,10 +131,6 @@ public class PlacementClassroom extends BaseEntity {
         return pupils.stream().map(Pupil::getId).toList();
     }
 
-//    public Set<Pupil> getPupils() {
-//        return Collections.unmodifiableSet(pupils);
-//    }
-
     public List<Pupil> getPupils() {
         return pupils.stream()
                 .sorted((o1, o2) -> (int)(o1.getId() - o2.getId()))
