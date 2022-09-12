@@ -98,7 +98,7 @@ const ClassPupils = ({classroom, classInfo, selected, setSelected}) => {
             // Conditions
             const preferToBe = classInfo?.preferToBeList[selected?.id]?.includes( pupil.id );
             const preferNotToBe = classInfo?.preferNotToBeList[selected?.id]?.includes( pupil.id );
-            const isAloneInClassroom = classInfo?.numberOfFriendsInClass[pupil.id] === 0;
+            const isAloneInClassroom = classInfo?.numberOfFriendsInClass[pupil.id] === 0 && classInfo?.preferToBeList[pupil.id]?.length > 0;
 
             // Class names for styling
             const preferToBeClass = preferToBe ? "prefer-to-be" : "";
