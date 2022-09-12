@@ -21,29 +21,33 @@ public class PlaceEngineConfig {
     @JsonIgnore
     private Long id;
 
-    int populationSize = 100;
+    int populationSize;
 
-    SELECTOR offspringSelector = SELECTOR.TournamentSelector;
+    SELECTOR offspringSelector;
 
-    ALTERER altererFirst = ALTERER.SwapMutator;
-    double altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+    ALTERER altererFirst;
+    double altererFirstProbability;
 
-    ALTERER altererSecond = ALTERER.SinglePointCrossover;
-    double altererSecondProbability = 0.36;
+    ALTERER altererSecond;
+    double altererSecondProbability;
 
-    int limitBySteadyFitness = 7;
+    int limitBySteadyFitness;
 
-    int generationsLimit = 100;
+    int generationsLimit;
+
+    public PlaceEngineConfig() {
+        ResetToDefault();
+    }
 
     public void ResetToDefault() {
-        populationSize = 100;
-        offspringSelector = SELECTOR.TournamentSelector;
-        altererFirst = ALTERER.SwapMutator;
-        altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
-        altererSecond = ALTERER.SinglePointCrossover;
-        altererSecondProbability = 0.36;
-        limitBySteadyFitness = 7;
-        generationsLimit = 100;
+        this.populationSize = 100;
+        this.offspringSelector = SELECTOR.TournamentSelector;
+        this.altererFirst = ALTERER.SwapMutator;
+        this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+        this.altererSecond = ALTERER.SinglePointCrossover;
+        this.altererSecondProbability = 0.36;
+        this.limitBySteadyFitness = 7;
+        this.generationsLimit = 100;
     }
 
     public Object createInstanceForSelector() {
