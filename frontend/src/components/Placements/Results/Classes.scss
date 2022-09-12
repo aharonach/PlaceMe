@@ -1,13 +1,24 @@
+@import '../../../CustomColors.scss';
+
+.selected-pupil {
+  font-weight: bold !important;
+  background-color: lighten($primary, 20%) !important;
+}
+
 .pupil-in-class {
   text-decoration-line: none !important;
 }
 
 .prefer-to-be {
-  color: green !important;
+  background-color: darken($success, 15%) !important;
+  color: white !important;
+  padding: 3px 5px;
 }
 
 .prefer-not-to-be {
-  color: red !important;
+  background-color: red !important;
+  color: white !important;
+  padding: 3px 5px;
 }
 
 .pupil-is-alone {

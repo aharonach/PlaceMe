@@ -46,7 +46,7 @@ export default function Attributes({ pupilId, group }) {
 
         // Set values again
         extractListFromAPI( pupilAttributes, 'attributeValueList', value => {
-            form.setValue(`attribute-${group.templateId}-${value.attribute.id}`, value.value);
+            form.setValue(`attribute-${group.templateId}-${value.attribute.id}`, value.value.toString());
             return value;
         });
     }
@@ -73,7 +73,7 @@ export default function Attributes({ pupilId, group }) {
     return (
         <>
             <Loading show={loading || loadingTemplate} />
-            {!errorTemplate && !error && template && attributeValues && (<>
+            {!errorTemplate && !error && template && (<>
                 {updated && <Alert variant="success">Attributes updated successfully</Alert> }
                 <h4>{template.name}</h4>
                 <p>{template.description}</p>

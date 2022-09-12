@@ -98,20 +98,20 @@ const ClassPupils = ({classroom, classInfo, selected, setSelected}) => {
             // Conditions
             const preferToBe = classInfo?.preferToBeList[selected?.id]?.includes( pupil.id );
             const preferNotToBe = classInfo?.preferNotToBeList[selected?.id]?.includes( pupil.id );
-            const isAloneInClassroom = classInfo?.numberOfFriendsInClass[pupil.id] === 0;
+            const isAloneInClassroom = classInfo?.numberOfFriendsInClass[pupil.id] === 0 && classInfo?.preferToBeList[pupil.id]?.length > 0;
 
             // Class names for styling
             const preferToBeClass = preferToBe ? "prefer-to-be" : "";
             const selectedIsNotWith = preferNotToBe ? "prefer-not-to-be" : "";
             const isAloneInClassroomClass = isAloneInClassroom ? "pupil-is-alone" : "";
-            const pupilSelectedClass = selected?.id === pupil.id || preferNotToBe || preferToBe ? "fw-bold" : "link-dark";
+            const pupilSelectedClass = selected?.id === pupil.id || preferNotToBe || preferToBe ? "selected-pupil" : "link-dark";
 
             return (
                 <Stack gap={2} direction={"horizontal"} key={pupil.id}>
                     <Gender pill gender={pupil.gender} noIcon/>{' '}
                     <Button
                         variant="link"
-                        className={`p-0 pupil-in-class ${pupilSelectedClass} ${preferToBeClass} ${selectedIsNotWith} ${isAloneInClassroomClass}`}
+                        className={`py-0 pupil-in-class ${pupilSelectedClass} ${preferToBeClass} ${selectedIsNotWith} ${isAloneInClassroomClass}`}
                         onClick={() => selectPupil(pupil)}
                     >{pupil.firstName} {pupil.lastName}</Button>
                 </Stack>
