@@ -85,10 +85,11 @@ public class PlacementResult extends BaseEntity {
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getPlacementScore() {
-        return getPercentageOfPupilsNumber() * 0.15
-                + getPercentageOfClassScores() * 0.3
+        return getPercentageOfPupilsNumber() * 0.125
+                + getPercentageOfClassScores() * 0.125
+                + getPercentageOfClassDeltasScores() * 0.125
                 + getPercentageOfPupilsScores() * 0.1
-                + getPercentageOfClassConnectionsScores() * 0.45;
+                + getPercentageOfClassConnectionsScores() * 0.525;
     }
 
     private double getPercentageOfPupilsNumber(){
@@ -104,23 +105,47 @@ public class PlacementResult extends BaseEntity {
 
     private double getPercentageOfClassScores(){
         double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
-        if(scoreOfAllClasses == 0){
+        if(scoreOfAllClasses == 0 || Double.isNaN(scoreOfAllClasses)){
             return 0;
         }
         return scoreOfAllClasses / classes.size();
+    }
+
+    private double getPercentageOfClassDeltasScores(){
+        double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
+        if(scoreOfAllClasses == 0 || Double.isNaN(scoreOfAllClasses)){
+            return 0;
+        }
+
+        double avgScore = scoreOfAllClasses / classes.size();
+        double deltaBetweenClassScores = classes.stream()
+                .map(classInfo -> Math.abs(classInfo.getClassScore() - avgScore))
+                .reduce(0d, Double::sum);
+
+        return (deltaBetweenClassScores / scoreOfAllClasses) * 100;
     }
 
     private double getPercentageOfClassConnectionsScores(){
-        double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassConnectionsScore).sum();
-        if(scoreOfAllClasses == 0){
+        double wrongConnectionsOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassConnectionsScore).sum();
+        double numOfStudents = classes.stream().mapToDouble(PlacementClassroom::getNumOfPupils).sum();
+
+        if(wrongConnectionsOfAllClasses == 0 || Double.isNaN(wrongConnectionsOfAllClasses)){
             return 0;
         }
-        return scoreOfAllClasses / classes.size();
+        return (wrongConnectionsOfAllClasses / numOfStudents) * 100;
     }
+
+//    private double getPercentageOfClassConnectionsScores(){
+//        double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassConnectionsScore).sum();
+//        if(scoreOfAllClasses == 0 || Double.isNaN(scoreOfAllClasses)){
+//            return 0;
+//        }
+//        return scoreOfAllClasses / classes.size();
+//    }
 
     private double getPercentageOfPupilsScores(){
         double sumRelativeScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getRelativeScoreOfPupils).sum();
-        if(sumRelativeScoreOfAllPupils == 0){
+        if(sumRelativeScoreOfAllPupils == 0 || Double.isNaN(sumRelativeScoreOfAllPupils)){
             return 0;
         }
         return sumRelativeScoreOfAllPupils / classes.size();

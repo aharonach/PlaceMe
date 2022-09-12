@@ -81,12 +81,20 @@ public class PlacementClassroom extends BaseEntity {
 
     public double getClassConnectionsScore(){
         initConnections();
-        double percentageOfWrongConnectionsToInclude = ((double) getNumberOfWrongConnectionsToInclude() / pupils.size()) * 100;
-        double percentageOfWrongConnectionsToExclude = ((double) getNumberOfWrongConnectionsToExclude() / pupils.size()) * 100;
+        double percentageOfWrongConnectionsToInclude = getNumberOfWrongConnectionsToInclude();
+        double percentageOfWrongConnectionsToExclude = getNumberOfWrongConnectionsToExclude();
 
-        return percentageOfWrongConnectionsToInclude * 0.75
-                + percentageOfWrongConnectionsToExclude * 0.25;
+        return percentageOfWrongConnectionsToInclude + percentageOfWrongConnectionsToExclude;
     }
+
+//    public double getClassConnectionsScore(){
+//        initConnections();
+//        double percentageOfWrongConnectionsToInclude = ((double) getNumberOfWrongConnectionsToInclude() / pupils.size()) * 100;
+//        double percentageOfWrongConnectionsToExclude = ((double) getNumberOfWrongConnectionsToExclude() / pupils.size()) * 100;
+//
+//        return percentageOfWrongConnectionsToInclude * 0.75
+//                + percentageOfWrongConnectionsToExclude * 0.25;
+//    }
 
     // same as prev but init the connections outside the alg
     public double getClassScoreForUi(){
