@@ -70,9 +70,9 @@ public class PlacementClassroom extends BaseEntity {
     @JsonIgnore
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getClassScore(){
-        double percentageOfMales = percentageRelativeToPupilsNumber(getDeltaBetweenMales());
-        double percentageOfFemales = percentageRelativeToPupilsNumber(getDeltaBetweenFemales());
-        double percentageOfMalesAndFemales = percentageRelativeToPupilsNumber(getDeltaBetweenMalesAndFemales());
+        double percentageOfMales = percentageRelativeToTotalPupilsNumber(getDeltaBetweenMales());
+        double percentageOfFemales = percentageRelativeToTotalPupilsNumber(getDeltaBetweenFemales());
+        double percentageOfMalesAndFemales = percentageRelativeToClassPupilsNumber(getDeltaBetweenMalesAndFemales());
 
         return percentageOfMales * 0.3
                 + percentageOfFemales * 0.3
@@ -94,8 +94,12 @@ public class PlacementClassroom extends BaseEntity {
         return getClassScore();
     }
 
-    private double percentageRelativeToPupilsNumber(double value){
+    private double percentageRelativeToTotalPupilsNumber(double value){
         return (value / (totalNumberOfFemales + totalNumberOfMales)) * 100;
+    }
+
+    private double percentageRelativeToClassPupilsNumber(double value){
+        return (value / (pupils.size())) * 100;
     }
 
     public long getNumberOfMales(){

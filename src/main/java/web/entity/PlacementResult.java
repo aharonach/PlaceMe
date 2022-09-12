@@ -85,10 +85,10 @@ public class PlacementResult extends BaseEntity {
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getPlacementScore() {
-        return getPercentageOfPupilsNumber() * 0.15
-                + getPercentageOfClassScores() * 0.2
+        return getPercentageOfPupilsNumber() * 0.175
+                + getPercentageOfClassScores() * 0.225
                 + getPercentageOfPupilsScores() * 0.1
-                + getPercentageOfClassConnectionsScores() * 0.55;
+                + getPercentageOfClassConnectionsScores() * 0.5;
     }
 
     private double getPercentageOfPupilsNumber(){
