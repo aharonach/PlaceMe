@@ -144,7 +144,7 @@ public class PlacementService implements EntityService<Placement> {
             placementClassroom.getPupils().forEach(pupil -> {
                 Set<Long> classIds = pupil.getClassroomIds();
                 classIds.add(placementClassroom.getId());
-                pupil.setClassrooms(placementClassroomRepository.getAllByIdIn(classIds));
+                pupil.setClassrooms(new HashSet<>(placementClassroomRepository.getAllByIdIn(classIds)));
             });
             pupilRepository.saveAll(placementClassroom.getPupils());
         });
@@ -269,6 +269,10 @@ public class PlacementService implements EntityService<Placement> {
         return placementClassroomRepository.getAllByIdIn(placementResult.getClassesIds(), pageRequest);
     }
 
+    public List<PlacementClassroom> getAllPlacementResultClasses(PlacementResult placementResult) {
+        return placementClassroomRepository.getAllByIdIn(placementResult.getClassesIds());
+    }
+
     public PlacementResult getResultById(Placement placement, Long resultID) throws Placement.ResultNotExistsException {
         PlacementResult placementResult = getOr404(placement.getId()).getResultById(resultID);
         return placementResultRepository.findById(placementResult.getId()).orElseThrow(() -> new NotFound("Could not find placement result " + placementResult.getId()));
@@ -320,8 +324,20 @@ public class PlacementService implements EntityService<Placement> {
     @Transactional
     public String exportCsvDataByPlacement(Placement placement) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
         verifyPlacementGroupContainTemplate(placement);
+        Group group = placement.getGroup();
         List<String> columns = importExportUtils.getColumnNames(placement);
-        List<String> rows = importExportUtils.createRowDataForPupils(placement);
+        List<String> rows = importExportUtils.createRowDataForPupils(group, columns);
+        CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns, rows);
+        return csvContent.getFullFileContent();
+    }
+
+    @Transactional
+    public String exportCsvDataByPlacementResult(PlacementResult placementResult) throws CsvUtils.CsvContent.CsvNotValidException, Group.PupilNotBelongException, IllegalAccessException, NoSuchFieldException, PlacementWithoutTemplateInGroupException, PlacementWithoutGroupException {
+        Placement placement = placementResult.getPlacement();
+        verifyPlacementGroupContainTemplate(placement);
+        Group group = placement.getGroup();
+        List<String> columns = importExportUtils.getColumnNamesWithClasses(placement);
+        List<String> rows = importExportUtils.getRowsForPupilsWithClasses(group, columns, getAllPlacementResultClasses(placementResult));
         CsvUtils.CsvContent csvContent = new CsvUtils.CsvContent(columns, rows);
         return csvContent.getFullFileContent();
     }

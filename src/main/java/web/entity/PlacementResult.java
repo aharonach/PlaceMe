@@ -87,8 +87,8 @@ public class PlacementResult extends BaseEntity {
     public double getPlacementScore() {
 
         return getPercentageOfPupilsNumber() * 0.2
-                + getPercentageOfClassScores() * 0.4
-                + getPercentageOfPupilsScores() * 0.4;
+                + getPercentageOfClassScores() * 0.45
+                + getPercentageOfPupilsScores() * 0.35;
     }
 
     private double getPercentageOfPupilsNumber(){

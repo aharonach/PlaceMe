@@ -192,17 +192,15 @@ public class PlacementRestController extends BaseRestController<Placement> {
 
     @GetMapping("/{placementId}/results/{resultId}/classes")
     public ResponseEntity<?> getResultClasses(@PathVariable Long placementId,
-                                              @PathVariable Long resultId,
-                                              @ParameterObject @ModelAttribute PagesAndSortHandler.PaginationInfo pageInfo) {
+                                              @PathVariable Long resultId) {
 
         Placement placement = placementService.getOr404(placementId);
 
         try {
-            PageRequest pageRequest = pagesAndSortHandler.getPageRequest(pageInfo, FieldSortingMaps.groupMap);
             PlacementResult placementResult = placementService.getResultById(placement, resultId);
-            CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toPageCollection(placementService.getPlacementResultClasses(placementResult, pageRequest));
+            CollectionModel<EntityModel<PlacementClassroom>> entities = placementClassroomModelAssembler.toCollectionModelWithoutPages(placementService.getAllPlacementResultClasses(placementResult));
             return ResponseEntity.ok().body(entities);
-        } catch (Placement.ResultNotExistsException | PagesAndSortHandler.FieldNotSortableException e) {
+        } catch (Placement.ResultNotExistsException e) {
             throw new BadRequest(e.getMessage());
         }
     }
@@ -280,6 +278,24 @@ public class PlacementRestController extends BaseRestController<Placement> {
             String columnsString = placementService.exportCsvDataByPlacement(placement);
             return ResponseEntity.ok().body(columnsString);
         } catch (CsvUtils.CsvContent.CsvNotValidException | Group.PupilNotBelongException e) {
+            throw new BadRequest(e.getMessage());
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InternalError(e.getMessage());
+        } catch (PlacementService.PlacementWithoutTemplateInGroupException | PlacementService.PlacementWithoutGroupException e) {
+            throw new PreconditionFailed(e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/{placementId}/results/{resultId}/export", produces = "text/csv;charset=UTF-8")
+    public ResponseEntity<?> exportCsvDataForPlacementResult(@PathVariable Long placementId,
+                                                             @PathVariable Long resultId) {
+
+        Placement placement = placementService.getOr404(placementId);
+        try {
+            PlacementResult placementResult = placementService.getResultById(placement, resultId);
+            String columnsString = placementService.exportCsvDataByPlacementResult(placementResult);
+            return ResponseEntity.ok().body(columnsString);
+        } catch (CsvUtils.CsvContent.CsvNotValidException | Group.PupilNotBelongException | Placement.ResultNotExistsException e) {
             throw new BadRequest(e.getMessage());
         } catch (IllegalAccessException | NoSuchFieldException e) {
             throw new InternalError(e.getMessage());
