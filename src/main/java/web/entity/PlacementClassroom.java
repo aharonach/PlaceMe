@@ -84,8 +84,8 @@ public class PlacementClassroom extends BaseEntity {
         double percentageOfWrongConnectionsToInclude = ((double) getNumberOfWrongConnectionsToInclude() / pupils.size()) * 100;
         double percentageOfWrongConnectionsToExclude = ((double) getNumberOfWrongConnectionsToExclude() / pupils.size()) * 100;
 
-        return percentageOfWrongConnectionsToInclude * 0.725
-                + percentageOfWrongConnectionsToExclude * 0.275;
+        return percentageOfWrongConnectionsToInclude * 0.75
+                + percentageOfWrongConnectionsToExclude * 0.25;
     }
 
     // same as prev but init the connections outside the alg

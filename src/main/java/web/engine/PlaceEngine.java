@@ -112,6 +112,45 @@ public class PlaceEngine {
         return allPupilArePlaced && numOfPlacedPupilsEqualToNumOfPupils;
     }
 
+//    public static Genotype<BitGene> repair(final Genotype<BitGene> placement) {
+//        int numOfAvailablePupils = getNumOfAvailablePupils(placement);
+//        int numOfAvailableClasses = placement.length();
+//        Map<Integer, Set<Integer>> classesByPupilIndex = createClassesByPupilIndexMap(numOfAvailablePupils, placement);
+//
+//        // save all chromosome to recreate the placement at the end
+//        Map<Integer, BitChromosome> newChromosomesMap = new HashMap<>(numOfAvailableClasses);
+//        for (int i = 0; i < numOfAvailableClasses; i++) {
+//            newChromosomesMap.put(i, placement.get(i).as(BitChromosome.class));
+//        }
+//
+//        // classesByPupilIndex contains : pairs of [pupil number -> classes that he place in]
+//        classesByPupilIndex.forEach((currentPupilIndex, classesOfCurrentPupil) -> {
+//            boolean pupilHasNoClass = classesOfCurrentPupil.size() == 0;
+//
+//            if (pupilHasNoClass) {
+//                // add the pupil to a random class
+//                int chromosomeToChange = random.nextInt(0, numOfAvailableClasses);
+//                setBitOnChromosomeMap(newChromosomesMap, chromosomeToChange, currentPupilIndex);
+//            } else {
+//                if(classesOfCurrentPupil.size() > 1){
+//                    // choose a random class that the pupil will stay in
+//                    int randomIndexOfClass = random.nextInt(0, classesOfCurrentPupil.size());
+//                    int chosenClass = classesOfCurrentPupil.stream().toList().get(randomIndexOfClass);
+//                    classesOfCurrentPupil.remove(chosenClass);
+//                    while (classesOfCurrentPupil.size() > 0) {
+//                        int chromosomeToChange = classesOfCurrentPupil.stream().findFirst().get();
+//                        clearBitOnChromosomeMap(newChromosomesMap, chromosomeToChange, currentPupilIndex);
+//                        classesOfCurrentPupil.remove(chromosomeToChange);
+//                    }
+//                }
+//            }
+//        });
+//
+//        List<BitChromosome> newChromosomes = new ArrayList<>(newChromosomesMap.size());
+//        IntStream.range(0, newChromosomesMap.size()).forEach(i -> newChromosomes.add(newChromosomesMap.get(i)));
+//        return Genotype.of(newChromosomes);
+//    }
+
     public static Genotype<BitGene> repair(final Genotype<BitGene> placement) {
         int numOfAvailablePupils = getNumOfAvailablePupils(placement);
         int numOfAvailableClasses = placement.length();
@@ -124,24 +163,25 @@ public class PlaceEngine {
         }
 
         // classesByPupilIndex contains : pairs of [pupil number -> classes that he place in]
-        classesByPupilIndex.forEach((currentPupilIndex, classesOfCurrentPupil) -> {
-            boolean pupilHasNoClass = classesOfCurrentPupil.size() == 0;
+        classesByPupilIndex.forEach((key, value) -> {
+            boolean pupilHasNoClass = value.size() == 0;
+            int pupilIndex = key;
 
             if (pupilHasNoClass) {
-                // add the pupil to a random class
-                int chromosomeToChange = random.nextInt(0, numOfAvailableClasses);
-                setBitOnChromosomeMap(newChromosomesMap, chromosomeToChange, currentPupilIndex);
+                // get the class index with the lowest pupils size
+                int chromosomeToChange = IntStream.range(0, numOfAvailableClasses).boxed()
+                        .max((o1, o2) -> (int) (newChromosomesMap.get(o1).as(BitChromosome.class).zeros().count() - newChromosomesMap.get(o2).as(BitChromosome.class).zeros().count()))
+                        .get();
+                setBitOnChromosomeMap(newChromosomesMap, chromosomeToChange, pupilIndex);
             } else {
-                if(classesOfCurrentPupil.size() > 1){
-                    // choose a random class that the pupil will stay in
-                    int randomIndexOfClass = random.nextInt(0, classesOfCurrentPupil.size());
-                    int chosenClass = classesOfCurrentPupil.stream().toList().get(randomIndexOfClass);
-                    classesOfCurrentPupil.remove(chosenClass);
-                    while (classesOfCurrentPupil.size() > 0) {
-                        int chromosomeToChange = classesOfCurrentPupil.stream().findFirst().get();
-                        clearBitOnChromosomeMap(newChromosomesMap, chromosomeToChange, currentPupilIndex);
-                        classesOfCurrentPupil.remove(chromosomeToChange);
-                    }
+                while (value.size() > 1) {
+                    // get the class index with The highest pupils size
+                    int chromosomeToChange = value
+                            .stream()
+                            .max((o1, o2) -> (int) (newChromosomesMap.get(o1).as(BitChromosome.class).ones().count() - newChromosomesMap.get(o2).as(BitChromosome.class).ones().count()))
+                            .get();
+                    clearBitOnChromosomeMap(newChromosomesMap, chromosomeToChange, pupilIndex);
+                    value.remove(chromosomeToChange);
                 }
             }
         });
