@@ -85,10 +85,9 @@ public class PlacementResult extends BaseEntity {
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getPlacementScore() {
-
         return getPercentageOfPupilsNumber() * 0.2
-                + getPercentageOfClassScores() * 0.45
-                + getPercentageOfPupilsScores() * 0.35;
+                + getPercentageOfClassScores() * 0.5
+                + getPercentageOfPupilsScores() * 0.3;
     }
 
     private double getPercentageOfPupilsNumber(){
@@ -104,13 +103,14 @@ public class PlacementResult extends BaseEntity {
 
     private double getPercentageOfClassScores(){
         double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
+
         double avgScore = scoreOfAllClasses / classes.size();
 
         double deltaBetweenClassScores = classes.stream()
                 .map(classInfo -> Math.abs(classInfo.getClassScore() - avgScore))
                 .reduce(0d, Double::sum);
 
-        return (deltaBetweenClassScores / scoreOfAllClasses) * 100;
+        return scoreOfAllClasses == 0 ? 0 : (deltaBetweenClassScores / scoreOfAllClasses) * 100;
     }
 
     private double getPercentageOfPupilsScores(){

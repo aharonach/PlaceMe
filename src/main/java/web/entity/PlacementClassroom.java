@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import web.dto.PupilsConnectionsDto;
 import lombok.*;
 import org.hibernate.Hibernate;
+import web.engine.PlaceEngine;
 
 import javax.persistence.*;
 import java.util.*;
@@ -56,6 +57,7 @@ public class PlacementClassroom extends BaseEntity {
         this.totalNumberOfFemales = totalNumberOfFemales;
     }
 
+    //@JsonIgnore
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getClassScore(){
         double percentageOfWrongConnectionsToInclude = percentageRelativeToPupilsNumber(getNumberOfWrongConnectionsToInclude());
@@ -64,11 +66,19 @@ public class PlacementClassroom extends BaseEntity {
         double percentageOfFemales = percentageRelativeToPupilsNumber(getDeltaBetweenFemales());
         double percentageOfMalesAndFemales = percentageRelativeToPupilsNumber(getDeltaBetweenMalesAndFemales());
 
-        return percentageOfWrongConnectionsToInclude * 0.18
-                + percentageOfWrongConnectionsToExclude * 0.13
-                + percentageOfMales * 0.23
-                + percentageOfFemales * 0.23
-                + percentageOfMalesAndFemales * 0.23;
+        return percentageOfWrongConnectionsToInclude * 0.45
+                + percentageOfWrongConnectionsToExclude * 0.10
+                + percentageOfMales * 0.15
+                + percentageOfFemales * 0.15
+                + percentageOfMalesAndFemales * 0.15;
+    }
+
+    // same as prev but init the connections outside the alg
+    public double getClassScoreForUi(){
+        this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getPlacement().getGroup(), true));
+        this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getPlacement().getGroup(), false));
+
+        return getClassScore();
     }
 
     private double percentageRelativeToPupilsNumber(double value){
