@@ -259,7 +259,8 @@ public class ImportExportUtils {
 
         Map<Long, Double> attributeValues = new HashMap<>(attributeMap.size());
         for(String name : attributeMap.keySet()){
-            attributeValues.put(attributeMap.get(name).getId(), Double.valueOf(rowMap.get(name)));
+            double value = rowMap.get(name).isEmpty() ? 0 : Double.parseDouble(rowMap.get(name));
+            attributeValues.put(attributeMap.get(name).getId(), value);
         }
 
         try {
