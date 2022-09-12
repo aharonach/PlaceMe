@@ -147,8 +147,12 @@ public class Pupil extends BaseEntity {
         return result;
     }
 
-    public Integer getAge(){
-        return Math.abs(Period.between(LocalDate.now(), this.birthDate).getYears());
+    public double getAge(){
+        LocalDate now = LocalDate.now();
+        Double ageYears = Double.parseDouble(String.valueOf(Math.abs(Period.between(now, this.birthDate).getYears())));
+        Double ageMonths = Double.parseDouble(String.valueOf(Math.abs(Period.between(now, this.birthDate).getMonths())));
+        long roundedAge = Math.round((ageYears + (ageMonths / 12)) * 10);
+        return (double) roundedAge / 10;
     }
 
     @JsonProperty
