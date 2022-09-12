@@ -15,7 +15,7 @@ export default function AttributeValues({ pupil, group, rows }) {
         thenCallback: (res) => {
             const mapped = {};
             extractListFromAPI(res, 'attributeValueList', (attributeValue) => {
-                mapped[`attribute-${attributeValue.attribute.id}`] = attributeValue.value;
+                mapped[`attribute-${attributeValue.attribute.id}`] = attributeValue.value.toString();
             });
             setFormValues(form, mapped);
         }

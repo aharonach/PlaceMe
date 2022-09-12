@@ -1,6 +1,6 @@
 // noinspection JSUnresolvedVariable
 
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 import useFetchList from "../../../hooks/useFetchList";
 import {Alert, Button, Card, Col, Offcanvas, OverlayTrigger, Popover, Row, Stack} from "react-bootstrap";
 import React, {useState} from "react";
@@ -137,7 +137,7 @@ const PupilData = ({ result, selected, setSelected }) => {
     return (
         <>
             <Stack direction="horizontal" gap={3} className="align-items-center">
-                <span>Showing info for: <strong>{selected.firstName} {selected.lastName} ({selected.givenId})</strong></span>
+                <span>Showing info for: <Link to={`/pupils/${selected.id}`}><strong>{selected.firstName} {selected.lastName} ({selected.givenId})</strong></Link></span>
                 <Button variant="secondary" size="sm" onClick={handleShow}>View attribute values</Button>
                 <Button variant="link" size="sm" as="a" onClick={handleClick}>Clear selection</Button>
             </Stack>
