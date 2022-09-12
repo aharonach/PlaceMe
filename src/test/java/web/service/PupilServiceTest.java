@@ -207,12 +207,14 @@ class PupilServiceTest {
         Pupil pupil1 = repositoryTestUtils.createPupil1();
         pupil1.addToGroup(receivedGroup1);
         Pupil receivedPupil = pupilService.add(pupil1);
+        Long pupilId = receivedPupil.getId();
 
         assertEquals(0, receivedPupil.getAttributeValues(receivedGroup1).size());
         assertEquals(0, pupilService.getAttributeValues(receivedPupil, receivedGroup1).size());
-        assertThrows(Group.PupilNotBelongException.class, () -> receivedPupil.getAttributeValues(receivedGroup2));
+        assertThrows(Group.PupilNotBelongException.class, () -> pupilService.getOr404(pupilId).getAttributeValues(receivedGroup2));
         assertEquals(0, receivedPupil.getAttributeValues().size());
 
+        receivedPupil = pupilService.getOr404(receivedPupil.getId());
         Map<Long, Double> valuesMap = new HashMap<>(2);
         valuesMap.put(1L, 2D);
         valuesMap.put(2L, 3D);
@@ -223,6 +225,18 @@ class PupilServiceTest {
         assertEquals(2D, attributeValue1.getValue());
         AttributeValue attributeValue2 = receivedPupil.getAttributeValues(receivedGroup1, Set.of(2L)).stream().findFirst().get();
         assertEquals(3D, attributeValue2.getValue());
+
+        receivedPupil = pupilService.getOr404(receivedPupil.getId());
+        Map<Long, Double> newValuesMap = new HashMap<>(2);
+        newValuesMap.put(1L, 4D);
+        newValuesMap.put(2L, 5D);
+        pupilService.addOrUpdateAttributeValuesFromIdValueMap(receivedPupil, receivedGroup1, newValuesMap);
+        assertEquals(2, pupilService.getAttributeValues(receivedPupil, receivedGroup1).size());
+
+        AttributeValue newAttributeValue1 = receivedPupil.getAttributeValues(receivedGroup1, Set.of(1L)).stream().findFirst().get();
+        assertEquals(4D, newAttributeValue1.getValue());
+        AttributeValue newAttributeValue2 = receivedPupil.getAttributeValues(receivedGroup1, Set.of(2L)).stream().findFirst().get();
+        assertEquals(5D, newAttributeValue2.getValue());
 
         pupilService.deleteById(receivedPupil.getId());
         groupService.deleteById(receivedGroup1.getId());
