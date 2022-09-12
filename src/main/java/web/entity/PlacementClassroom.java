@@ -57,27 +57,40 @@ public class PlacementClassroom extends BaseEntity {
         this.totalNumberOfFemales = totalNumberOfFemales;
     }
 
-    //@JsonIgnore
+    private void initConnections(){
+        boolean isResultExist = placementResult != null;
+        boolean isPlacementExist = isResultExist && placementResult.getPlacement() != null;
+        if(this.connectionsToInclude.getValues().size() == 0 &&
+                this.connectionsToExclude.getValues().size() == 0 && isResultExist && isPlacementExist){
+            this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getPlacement().getGroup(), true));
+            this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getPlacement().getGroup(), false));
+        }
+    }
+
+    @JsonIgnore
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getClassScore(){
-        double percentageOfWrongConnectionsToInclude = percentageRelativeToPupilsNumber(getNumberOfWrongConnectionsToInclude());
-        double percentageOfWrongConnectionsToExclude = percentageRelativeToPupilsNumber(getNumberOfWrongConnectionsToExclude());
         double percentageOfMales = percentageRelativeToPupilsNumber(getDeltaBetweenMales());
         double percentageOfFemales = percentageRelativeToPupilsNumber(getDeltaBetweenFemales());
         double percentageOfMalesAndFemales = percentageRelativeToPupilsNumber(getDeltaBetweenMalesAndFemales());
 
-        return percentageOfWrongConnectionsToInclude * 0.45
-                + percentageOfWrongConnectionsToExclude * 0.10
-                + percentageOfMales * 0.15
-                + percentageOfFemales * 0.15
-                + percentageOfMalesAndFemales * 0.15;
+        return percentageOfMales * 0.3
+                + percentageOfFemales * 0.3
+                + percentageOfMalesAndFemales * 0.4;
+    }
+
+    public double getClassConnectionsScore(){
+        initConnections();
+        double percentageOfWrongConnectionsToInclude = ((double) getNumberOfWrongConnectionsToInclude() / pupils.size()) * 100;
+        double percentageOfWrongConnectionsToExclude = ((double) getNumberOfWrongConnectionsToExclude() / pupils.size()) * 100;
+
+        return percentageOfWrongConnectionsToInclude * 0.725
+                + percentageOfWrongConnectionsToExclude * 0.275;
     }
 
     // same as prev but init the connections outside the alg
     public double getClassScoreForUi(){
-        this.connectionsToInclude = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getPlacement().getGroup(), true));
-        this.connectionsToExclude = PupilsConnectionsDto.fromSelectorSelectedSet(PlaceEngine.getSelectorSelectedIds(placementResult.getPlacement().getGroup(), false));
-
+        initConnections();
         return getClassScore();
     }
 
@@ -148,6 +161,7 @@ public class PlacementClassroom extends BaseEntity {
     }
 
     public int getNumberOfWrongConnectionsToInclude(){
+        initConnections();
         int wrongConnections = 0;
         Map<Long, Set<Long>> connectionsMap = connectionsToInclude.getValues();
 
@@ -163,6 +177,7 @@ public class PlacementClassroom extends BaseEntity {
     }
 
     public int getNumberOfWrongConnectionsToExclude(){
+        initConnections();
         int wrongConnections = 0;
         Map<Long, Set<Long>> connectionsMap = connectionsToExclude.getValues();
 

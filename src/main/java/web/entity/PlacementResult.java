@@ -85,9 +85,10 @@ public class PlacementResult extends BaseEntity {
 
     // score of 0 to 100, the target is to get the lowest score (A lower score is better)
     public double getPlacementScore() {
-        return getPercentageOfPupilsNumber() * 0.2
-                + getPercentageOfClassScores() * 0.5
-                + getPercentageOfPupilsScores() * 0.3;
+        return getPercentageOfPupilsNumber() * 0.15
+                + getPercentageOfClassScores() * 0.2
+                + getPercentageOfPupilsScores() * 0.1
+                + getPercentageOfClassConnectionsScores() * 0.55;
     }
 
     private double getPercentageOfPupilsNumber(){
@@ -103,18 +104,32 @@ public class PlacementResult extends BaseEntity {
 
     private double getPercentageOfClassScores(){
         double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassScore).sum();
+        if(scoreOfAllClasses == 0){
+            return 0;
+        }
+        return scoreOfAllClasses / classes.size();
 
-        double avgScore = scoreOfAllClasses / classes.size();
+//        double avgScore = scoreOfAllClasses / classes.size();
+//        double deltaBetweenClassScores = classes.stream()
+//                .map(classInfo -> Math.abs(classInfo.getClassScore() - avgScore))
+//                .reduce(0d, Double::sum);
+//
+//        return (deltaBetweenClassScores / scoreOfAllClasses) * 100;
+    }
 
-        double deltaBetweenClassScores = classes.stream()
-                .map(classInfo -> Math.abs(classInfo.getClassScore() - avgScore))
-                .reduce(0d, Double::sum);
-
-        return scoreOfAllClasses == 0 ? 0 : (deltaBetweenClassScores / scoreOfAllClasses) * 100;
+    private double getPercentageOfClassConnectionsScores(){
+        double scoreOfAllClasses = classes.stream().mapToDouble(PlacementClassroom::getClassConnectionsScore).sum();
+        if(scoreOfAllClasses == 0){
+            return 0;
+        }
+        return scoreOfAllClasses / classes.size();
     }
 
     private double getPercentageOfPupilsScores(){
         double sumRelativeScoreOfAllPupils = classes.stream().mapToDouble(PlacementClassroom::getRelativeScoreOfPupils).sum();
+        if(sumRelativeScoreOfAllPupils == 0){
+            return 0;
+        }
         return sumRelativeScoreOfAllPupils / classes.size();
     }
 
