@@ -1,5 +1,7 @@
 package web.service;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import web.engine.PlaceEngine;
 import web.entity.*;
 import web.exception.EntityAlreadyExists;
@@ -200,10 +202,10 @@ public class PlacementService implements EntityService<Placement> {
         placementResultRepository.deleteById(resultId);
     }
 
-    public PlacementResult generatePlacementResult(Placement placement, String name, String description) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
+    public PlacementResult generatePlacementResult(Placement placement, String name, String description, Long configId) throws PlacementWithoutGroupException, PlacementWithoutPupilsInGroupException {
         verifyPlacementGroupContainsPupils(placement);
 
-        PlaceEngine placeEngine = new PlaceEngine(placement, getGlobalConfig());
+        PlaceEngine placeEngine = new PlaceEngine(placement, getGlobalConfig(configId));
 
         PlacementResult placementResult = new PlacementResult();
         if (name != null) placementResult.setName(name);
@@ -287,18 +289,23 @@ public class PlacementService implements EntityService<Placement> {
         return placementResult;
     }
 
-    public PlaceEngineConfig getGlobalConfig() {
-        return engineConfigRepository.findById(1L).get();
+    public PlaceEngineConfig getGlobalConfig(Long configId) {
+        PlaceEngineConfig config = engineConfigRepository.findById(configId).get();
+
+        if ( config == null) {
+            throw new NotFound("Config not found");
+        }
+
+        return config;
     }
 
     public PlaceEngineConfig updateGlobalConfig(PlaceEngineConfig placeEngineConfig) {
-        placeEngineConfig.setId(1L);
         return engineConfigRepository.save(placeEngineConfig);
     }
 
-    public PlaceEngineConfig resetGlobalConfig() {
-        PlaceEngineConfig config = getGlobalConfig();
-        config.ResetToDefault();
+    public PlaceEngineConfig resetGlobalConfig(Long configId) {
+        PlaceEngineConfig config = getGlobalConfig(configId);
+        config.ResetToDefault(configId);
         return engineConfigRepository.save(config);
     }
 
@@ -327,6 +334,10 @@ public class PlacementService implements EntityService<Placement> {
 
         // parse data and create pupils map
         return importExportUtils.parseAndAddDataFromFile(csvContent, placement);
+    }
+
+    public List<PlaceEngineConfig> allConfigs() {
+        return engineConfigRepository.findAll();
     }
 
     public static class PlacementWithoutGroupException extends Exception {

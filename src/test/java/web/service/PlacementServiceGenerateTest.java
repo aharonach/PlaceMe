@@ -30,7 +30,7 @@ public class PlacementServiceGenerateTest {
     @BeforeEach
     void setUp() {
         repositoryTestUtils.clearAllData();
-        PlaceEngineConfig placeEngineConfig = new PlaceEngineConfig();
+        PlaceEngineConfig placeEngineConfig = new PlaceEngineConfig(1L);
         placementService.updateGlobalConfig(placeEngineConfig);
     }
 
@@ -54,7 +54,7 @@ public class PlacementServiceGenerateTest {
         groupService.linkPupilToGroup(receivedGroup, receivedPupil2);
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
 
-        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement, "name", "description");
+        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement, "name", "description", 1L);
         assertEquals(PlacementResult.Status.IN_PROGRESS, placementResult.getStatus());
         assertNotNull(placementResult.getId());
 
@@ -95,7 +95,7 @@ public class PlacementServiceGenerateTest {
 
         List<PlacementResult> results = new ArrayList<>(3);
         for(int i=0; i<3; i++){
-            PlacementResult placementResult = placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()), "name", "description");
+            PlacementResult placementResult = placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()), "name", "description", (long) i+1);
             results.add(placementResult);
             assertEquals(PlacementResult.Status.IN_PROGRESS, placementResult.getStatus());
             assertNotNull(placementResult.getId());
@@ -117,7 +117,7 @@ public class PlacementServiceGenerateTest {
         assertEquals(0, placementService.getOr404(receivedPlacement.getId()).getResults().size());
 
         // generate one more result
-        placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()), "name", "description");
+        placementService.generatePlacementResult(placementService.getOr404(receivedPlacement.getId()), "name", "description", 1L);
         executorMock.submitFirst().get();
         assertEquals(1, placementService.getOr404(receivedPlacement.getId()).getResults().size());
 
@@ -142,7 +142,7 @@ public class PlacementServiceGenerateTest {
         groupService.linkPupilToGroup(receivedGroup, receivedPupil2);
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
 
-        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement, "name", "description");
+        PlacementResult placementResult = placementService.generatePlacementResult(receivedPlacement, "name", "description", 1L);
         PlacementResult updatedResult = new PlacementResult();
 
         updatedResult.setName("name updated");

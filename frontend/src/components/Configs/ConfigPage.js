@@ -1,16 +1,17 @@
-import useFetchRecord from "../../../hooks/useFetchRecord";
+import useFetchRecord from "../../hooks/useFetchRecord";
 import {useForm} from "react-hook-form";
-import {setFormValues} from "../../../utils";
-import HtmlForm from "../../Forms/HtmlForm";
+import {extractListFromAPI, setFormValues} from "../../utils";
+import HtmlForm from "../Forms/HtmlForm";
 import {Alert, Button} from "react-bootstrap";
 import FormFields from "./FormFields";
 import {useState} from "react";
+import useFetchList from "../../hooks/useFetchList";
 
-export default function Configs() {
+export default function ConfigPage({ configId }) {
     const form = useForm();
-    const url = '/placements/configs';
+    const url = `/placements/configs/${configId}`;
     // eslint-disable-next-line no-unused-vars
-    const [configs, error, loading, fetch] = useFetchRecord({
+    const [configs, error, loading, fetch] = useFetchList({
         fetchUrl: url,
         thenCallback: (configs) => setForm(configs)
     });
@@ -45,9 +46,6 @@ export default function Configs() {
 
     return (
         <>
-            <div className="page-header">
-                <h1>Configure Placing Algorithm</h1>
-            </div>
             {error && <Alert variant="danger">{error}</Alert>}
             {updated && <Alert variant="success">{updated}</Alert>}
             <HtmlForm

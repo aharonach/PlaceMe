@@ -81,7 +81,7 @@ class PlacementServiceTest {
     @Test
     void shouldThrowExceptionsOnGenerateResultWhenThereIsNoGroup() throws PlacementService.PlacementResultsInProgressException {
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, null));
-        assertThrows(PlacementService.PlacementWithoutGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement, "name", "description"));
+        assertThrows(PlacementService.PlacementWithoutGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement, "name", "description", 1L));
         placementService.deleteById(receivedPlacement.getId());
     }
 
@@ -89,7 +89,7 @@ class PlacementServiceTest {
     void shouldThrowExceptionsOnGenerateResultWhenThereAreNoPupilsGroup() throws PlacementService.PlacementResultsInProgressException {
         Group receivedGroup = groupService.add(new Group("group 1", "group 1 desc", null));
         Placement receivedPlacement = placementService.add(new Placement("placement 1", 4, receivedGroup));
-        assertThrows(PlacementService.PlacementWithoutPupilsInGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement,"name", "description"));
+        assertThrows(PlacementService.PlacementWithoutPupilsInGroupException.class, () -> placementService.generatePlacementResult(receivedPlacement,"name", "description", 1L));
         placementService.deleteById(receivedPlacement.getId());
         groupService.deleteById(receivedGroup.getId());
     }

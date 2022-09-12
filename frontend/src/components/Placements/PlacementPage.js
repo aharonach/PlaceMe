@@ -25,13 +25,18 @@ export default function PlacementPage(){
         }).then(() => navigate('/placements', {replace: true}));
     }
 
+    const hideImport = () => {
+        setShowImport(false);
+        getPlacement();
+    }
+
     return (
         <>
             <Loading show={loading} />
             {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && placement &&
                 <article>
-                    <div className={"page-header"}>
+                    <div className="page-header">
                         <h1>{placement.name}</h1>
                         <Stack direction="horizontal" gap={2}>
                             <ButtonGroup>
@@ -41,13 +46,13 @@ export default function PlacementPage(){
                             </ButtonGroup>
                             <ButtonGroup>
                                 <Button variant="secondary" onClick={() => setShowImport(true)}>Import</Button>
-                                <Button as="a" variant="secondary" href={exportDownloadUrl} download={CSV_CONTENT_TYPE}>Export</Button>
+                                <Button as="a" variant="secondary" href={exportDownloadUrl} download={`${CSV_CONTENT_TYPE}`}>Export</Button>
                             </ButtonGroup>
                         </Stack>
                     </div>
                     <Outlet context={{ placement, error, loading, axiosFetch, getPlacement }} />
-                    <Modal show={showImport}>
-                        <Modal.Header closeButton onHide={() => setShowImport(false)}>
+                    <Modal show={showImport} size="lg">
+                        <Modal.Header closeButton onHide={hideImport}>
                             <Modal.Title>Import</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>

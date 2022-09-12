@@ -12,11 +12,17 @@ import Range from "./Range";
 import SelectMultiple from "./SelectMultiple";
 import File from "./File";
 
-function outputFieldWrapper(field, vertical, formProps, hasError, error) {
+function outputFieldWrapper(field, formProps, hasError, error) {
+    const output = outputField(field, {field: field, control: formProps.control, hasError: hasError});
+
+    if ( field.type === 'hidden' ) {
+        return output;
+    }
+
     return (
-        <Form.Group as={vertical ? Col : "div"} controlId={field.id} className="mb-3">
+        <Form.Group as="div" controlId={field.id} className="mb-3">
             <Label settings={field}/>
-            {outputField(field, {field: field, control: formProps.control, hasError: hasError})}
+            {output}
             {field.description && <Form.Text muted>{field.description}</Form.Text>}
             {<FieldFeedback hasError={hasError} error={error}/>}
         </Form.Group>
@@ -30,7 +36,6 @@ export default function HtmlForm(
         formProps,
         loading,
         submitLabel,
-        vertical,
         disabled = false,
         submitClass,
         additionalButtons,
@@ -50,7 +55,13 @@ export default function HtmlForm(
                         field.bsProps.disabled = true;
                     }
 
-                    return <Col key={field.id}>{outputFieldWrapper(field, vertical, formProps, hasError, error)}</Col>;
+                    const output = outputFieldWrapper(field, formProps, hasError, error);
+
+                    if ( field.type === 'hidden' ) {
+                        return output;
+                    }
+
+                    return <Col key={field.id}>{output}</Col>;
                 })}
             </Row>
 
@@ -96,6 +107,6 @@ function outputField(field, props) {
             return <File {...props} />;
 
         default:
-            return <Input {...props} />;
+            return <Input key={field.id} {...props} />;
     }
 }

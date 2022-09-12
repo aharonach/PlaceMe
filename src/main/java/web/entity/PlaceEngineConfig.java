@@ -3,23 +3,28 @@ package web.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.jenetics.SinglePointCrossover;
 import io.jenetics.SwapMutator;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 import static io.jenetics.Alterer.DEFAULT_ALTER_PROBABILITY;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 public class PlaceEngineConfig {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
-    @JsonIgnore
     private Long id;
+
+    private String name;
 
     int populationSize;
 
@@ -35,19 +40,42 @@ public class PlaceEngineConfig {
 
     int generationsLimit;
 
-    public PlaceEngineConfig() {
-        ResetToDefault();
+    public PlaceEngineConfig(Long optionNumber) {
+        ResetToDefault(optionNumber);
     }
 
-    public void ResetToDefault() {
-        this.populationSize = 100;
-        this.offspringSelector = SELECTOR.TournamentSelector;
-        this.altererFirst = ALTERER.SwapMutator;
-        this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
-        this.altererSecond = ALTERER.SinglePointCrossover;
-        this.altererSecondProbability = 0.36;
-        this.limitBySteadyFitness = 7;
-        this.generationsLimit = 100;
+    public void ResetToDefault(Long optionNumber) {
+        if (optionNumber == 1L) {
+            this.name = "Option 1 (Default)";
+            this.populationSize = 100;
+            this.offspringSelector = SELECTOR.TournamentSelector;
+            this.altererFirst = ALTERER.SwapMutator;
+            this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+            this.altererSecond = ALTERER.SinglePointCrossover;
+            this.altererSecondProbability = 0.36;
+            this.limitBySteadyFitness = 7;
+            this.generationsLimit = 100;
+        } else if (optionNumber == 2L) {
+            this.name = "Option 2";
+            this.populationSize = 100;
+            this.offspringSelector = SELECTOR.TournamentSelector;
+            this.altererFirst = ALTERER.SwapMutator;
+            this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+            this.altererSecond = ALTERER.SinglePointCrossover;
+            this.altererSecondProbability = 0.36;
+            this.limitBySteadyFitness = 7;
+            this.generationsLimit = 100;
+        } else {
+            this.name = "Option 3";
+            this.populationSize = 100;
+            this.offspringSelector = SELECTOR.TournamentSelector;
+            this.altererFirst = ALTERER.SwapMutator;
+            this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
+            this.altererSecond = ALTERER.SinglePointCrossover;
+            this.altererSecondProbability = 0.36;
+            this.limitBySteadyFitness = 7;
+            this.generationsLimit = 100;
+        }
     }
 
     public Object createInstanceForSelector() {

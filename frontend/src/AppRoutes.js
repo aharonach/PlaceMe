@@ -5,9 +5,9 @@ import * as Pupil from "./components/Pupils";
 import * as Group from "./components/Groups";
 import * as Template from "./components/Templates";
 import * as Placement from "./components/Placements";
+import * as Configs from "./components/Configs";
 import ErrorPage from "./components/ErrorPage";
 import React from "react";
-import Configs from "./components/Placements/Configs";
 
 export default function AppRoutes() {
     return (
@@ -56,7 +56,7 @@ export default function AppRoutes() {
                     </Route>
                 </Route>
             </Route>
-            <Route path="/configs" element={<Page><Configs /></Page>}></Route>
+            <Route path="/configs" element={<Page><Configs.List /></Page>}></Route>
             <Route path="*" element={<Page><ErrorPage /></Page>}></Route>
         </Routes>
     );

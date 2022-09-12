@@ -28,7 +28,7 @@ export default function GroupPage() {
             {!loading && !error && group &&
                 <article className="group">
                     <div className={"page-header"}>
-                        <h1>{group.name} (ID: {group.id})</h1>
+                        <h1>{group.name}</h1>
                         <ButtonGroup>
                             <LinkContainer to={`/groups/${group.id}/edit`}><Button>Edit Group</Button></LinkContainer>
                             <LinkContainer to={`/groups/${group.id}/preferences`}><Button>Preferences</Button></LinkContainer>

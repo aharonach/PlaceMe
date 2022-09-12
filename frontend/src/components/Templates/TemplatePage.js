@@ -28,7 +28,7 @@ export default function TemplatePage() {
             {!loading && !error && template &&
                 <article className="template">
                     <div className={"page-header"}>
-                        <h1>{template.name} (ID: {template.id})</h1>
+                        <h1>{template.name}</h1>
                         <ButtonGroup>
                             <LinkContainer to={`/templates/${template.id}/edit`}><Button>Edit</Button></LinkContainer>
                             <Button variant="danger" onClick={handleDelete}>Delete Template</Button>

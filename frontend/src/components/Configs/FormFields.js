@@ -1,6 +1,11 @@
 export default function FormFields() {
     return [
         {
+            id: "id",
+            label: "Config ID",
+            type: 'hidden'
+        },
+        {
             id: "populationSize",
             label: "Population Size",
             type: 'number',

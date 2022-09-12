@@ -105,10 +105,10 @@ public class PlacementRestController extends BaseRestController<Placement> {
         int numOfResults = getHowManyResultsToGenerate(amountOfResults);
         Set<PlacementResult> results = new HashSet<>(numOfResults);
 
-        for(int i=1; i <= numOfResults; i++) {
+        for(int i=0; i < numOfResults; i++) {
             try {
-                String name = numOfResults > 1 ? result.getName().concat(" " + i) : result.getName();
-                results.add(placementService.generatePlacementResult(placement, name, result.getDescription()));
+                String name = numOfResults > 1 ? result.getName().concat(" " + (i + 1)) : result.getName();
+                results.add(placementService.generatePlacementResult(placement, name, result.getDescription(), (long) i % 3 + 1));
             } catch (PlacementService.PlacementWithoutGroupException | PlacementService.PlacementWithoutPupilsInGroupException e) {
                 throw new PreconditionFailed(e.getMessage());
             }
@@ -236,18 +236,26 @@ public class PlacementRestController extends BaseRestController<Placement> {
     }
 
     @GetMapping("/configs")
-    public ResponseEntity<?> getConfig() {
-        return ResponseEntity.ok(EntityModel.of(placementService.getGlobalConfig()));
+    public ResponseEntity<?> getConfigs() {
+        CollectionModel<PlaceEngineConfig> configs = CollectionModel.of(placementService.allConfigs());
+        return ResponseEntity.ok(configs);
     }
 
-    @PostMapping("/configs")
-    public ResponseEntity<?> updateConfig(@RequestBody PlaceEngineConfig config) {
+    @GetMapping("/configs/{configId}")
+    public ResponseEntity<?> getConfig(@PathVariable Long configId) {
+        return ResponseEntity.ok(EntityModel.of(placementService.getGlobalConfig(configId)));
+    }
+
+    @PostMapping("/configs/{configId}")
+    public ResponseEntity<?> updateConfig(@PathVariable Long configId, @RequestBody PlaceEngineConfig config) {
+        PlaceEngineConfig configFromDB = placementService.getGlobalConfig(configId);
+        config.setId(configFromDB.getId());
         return ResponseEntity.ok(placementService.updateGlobalConfig(config));
     }
 
-    @PostMapping("/configs/reset")
-    public ResponseEntity<?> resetConfigs() {
-        return ResponseEntity.ok(placementService.resetGlobalConfig());
+    @PostMapping("/configs/{configId}/reset")
+    public ResponseEntity<?> resetConfigs(@PathVariable Long configId) {
+        return ResponseEntity.ok(placementService.resetGlobalConfig(configId));
     }
 
     @GetMapping(value = "/{placementId}/export/columns", produces = "text/csv;charset=UTF-8")

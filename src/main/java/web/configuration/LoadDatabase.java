@@ -53,7 +53,13 @@ public class LoadDatabase {
     }
 
     private void createEngineConfig() {
-        PlaceEngineConfig placeEngineConfig = new PlaceEngineConfig();
+        PlaceEngineConfig placeEngineConfig = new PlaceEngineConfig(1L);
+        placementService.updateGlobalConfig(placeEngineConfig);
+
+        placeEngineConfig = new PlaceEngineConfig(2L);
+        placementService.updateGlobalConfig(placeEngineConfig);
+
+        placeEngineConfig = new PlaceEngineConfig(3L);
         placementService.updateGlobalConfig(placeEngineConfig);
     }
 

@@ -2,13 +2,14 @@ import {LinkContainer} from "react-router-bootstrap";
 import {Alert, Button} from "react-bootstrap";
 import HeroAddRecord from "../General/HeroAddRecord";
 import Loading from "../Loading";
-import {useOutletContext} from "react-router-dom";
+import {useNavigate, useOutletContext} from "react-router-dom";
 import useAxios from "../../hooks/useAxios";
 
 export default function GenerateFirstResults({ hasResults }) {
     const { placement, getPlacement } = useOutletContext();
     // eslint-disable-next-line no-unused-vars
     const [results, error, loading, axiosFetch] = useAxios();
+    const navigate = useNavigate();
 
     if ( hasResults ) {
         return <HeroAddRecord
@@ -23,7 +24,12 @@ export default function GenerateFirstResults({ hasResults }) {
             method: 'post',
             url: `/placements/${placement.id}/results/generate?amountOfResults=3`,
             data: { name: "Initial Result" }
-        }).then( res => res && getPlacement());
+        }).then( res => {
+            if ( res ) {
+                navigate(`/placements/${placement.id}/results`);
+                getPlacement();
+            }
+        });
     }
 
     return <HeroAddRecord
