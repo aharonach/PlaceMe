@@ -52,7 +52,7 @@ public class PlaceEngineConfig {
             this.altererFirst = ALTERER.SwapMutator;
             this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
             this.altererSecond = ALTERER.SinglePointCrossover;
-            this.altererSecondProbability = 0.36;
+            this.altererSecondProbability = 0.9;
             this.limitBySteadyFitness = 25;
             this.generationsLimit = 100;
         } else if (optionNumber == 2L) {
@@ -62,7 +62,7 @@ public class PlaceEngineConfig {
             this.altererFirst = ALTERER.SwapMutator;
             this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
             this.altererSecond = ALTERER.SinglePointCrossover;
-            this.altererSecondProbability = 0.36;
+            this.altererSecondProbability = 0.9;
             this.limitBySteadyFitness = 25;
             this.generationsLimit = 100;
         } else {
@@ -70,9 +70,9 @@ public class PlaceEngineConfig {
             this.populationSize = 95;
             this.offspringSelector = SELECTOR.TournamentSelector;
             this.altererFirst = ALTERER.SwapMutator;
-            this.altererFirstProbability = 0.3;
+            this.altererFirstProbability = DEFAULT_ALTER_PROBABILITY;
             this.altererSecond = ALTERER.SinglePointCrossover;
-            this.altererSecondProbability = 0.3;
+            this.altererSecondProbability = 1;
             this.limitBySteadyFitness = 20;
             this.generationsLimit = 100;
         }
