@@ -44,7 +44,7 @@ export default function Classes({ result }) {
                 <Legend />
             </h3>
             {error && <Alert variant="danger">{error}</Alert>}
-            {<Alert variant="secondary">
+            {<Alert variant="secondary" style={{ minHeight: '70px' }} className="d-flex align-items-center">
                 {selectedPupil
                     ? <PupilData />
                     : <>Click on a pupil to view details</>}
@@ -94,7 +94,7 @@ const Classroom = ({ classNumber, classroom, classView }) => {
     return (
         <Col key={classroom.id}>
             <Card className="mb-2 shadow-sm">
-                <Card.Header as={"h4"}>
+                <Card.Header as={"h4"} style={{ minHeight: '50px' }} className="d-flex align-items-center">
                     Class #{classNumber}
                     {selectedPupil && selectedClassroom !== classroom.id && <Button size="sm" onClick={handleMove} className="ms-3">Move Here</Button>}
                 </Card.Header>
