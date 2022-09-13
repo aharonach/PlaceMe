@@ -24,7 +24,7 @@ export default function GroupPage() {
     return (
         <>
             <Loading show={loading} />
-            {!loading && error && <Alert variant="danger">{error}</Alert>}
+            {/*{!loading && error && <Alert variant="danger">{error}</Alert>}*/}
             {!loading && !error && group &&
                 <article className="group">
                     <div className={"page-header"}>

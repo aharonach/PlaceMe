@@ -24,7 +24,7 @@ export default function TemplatePage() {
     return (
         <>
             <Loading show={loading} />
-            {!loading && error && <Alert variant="danger">{error}</Alert>}
+            {/*{!loading && error && <Alert variant="danger">{error}</Alert>}*/}
             {!loading && !error && template &&
                 <article className="template">
                     <div className={"page-header"}>

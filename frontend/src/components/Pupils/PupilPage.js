@@ -22,7 +22,7 @@ export default function PupilPage() {
     return (
         <>
             <Loading show={loading} />
-            {!loading && error && <Alert variant="danger">{error}</Alert>}
+            {/*{!loading && error && <Alert variant="danger">{error}</Alert>}*/}
             {!loading && !error && pupil &&
                 <article className="pupil">
                     <div className={"page-header"}>

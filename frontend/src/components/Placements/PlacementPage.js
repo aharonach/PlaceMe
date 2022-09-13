@@ -33,7 +33,6 @@ export default function PlacementPage(){
     return (
         <>
             <Loading show={loading} />
-            {!loading && error && <Alert variant="danger">{error}</Alert>}
             {!loading && placement &&
                 <article>
                     <div className="page-header">
